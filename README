@@ -1,0 +1,5 @@
+for help on installation read INSTALL
+for help on usage read the manpage (call "man wesen") or the shell help (call "wesen h")
+for specific usage help type "wesen c --help" (config) or "wesen d --help" (game)
+visit http://wesen.sf.net for complete help
+visit http://sf.net/projects/wesen for new versions

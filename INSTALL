@@ -1,0 +1,53 @@
+Installation help
+=================
+
+
+Minimum Requirements
+
+A Windows or Unix-like (includes Linux, *BSD and OS X) operating system
+If you need a GUI: OpenGL capability (loads of RAM and a fast processor will speed up a bit)
+Dependencies
+
+    * Python > 2.3.0
+    * Numeric Python > 22.0
+      we use numpy, not the newer numarray.
+      recent versions of PyOpenGL need numarray, so if you got problems with Numeric, just install both numpy & numarray.
+    * PyOpenGL > 2.0.1.0
+      On Windows, you need OpenGL and GLUT.
+      You can get a GLUT DLL from the Nate Robins homepage.
+      Install the DLL (after extracting from a zip file) into you \$WIN\System\ folder.
+
+Package selection
+
+    * If you don't know what you want, choose
+      wesen-0.5.tar.gz for Linux, *BSD, Mac OS X and other Unices,
+      wesen-0.5.win32.exe for all Windows systems.
+    * If you want documentation,
+      wesen-0.4-ref.tar.gz is a packed version of help from docstrings.
+    * As developer, you should use direct CVS access.
+      You can browse the CVS directly via SourceForge or,
+      if you experience problems, request a CVS copy by mail.
+
+Installation
+=============
+
+Unix (Linux,BSD,OSX)
+
+Download the right package somewhere.
+Extract it. You can do this with
+
+gunzip packagename
+tar -xf packagename
+
+change directory to the new folder
+hint: packagename and then foldername should be "wesen-0.5"
+type "python setup.py install" as root
+run it by calling "wesen" (as user)
+report the dirty bugs to us ;-)
+
+Windows
+
+Download the right package somewhere.
+Double-click on the .exe file.
+Do everything the installer tells you.
+Double-click on the nice desktop icon.

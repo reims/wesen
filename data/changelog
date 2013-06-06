@@ -1,0 +1,56 @@
+0.5.01
+------
+installer:
+	fixed some windows bugs (links)
+
+0.4 => 0.5
+=========
+core:
+	rewritten loader
+	important config default changes
+gui:
+	interactive
+	statistics display
+	graph
+documentation:
+	look at http://wesen.sourceforge.net for the documentation index
+	or get our doc packages (now in another cvs tree).
+devtools:
+	rewritten, repackaged
+sources:
+	put kon & reim in own packages
+	dramatically improved nightwatch
+
+0.3 => 0.4
+=========
+core:
+	code cleanup
+	optimizations, 300% faster (don't ask questions...)
+gui:
+	working now!
+bugfixes:
+	uncountable
+behaviours:
+	drunken sailor, scanner
+
+0.2 => 0.3
+=========
+wesen: vomit, donate, broadcast
+working distutils now!
+releases: src, dev, doc, win32
+
+0.1 => 0.2
+==========
+wesend-0.25 with major bugfixes
+new wesen capabilities: Attack, MoveToPosition, hasTime
+optimized code, 80% faster
+improved loader & configed
+I18N now implementable by changing only one file (stringtable)
+
+initial release
+==========
+core: logging, exchangeable GUI support, commandline options, config parser
+wesen: Move, look, lookCloser, Eat, Attack, Reproduce, Talk, exchangeable sources and programmable AI
+food: Grow and Seed
+configed 0.2: textmode, automatic default setting and command-line options
+loader 0.1: commandline options

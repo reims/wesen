@@ -1,0 +1,291 @@
+"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
+This program is distributed under the terms of the GNU General Public License.
+visit http://www.sourceforge.net/projects/wesen or
+http://wesen.sourceforge.net for newer versions."""
+
+from Wesen.definition import NAMES, VERSIONS;
+from Wesen.gui.map import Map;
+from Wesen.gui.text import Text;
+from Wesen.gui.graph import Graph;
+from Wesen.gui.graph import SensorSystem;
+from Wesen.objects.food import Food;
+from Wesen.objects.wesen import Wesen;
+from OpenGL.GL import *;
+from OpenGL.GLU import *;
+from OpenGL.GLUT import *;
+import math;
+from random import randint;
+from time import time;
+import sys;
+
+cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0],\
+		[0.5, 0.0, 0.0], [0.0, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.5, 0.0], [0.0, 0.5, 0.5]];
+cl_freak =     [[0.4, 0.2, 0.6], [0.6, 0.2, 0.4], [0.8, 0.2, 0.2], [0.2, 0.2, 0.8]];
+
+colorList = cl_freak;
+
+GRAPHRESOLUTION = 1;
+DEFAULT_GUI_SIZE = 800;
+
+class GUI:
+
+	def __init__(self, infoGUI, GameLoop, world):
+		self.GameLoop = GameLoop;
+		self.config = infoGUI["config"];
+		self.wesend = infoGUI["wesend"];
+		self.infoWorld = infoGUI["world"];
+		self.infoWesen = infoGUI["wesen"];
+		self.infoFood = infoGUI["food"];
+		self.infoGui = infoGUI["gui"];
+		self.world = world;
+		self.windowactive = True;
+		self.size = self.infoGui["size"];
+		self.windowSize = [self.size, self.size];
+		self.pause = False;
+		self.init = True;
+		self.frame = 0;
+		self.lasttime = 0;
+		self.fps = 0;
+		self.speed = 1.0;
+		self.wait = 1;
+		self.posX, self.posY = (0, 0);
+		initxy = self.infoGui["pos"];
+		self.initx = int(initxy[:initxy.index(",")]);
+		self.inity = int(initxy[initxy.index(",")+1:]);
+		self.fieldInformation = [];
+		self.step = False;
+		self.descriptor = [dict(),[]];
+		self.bgcolor = [0.0, 0.0, 0.05];
+		self.fgcolor = [0.0, 0.1, 0.2];
+		self._SetColorDescriptor();
+		self.graph = Graph(self);
+		self.map = Map(self, self.infoWorld, self.colorDescriptor);
+		self.text = Text(self, self.descriptor, self.world, self.infoWorld);
+		self.text.SetAspect(2,1); # aspect ratio x:y is 2:1
+		self.objects = [self.map, self.text];
+		SensorSystem(self, self.graph, self.world);
+		if(not self.infoGui["map"]): self.map.ChangeVisibility();
+		if(not self.infoGui["text"]): self.text.ChangeVisibility();
+		if(not self.infoGui["graph"]): self.graph.ChangeVisibility();
+		self.initGL();
+		self.initMenu();
+		glutMainLoop();
+
+	def initGL(self):
+		"""initializes OpenGL and creates the Window"""
+		glutInit([""]);
+		glutInitDisplayMode(GLUT_DEPTH | GL_DOUBLEBUFFER | GLUT_RGBA);
+		glutInitWindowSize(self.size, self.size);
+		glutInitWindowPosition(self.initx, self.inity);
+		glutCreateWindow("%s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"]));
+		glutDisplayFunc(self.Draw);
+		glutIdleFunc(glutPostRedisplay);
+		glutReshapeFunc(self.Reshape);
+		glutKeyboardFunc(self.HandleKeys);
+		glutSpecialFunc(self.HandleKeys);
+		glutMouseFunc(self.HandleMouse);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0);
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glClearColor(self.bgcolor[0], self.bgcolor[1], self.bgcolor[2], 0.0);
+
+	def Exit(self):
+		glFinish();
+		sys.exit();
+
+	def Pause(self):
+		self.pause = not self.pause;
+
+	def SetSpeed(self, amount):
+		"""SetSpeed(amount) -> amount is added to the speed, checks if too low  or high"""
+		self.wait = 1;
+		self.speed += amount;
+		if(self.speed <= 0):
+			self.speed = 0.0;
+		if(self.speed > 1):
+			self.speed = 1.0;
+
+	def SpeedDown(self):
+		"""decrease Speed by 0.05"""
+		self.SetSpeed(-0.05);
+
+	def SpeedUp(self):
+		"""increase Speed by 0.05"""
+		self.SetSpeed(0.05);
+
+	def Step(self):
+		"""run 1 turn of game"""
+		self.step = True;
+
+	def ModifyFood(self, action):
+		"""action can be "delete" "add" "increase" "decrease" """
+		if(action == "delete"):
+			for object in self.world.objects:
+				if(type(object) == Food):
+					if(self.world.DeleteObject(id(object))):
+						break;
+		if(action == "add"):
+			infoFood = self.infoFood;
+			if(infoFood.has_key("position")):
+				del infoFood["position"];
+			self.world.AddObject(infoFood);
+		if(action == "increase"):
+			for object in self.world.objects:
+				if(type(object) == Food):
+					object.energy += 10;
+		if(action == "decrease"):
+			for object in self.world.objects:
+				if(type(object) == Food):
+					object.energy -= 10;
+
+	def initMenu(self):
+		self.menu = glutCreateMenu(self.HandleAction);
+		glutAddMenuEntry("change map visibility",0);
+		glutAddMenuEntry("change graph visibility",25);
+		glutAddMenuEntry("change text visibility",50);
+		glutAddMenuEntry("pause   (space)",100);
+		glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+	def HandleAction(self, action):
+		if(action == 0):
+			self.map.ChangeVisibility();
+		elif(action == 25):
+			self.graph.ChangeVisibility();
+		elif(action == 50):
+			self.text.ChangeVisibility();
+		elif(action == 100):
+			self.Pause();
+		else:
+			raise "unknown action from popup-menu (%s)" % (action);
+
+	def HandleKeys(self, key, x, y):
+		"""handle both usual (character) and special (ordinal) keys"""
+		if(key == "x" or key == "q"): self.Exit();
+		elif(key == "p" or key == " "): self.Pause();
+		elif(key == "-"): self.SpeedDown();
+		elif(key == "+"): self.SpeedUp();
+		elif(key == 13): self.Step(); # <enter>
+		elif(key == 27): self.Exit(); # <esc>
+		elif(key == 100): self.ModifyFood("delete");
+		elif(key == 101): self.ModifyFood("increase");
+		elif(key == 102): self.ModifyFood("add");
+		elif(key == 103): self.ModifyFood("decrease");
+
+	def _win2glCoord(self, x, y):
+		posX = (2.0 * x / self.windowSize[0]);
+		posY = (2.0 * y / self.windowSize[1]);
+		return (posX, posY);
+
+	def _win2wesenCoord(self, x, y):
+		x, y = self._win2glCoord(x, y);
+		posX = int(x * self.infoWorld["length"]);
+		posY = int((1.0-y) * self.infoWorld["length"]) + 1;
+		return (posX, posY);
+
+	def HandleMouse(self, button, state, x, y):
+		"""handles all mouse events as clicks, dragdrops, etc."""
+		if(state == 0):
+			self.mouseFirst = [x,y];
+			posX, posY = self._win2wesenCoord(x, y);
+			if(posX != self.posX or posY != self.posY):
+				self.posX, self.posY = (posX, posY);
+				self.UpdateFieldInformation();
+		if(state == 1):
+			self.mouseLast = [x,y];
+
+	def Reshape(self, x, y):
+		"""warning: symmetrical x/y reshape not implemented yet"""
+		glViewport(0, 0, x, y);
+		self.windowSize = [x, y];
+		for object in self.objects:
+			object.Reshape(x,y);
+
+	def DrawMap(self):
+		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
+		self.map.SetDescriptor(self.descriptor);
+		if(self.descriptor[0]["finished"]):
+			self.map.active = False;
+		self.map.Step();
+		self.map.Draw();
+
+	def DrawGraph(self):
+		# draw at 0.0/0.0 - 1.0/1.0 (standard)
+		self.graph.Draw();
+
+	def DrawText(self):
+		glTranslatef(-1.0, -1.0, 0.0); # draw at -1.0/-1.0 - 0.0/1.0
+		glScale(2.0, 1.0, 1.0);
+		self.text.SetDescriptor(self.descriptor);
+		self.text.Step();
+		self.text.Draw();
+
+	def ResetView(self):
+		glLoadIdentity();
+
+	def RenderScene(self):
+		"""draws the actual descriptor"""
+		glClear(GL_COLOR_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_MODELVIEW);
+		self.ResetView();
+		glPushMatrix();
+		self.DrawMap();
+		glPopMatrix();
+		glPushMatrix();
+		self.DrawGraph();
+		glPopMatrix();
+		glPushMatrix();
+		self.DrawText();
+		glPopMatrix();
+		glutSwapBuffers();
+
+	def UpdateFieldInformation(self):
+		try:
+			descriptorList = self.map.array[self.posX,self.posY].descriptorList;
+		except IndexError:          # IndexError on wrong pos-Values
+			descriptorList = [];
+		except AttributeError:      # AttributeError when map is not ready
+			descriptorList = [];
+		else:
+			self.fieldInformation = descriptorList;
+
+	def CalcFps(self):
+		"""calculates GUI.fps (call every frame)"""
+		self.frame += 1;
+		self.actualtime = glutGet(GLUT_ELAPSED_TIME);
+		timenow = self.actualtime-self.lasttime;
+		if(timenow > 100):
+			self.fps = self.frame*1000.0/timenow;
+			self.lasttime = self.actualtime;
+			self.frame = 0;
+
+	def Draw(self):
+		"""actualizes the descriptor by calling his GameLoop and renders it"""
+		if((not self.pause) or self.step):
+			if(self.step):
+				self.descriptor = self.GameLoop();
+				if(not self.descriptor[0]["finished"]):
+					self.graph.Step();
+				self.step = False;
+			else:
+				if(self.wait == int(1.0/self.speed)):
+					self.wait = 1;
+					self.descriptor = self.GameLoop();
+					if(not self.descriptor[0]["finished"]):
+						self.graph.Step();
+				else:
+					self.wait += 1;
+			self.CalcFps();
+		if(self.init):
+			self.Pause();
+			self.init = False;
+		self.RenderScene();
+
+	def _SetColorDescriptor(self):
+		colorDescriptor = dict();
+		sourceList = self.infoWesen["sources"];
+		sourceList.sort();
+		for i in xrange(len(sourceList)):
+			colorDescriptor[sourceList[i]] = colorList[i % len(colorList)];
+		self.colorDescriptor = colorDescriptor;

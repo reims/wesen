@@ -1,0 +1,17 @@
+0.5.01
+------
+windows installer should now work properly
+
+0.5
+=========
+documentation is not in this package anymore;
+win32 support has improved (and is tested!)
+
+0.4
+=========
+this is the first release with stable GUI,
+you can now start to develop your own wesen!
+
+older versions
+=========
+not much to say ... it was a lot of work
