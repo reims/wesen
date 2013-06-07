@@ -3,8 +3,8 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from objects.wesen import Wesen;
-from objects.food import Food;
+from .objects.wesen import Wesen;
+from .objects.food import Food;
 
 class World(object):
 	"""World(infoObject) creates a World instance.
@@ -87,8 +87,8 @@ class World(object):
 			object.main();
 		self.energy = globalEnergy;
 		self.stats = sources;
-		if(len(sources.keys()) == 2):
+		if(len(list(sources.keys())) == 2):
                         self.winner = [s for s in sources if s != "food"][0]
-                        print("the winner is %s" % self.winner)
+                        print(("the winner is %s" % self.winner))
 		if(not (stillActive)):
 			self.finished = True;

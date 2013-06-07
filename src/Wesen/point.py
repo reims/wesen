@@ -3,7 +3,7 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from definition import DIMENSIONS;
+from .definition import DIMENSIONS;
 from random import randint;
 
 def getRandomPosition(length):

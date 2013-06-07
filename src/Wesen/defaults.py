@@ -1,6 +1,6 @@
 """config defaults"""
 
-from definition import DIMENSIONS;
+from .definition import DIMENSIONS;
 from os.path import expanduser, join;
 
 DEFAULT_GENERAL_CONFIGFILE = join(expanduser("~"),".wesen","conf"); # this configfile is _always_ used before any other specified!

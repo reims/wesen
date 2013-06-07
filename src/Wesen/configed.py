@@ -1,6 +1,6 @@
-from definition import *;
-from defaults import *;
-from strings import *;
+from .definition import *;
+from .defaults import *;
+from .strings import *;
 from configparser import SafeConfigParser;
 from os.path import exists;
 from sys import argv;
@@ -13,7 +13,7 @@ class ConfigEd(object):
 
 	def __init__(self,filename):
 		if(__name__ == "__main__"):
-			print(("%s %s %s %s") % (NAMES["PROJECT"], VERSIONS["PROJECT"], NAMES["CONFIGED"], VERSIONS["CONFIGED"]));
+			print((("%s %s %s %s") % (NAMES["PROJECT"], VERSIONS["PROJECT"], NAMES["CONFIGED"], VERSIONS["CONFIGED"])));
 		self.configfile = filename;
 		self.configParser = SafeConfigParser();
 		self.alwaysDefaults = False;
@@ -40,9 +40,9 @@ class ConfigEd(object):
 
 	def printConfig(self):
 		"""prints the configfile to screen"""
-		print ("%s:" % self.configfile);
+		print(("%s:" % self.configfile));
 		for line in open(self.configfile).readlines():
-			print(line[:-1]); # for \n removal
+			print((line[:-1])); # for \n removal
 		print(".");
 
 
@@ -107,7 +107,7 @@ class ConfigEd(object):
 			overwrite = True;
 		if overwrite:
 			self.configParser.read(self.configfile);
-			print(self.configfile);
+			print((self.configfile));
 			if(not self.configParser.has_section("wesen")):
 				self.configParser.add_section("wesen");
 			print("[wesen]");
@@ -205,6 +205,6 @@ class ConfigEd(object):
                              STRING_CONFIGED["TIME"]["REPRODUCE"])));
 			print(".");
 			self.configParser.write(open(self.configfile,"w"));
-			print(STRING_MESSAGE_WROTE % self.configfile);
+			print((STRING_MESSAGE_WROTE % self.configfile));
 		else:
-			print(STRING_ERROR_NOTWROTE % self.configfile);
+			print((STRING_ERROR_NOTWROTE % self.configfile));

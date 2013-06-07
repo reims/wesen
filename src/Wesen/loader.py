@@ -5,8 +5,8 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from defaults import DEFAULT_GENERAL_CONFIGFILE, DEFAULT_GENERAL_CONFIGFILE_PROFILE;
-from strings import STRING_ERROR_NOTSAMEPATH, STRING_USAGE_LOADER;
+from .defaults import DEFAULT_GENERAL_CONFIGFILE, DEFAULT_GENERAL_CONFIGFILE_PROFILE;
+from .strings import STRING_ERROR_NOTSAMEPATH, STRING_USAGE_LOADER;
 from optparse import OptionParser;
 from os import execv, environ, mkdir;
 from sys import argv;
@@ -38,7 +38,7 @@ class Loader(object):
 		if len(args) >= 2:
 			argument = args[1];
 			if argument == "c":
-				from configed import ConfigEd;
+				from .configed import ConfigEd;
 				if len(args)==4:
 					configEd=ConfigEd(args[2]);
 				else:
@@ -53,7 +53,7 @@ class Loader(object):
 				if "-g" in args or "--get" in args:
 					configEd.printConfig();
 			elif argument == "d":
-				from wesend import Wesend;
+				from .wesend import Wesend;
 				wesend = Wesend();
 			elif argument == "h":
 				print("help")

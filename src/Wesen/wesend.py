@@ -3,15 +3,16 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from definition import NAMES, VERSIONS, FORMAT_LOGSTRING;
-from defaults import DEFAULT_GENERAL_CONFIGFILE;
-from strings import *;
-from world import World;
-from configed import ConfigEd;
+from .definition import NAMES, VERSIONS, FORMAT_LOGSTRING;
+from .defaults import DEFAULT_GENERAL_CONFIGFILE;
+from .strings import *;
+from .world import World;
+from .configed import ConfigEd;
 from optparse import OptionParser;
 from time import time, sleep;
 import re;
 import logging;
+import importlib;
 
 class Wesend:
 	"""Wesend([configfile])
@@ -52,7 +53,7 @@ class Wesend:
 
 	def initGUI(self):
 		"""handing over all control to the gui"""
-		GUI = __import__("Wesen.gui."+self.infoGeneral["guisource"], globals(), locals(), ['GUI']).GUI;
+		GUI = importlib.import_module(".gui."+self.infoGeneral["guisource"], __package__).GUI;
 		infoGui = dict(config=self.infoGeneral, wesend=self, world=self.infoWorld, wesen=self.infoWesen, food=self.infoFood, gui=self.infoGui);
 		self.gui = GUI(infoGui, self.mainLoop, self.world);
 
@@ -168,6 +169,6 @@ class Wesend:
 			#if((self.world.turns % 200) == 0):
 			#	print "stats = %s" % (self.world.stats);
 		if(self.world.winner):
-			print("Congratulations, \"%s\" has won the game" % (self.world.winner));
+			print(("Congratulations, \"%s\" has won the game" % (self.world.winner)));
 		else:
 			print("Sorry, nobody has won the game (maybe error!)");
