@@ -17,7 +17,7 @@ class GuiObject(object):
 		self.active = True;
 
 	def _getFrameData(self):
-		frame = self.frame["frame"] * 0.002;
+		frame = self.frame["frame"] * 0.001;
 		col = self.frame["color"];
 		plast = self.frame["plastic"] / 2.0;
 		aspect = self.frame["aspect"];
@@ -47,12 +47,12 @@ class GuiObject(object):
 		glRectf(0.0,0.0,y,1.0); # left
 		glColor4f(col[0]+plast, col[1]+plast, col[2]+plast, 1.0);
 		glRectf(0.0,0.0,1.0,x); # bottom
-		glRectf(1.0,0.0,1.0-x,1.0); # right
+		glRectf(1.0,0.0,1.0-y,1.0); # right
 
 	def DrawBlank(self):
 		frame, col, plast, x, y = self._getFrameData();
 		glColor4f(self.gui.fgcolor[0], self.gui.fgcolor[1], self.gui.fgcolor[2], 1.0);
-		glRectf(0.0+x,0.0-y,1.0-x,1.0-y);
+		glRectf(0.0+x,0.0+y,1.0-x,1.0-y);
 
 	def Draw(self):
 		self.DrawFrame();
