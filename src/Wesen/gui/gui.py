@@ -269,7 +269,7 @@ class GUI:
                                 self.descriptor = self.GameLoop();
                                 if(not self.descriptor[0]["finished"]):
                                         self.graph.Step();
-                                self.step = False;
+                                        self.step = False;
                         else:
                                 if(self.wait == int(1.0/self.speed)):
                                         self.wait = 1;
@@ -282,7 +282,12 @@ class GUI:
                 if(self.init):
                         self.Pause();
                         self.init = False;
-                self.RenderScene();
+                try:
+                        self.RenderScene();
+                except Exception as e:
+                        print("exception:", e);
+                        sys.exit(1);
+                        return 0;
                 return 1
 
 	def _SetColorDescriptor(self):

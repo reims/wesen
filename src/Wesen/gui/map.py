@@ -15,9 +15,10 @@ class Map(GuiObject):
 		self.NewArray();
 
 	def Step(self):
-		if(self.active):
-			self.NewArray();
-			self.FillArray();
+                pass;
+		# if(self.active):
+		# 	self.NewArray();
+		# 	self.FillArray();
 
 	def NewArray(self):
 		self.array = numericArray([[Field([], self.colorDescriptor) for i in range(self.infoWorld["length"])]
@@ -31,15 +32,22 @@ class Map(GuiObject):
 				raise "GuiError: descriptor does not fit array: %s" % descriptor;
 
 	def DrawMap(self):
-		length = float(self.infoWorld["length"]);
-		blockSize = 1.0 / length;
-		scaleFactor = blockSize;
-		glScale(scaleFactor, scaleFactor, 1.0);
-		for x in range(len(self.array)):
-			for y in range(len(self.array[0])):
-				self.array[x,y].Draw();
-				glTranslatef(0.0, 1.0, 0.0);
-			glTranslatef(1.0, -length, 0.0);
+                length = float(self.infoWorld["length"]);
+                blockSize = 1.0 / length;
+                scaleFactor = blockSize;
+                glScale(scaleFactor, scaleFactor, 1.0);
+                for desc in self.descriptor[1]:
+                        #print(desc);
+                        color = self.colorDescriptor[desc["source"]] if desc["type"] == "wesen" else [0.0, 1.0, 0.0];
+                        #print(color);
+                        glColor4f(color[0], color[1], color[2], 1.0);
+                        glRectf(desc["position"][0], desc["position"][1], desc["position"][0]+1.0, desc["position"][1]-1.0);
+
+		# for x in range(len(self.array)):
+		# 	for y in range(len(self.array[0])):
+		# 		self.array[x,y].Draw();
+		# 		glTranslatef(0.0, 1.0, 0.0);
+		# 	glTranslatef(1.0, -length, 0.0);
 
 	def Draw(self):
 		"""draws the map"""
