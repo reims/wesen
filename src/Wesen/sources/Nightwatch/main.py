@@ -1,6 +1,6 @@
-from Wesen.sources.Nightwatch import helper;
-from Wesen.defaultwesensource import DefaultWesenSource;
-from Wesen.point import *;
+from . import helper;
+from ...defaultwesensource import DefaultWesenSource;
+from ...point import *;
 from random import randint;
 from sys import exit;
 

@@ -3,8 +3,8 @@ from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 import math;
 from random import randint; # funny stuff, can be deleted!!
-from Wesen.objects.wesen import Wesen;
-from Wesen.gui.object import GuiObject;
+from ..objects.wesen import Wesen;
+from .object import GuiObject;
 
 color3white = [1,1,1];
 color3grey = [0.9,0.9,0.9];
@@ -41,7 +41,7 @@ class Text(GuiObject):
 
 	def DrawGameStats(self, p):
 		p.PrintLn("        global | %s e | %s o |" % (p.fullString(self.world.energy,5), p.fullString(len(self.world.objects),3)));
-		for source in self.world.stats.keys():
+		for source in list(self.world.stats.keys()):
 			energy = self.world.stats[source]["energy"];
 			count = self.world.stats[source]["count"];
 			try:

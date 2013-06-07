@@ -1,3 +1,9 @@
+current development version
+---------------------------
+ported to python 2.7 and 3.3 (tested: 3.3 only)
+distutils stuff probably broken now
+
+
 0.5.01
 ------
 windows installer should now work properly

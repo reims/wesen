@@ -1,3 +1,10 @@
+0.5 => 0.6
+-----
+everything:
+	ported to python 3.3
+installer:
+	broken
+
 0.5.01
 ------
 installer:

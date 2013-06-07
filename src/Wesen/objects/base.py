@@ -3,7 +3,7 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from Wesen.point import getRandomPosition;
+from ..point import getRandomPosition;
 
 class WorldObject(object):
 	"""this class is an abstraction to all world objects,

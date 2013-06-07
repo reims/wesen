@@ -7,8 +7,8 @@ from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 from random import randint;
-from Wesen.gui.object import GuiObject;
-from Wesen.gui.text import TextPrinter;
+from .object import GuiObject;
+from .text import TextPrinter;
 
 PLOTMODE = GL_LINE_STRIP; # GL_LINES GL_POINTS GL_LINE_STRIP
 

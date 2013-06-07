@@ -1,4 +1,4 @@
-#! /bin/env python
+#! /usr/bin/python3
 
-from Wesen.loader import Loader;
+from src.Wesen.loader import Loader;
 Loader();

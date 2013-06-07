@@ -3,9 +3,9 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from Wesen.objects.base import WorldObject;
-from Wesen.point import *;
-from Wesen.strings import STRING_LOGGER;
+from .base import WorldObject;
+from ..point import *;
+from ..strings import STRING_LOGGER;
 from random import randint;
 
 class Food(WorldObject):

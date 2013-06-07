@@ -54,8 +54,6 @@ def acceptableFood(self, object):
 		return False;
 
 def foodFitness(a):
-        print(a);
-        #distance = abs(abs(a["position"][0]-b["position"][0])-abs(a["position"][1]-b["position"][1]));
         return a["energy"]
 
 def acceptableEnemy(self, object):

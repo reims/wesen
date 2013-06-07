@@ -2,7 +2,7 @@
 the scanner is a simple wesen, running over the screen like a scanner, eating and reproducing.
 """
 
-from Wesen.defaultwesensource import DefaultWesenSource;
+from ...defaultwesensource import DefaultWesenSource;
 
 class WesenSource(DefaultWesenSource):
 

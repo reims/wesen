@@ -3,13 +3,13 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from Wesen.definition import NAMES, VERSIONS;
-from Wesen.gui.map import Map;
-from Wesen.gui.text import Text;
-from Wesen.gui.graph import Graph;
-from Wesen.gui.graph import SensorSystem;
-from Wesen.objects.food import Food;
-from Wesen.objects.wesen import Wesen;
+from ..definition import NAMES, VERSIONS;
+from .map import Map;
+from .text import Text;
+from .graph import Graph;
+from .graph import SensorSystem;
+from ..objects.food import Food;
+from ..objects.wesen import Wesen;
 from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
@@ -128,7 +128,7 @@ class GUI:
 						break;
 		if(action == "add"):
 			infoFood = self.infoFood;
-			if(infoFood.has_key("position")):
+			if("position" in infoFood):
 				del infoFood["position"];
 			self.world.AddObject(infoFood);
 		if(action == "increase"):
@@ -159,13 +159,15 @@ class GUI:
 			self.Pause();
 		else:
 			raise "unknown action from popup-menu (%s)" % (action);
+		return 0;
 
 	def HandleKeys(self, key, x, y):
 		"""handle both usual (character) and special (ordinal) keys"""
-		if(key == "x" or key == "q"): self.Exit();
-		elif(key == "p" or key == " "): self.Pause();
-		elif(key == "-"): self.SpeedDown();
-		elif(key == "+"): self.SpeedUp();
+		#print("key detection: key="+str(key)+" at (x,y)="+str(x)+","+str(y));
+		if(key == b"x" or key == b"q"): self.Exit();
+		elif(key == b"p" or key == b" "): self.Pause();
+		elif(key == b"-"): self.SpeedDown();
+		elif(key == b"+"): self.SpeedUp();
 		elif(key == 13): self.Step(); # <enter>
 		elif(key == 27): self.Exit(); # <esc>
 		elif(key == 100): self.ModifyFood("delete");

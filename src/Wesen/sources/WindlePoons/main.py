@@ -1,5 +1,5 @@
-from Wesen.defaultwesensource import DefaultWesenSource;
-from Wesen.point import *;
+from ...defaultwesensource import DefaultWesenSource;
+from ...point import *;
 from random import randint;
 from sys import exit;
 

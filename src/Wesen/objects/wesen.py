@@ -3,10 +3,11 @@ This program is distributed under the terms of the GNU General Public License.
 visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
-from Wesen.strings import STRING_LOGGER;
-from Wesen.point import getZeroPosition, getNewPosition, positionToDirection;
-from Wesen.objects.base import WorldObject;
+from ..strings import STRING_LOGGER;
+from ..point import getZeroPosition, getNewPosition, positionToDirection;
+from .base import WorldObject;
 import sys;
+import importlib;
 
 class Wesen(WorldObject):
 	"""Wesen(infoObject) creates a new Wesen instance.
@@ -31,15 +32,12 @@ class Wesen(WorldObject):
 		self.wesenSource = WesenSource(infoAllSource);
 		self.PutInterface(self.wesenSource);
 
-	def getSource(self):
+	def getSource(self): #TODO this might import multiple times...?
 		try:
-			result = __import__("Wesen.sources."+self.source+".main", globals(), locals(), ['WesenSource']).WesenSource;
-		except ImportError:
-			try:
-				result = __import__(self.source+".main", globals(), locals(), ['WesenSource']).WesenSource;
-			except ImportError as e:
-				print("%s could not been loaded:\n%s" % (self.source, e));
-				sys.exit();
+			result = importlib.import_module("..sources."+self.source+".main", __package__).WesenSource;
+		except ImportError as e:
+			print(("%s could not been loaded:\n%s" % (self.source, e)));
+			sys.exit();
 		return result;
 
 	def __repr__(self):

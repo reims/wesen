@@ -3,7 +3,7 @@ from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 import math;
 from numpy import array as numericArray;
-from Wesen.gui.object import GuiObject;
+from .object import GuiObject;
 
 class Map(GuiObject):
 	"""used to draw a map of all objects"""

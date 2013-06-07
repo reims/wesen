@@ -2,7 +2,7 @@
 the drunken sailor is a simple implementation of random movement.
 """
 
-from Wesen.defaultwesensource import DefaultWesenSource;
+from ...defaultwesensource import DefaultWesenSource;
 from random import choice;
 
 class WesenSource(DefaultWesenSource):

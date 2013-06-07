@@ -2,7 +2,7 @@
 for developers: manual (console) wesen programming
 """
 
-from Wesen.defaultwesensource import DefaultWesenSource;
+from ...defaultwesensource import DefaultWesenSource;
 import re, readline, sys;
 
 class WesenSource(DefaultWesenSource):
@@ -16,7 +16,7 @@ class WesenSource(DefaultWesenSource):
 
 	def getInput(self):
 		"""pull a string from somewhere - usually raw_input()"""
-		return raw_input("\n> ");
+		return eval(input("\n> "));
 
 	def main(self):
 		while(True):
@@ -30,7 +30,7 @@ class WesenSource(DefaultWesenSource):
 				if(self.exitPattern.match(userInput)):
 					sys.exit();
 				else:
-					exec userInput;
+					exec(userInput);
 
 class Completer:
 
