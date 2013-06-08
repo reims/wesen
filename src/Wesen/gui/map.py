@@ -32,8 +32,8 @@ class Map(GuiObject):
 				raise "GuiError: descriptor does not fit array: %s" % descriptor;
 
 	def DrawMap(self):
-		frame, col, plast, x, y = self._getFrameData();
-		glTranslatef(frame, frame, 0.0); # moving away from the frame
+                frame, col, plast, x, y = self._getFrameData();
+                glTranslatef(frame, frame, 0.0); # moving away from the frame
                 length = float(self.infoWorld["length"]);
                 blockSize = (1.0 - 2*frame) / length;
                 scaleFactor = blockSize;
