@@ -170,10 +170,10 @@ class GUI:
 		elif(key == b"+"): self.SpeedUp();
 		elif(key == 13): self.Step(); # <enter>
 		elif(key == 27): self.Exit(); # <esc>
-		elif(key == 100): self.ModifyFood("delete");
-		elif(key == 101): self.ModifyFood("increase");
-		elif(key == 102): self.ModifyFood("add");
-		elif(key == 103): self.ModifyFood("decrease");
+		elif(key == 100): self.ModifyFood("delete");   # <leftarrow>
+		elif(key == 101): self.ModifyFood("increase"); # <uparrow>
+		elif(key == 102): self.ModifyFood("add");      # <rightarrow>
+		elif(key == 103): self.ModifyFood("decrease"); # <downarrow>
 
 	def _win2glCoord(self, x, y):
 		posX = (2.0 * x / self.windowSize[0]);
@@ -183,7 +183,7 @@ class GUI:
 	def _win2wesenCoord(self, x, y):
 		x, y = self._win2glCoord(x, y);
 		posX = int(x * self.infoWorld["length"]);
-		posY = int((1.0-y) * self.infoWorld["length"]) + 1;
+		posY = int((1.0-y) * self.infoWorld["length"])+1; # why +1 ?
 		return (posX, posY);
 
 	def HandleMouse(self, button, state, x, y):

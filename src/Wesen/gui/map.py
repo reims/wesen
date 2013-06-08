@@ -32,8 +32,10 @@ class Map(GuiObject):
 				raise "GuiError: descriptor does not fit array: %s" % descriptor;
 
 	def DrawMap(self):
+		frame, col, plast, x, y = self._getFrameData();
+		glTranslatef(frame, frame, 0.0); # moving away from the frame
                 length = float(self.infoWorld["length"]);
-                blockSize = 1.0 / length;
+                blockSize = (1.0 - 2*frame) / length;
                 scaleFactor = blockSize;
                 glScale(scaleFactor, scaleFactor, 1.0);
                 for desc in self.descriptor[1]:
@@ -43,11 +45,7 @@ class Map(GuiObject):
                         glColor4f(color[0], color[1], color[2], 1.0);
                         glRectf(desc["position"][0], desc["position"][1], desc["position"][0]+1.0, desc["position"][1]-1.0);
 
-		# for x in range(len(self.array)):
-		# 	for y in range(len(self.array[0])):
-		# 		self.array[x,y].Draw();
-		# 		glTranslatef(0.0, 1.0, 0.0);
-		# 	glTranslatef(1.0, -length, 0.0);
+
 
 	def Draw(self):
 		"""draws the map"""
@@ -55,6 +53,7 @@ class Map(GuiObject):
 		if(self.visible):
 			self.DrawMap();
 
+#not used any more
 class Field(object):
 
 	def __init__(self, descriptorList, colorDescriptor):
