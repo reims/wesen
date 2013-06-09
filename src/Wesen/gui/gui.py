@@ -17,6 +17,7 @@ import math;
 from random import randint;
 from time import time;
 import sys;
+import traceback;
 
 cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0],\
 		[0.5, 0.0, 0.0], [0.0, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.5, 0.0], [0.0, 0.5, 0.5]];
@@ -263,32 +264,33 @@ class GUI:
 			self.frame = 0;
 
 	def Draw(self):
-                """actualizes the descriptor by calling his GameLoop and renders it"""
-                if((not self.pause) or self.step):
-                        if(self.step):
-                                self.descriptor = self.GameLoop();
-                                if(not self.descriptor[0]["finished"]):
-                                        self.graph.Step();
-                                        self.step = False;
-                        else:
-                                if(self.wait == int(1.0/self.speed)):
-                                        self.wait = 1;
-                                        self.descriptor = self.GameLoop();
-                                        if(not self.descriptor[0]["finished"]):
-                                                self.graph.Step();
-                                else:
-                                        self.wait += 1;
-                        self.CalcFps();
-                if(self.init):
-                        self.Pause();
-                        self.init = False;
-                try:
-                        self.RenderScene();
-                except Exception as e:
-                        print("exception:", e);
-                        sys.exit(1);
-                        return 0;
-                return 1
+		"""actualizes the descriptor by calling his GameLoop and renders it"""
+		if((not self.pause) or self.step):
+			if(self.step):
+				self.descriptor = self.GameLoop();
+				if(not self.descriptor[0]["finished"]):
+					self.graph.Step();
+					self.step = False;
+			else:
+				if(self.wait == int(1.0/self.speed)):
+					self.wait = 1;
+					self.descriptor = self.GameLoop();
+					if(not self.descriptor[0]["finished"]):
+						self.graph.Step();
+				else:
+					self.wait += 1;
+			self.CalcFps();
+		if(self.init):
+			self.Pause();
+			self.init = False;
+		try:
+			self.RenderScene();
+		except Exception as e:
+			print("exception:", e);
+			print(traceback.format_exc());
+			sys.exit(1);
+			return 0;
+		return 1
 
 	def _SetColorDescriptor(self):
 		colorDescriptor = dict();
