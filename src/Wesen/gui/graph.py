@@ -84,7 +84,6 @@ class SensorData(object):
 
 	def AddValue(self, value):
 		if self.previous_index == self.size - 1 and not(self.buffer_full):
-			print(self.buf);
 			self.buffer_full = True;
 		self.previous_index = (self.previous_index +1) % self.size;
 		self.buf[self.previous_index*2+1] = value;
@@ -92,7 +91,6 @@ class SensorData(object):
 
 
 	def Draw(self):
-		print("Draw:", self.previous_index, self.buffer_full);
 		self.vbo.bind();
 		self.vbo.copy_data();
 		try:

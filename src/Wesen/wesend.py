@@ -49,7 +49,7 @@ class Wesend:
 
 	def runCondition(self):
 		"""returns False if the game or the world stopped"""
-		return (not (self.world.finished or self.finished or self.world.winner));
+		return (not (self.world.finished or self.finished));
 
 	def initGUI(self):
 		"""handing over all control to the gui"""
