@@ -89,6 +89,5 @@ class World(object):
 		self.stats = sources;
 		if(len(list(sources.keys())) == 2):
                         self.winner = [s for s in sources if s != "food"][0]
-                        print(("the winner is %s" % self.winner))
 		if(not (stillActive)):
 			self.finished = True;
