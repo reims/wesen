@@ -6,7 +6,7 @@ http://wesen.sourceforge.net for newer versions."""
 from .base import WorldObject;
 from ..point import *;
 from ..strings import STRING_LOGGER;
-from random import randint;
+from random import randint, uniform;
 
 class Food(WorldObject):
 	"""unlike wesen, who are programmable and capable of intelligence,
@@ -34,8 +34,6 @@ class Food(WorldObject):
 		"""
 		energy = self.energy;
 		if(energy):
-			for i in range(self.seedrate):
-				self.Seed();
 			self.Die();
 		return energy;
 
@@ -70,4 +68,11 @@ class Food(WorldObject):
 		"""randomly grow or seed, based on growrate and seedrate.
 		When too old, die."""
 		WorldObject.main(self);
+		range = self.getRange(2);
+		food_count = 0;
+		for o in range:
+			if o["type"] == food:
+				food_count += 1;
+		if uniform(0,1) < self.seedrate and self.age > 5 and food_count < 40: #TODO 5 and 20 should be a config option
+			self.Seed();
 		self.Grow();

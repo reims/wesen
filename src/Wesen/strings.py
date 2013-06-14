@@ -42,6 +42,7 @@ STRING_CONFIGED = {
 	"GROWRATE":"(in %, 100 means every, 1 means every 100th round)\ngrowrate="},
 "RANGE":{
 	"LOOK":"(how far the wesen can look)\nlook=",
+	"CLOSER_LOOK":"(how far the wesen can look closely)\nlook=",
 	"TALK":"(how \"far\" the wesen can talk)\ntalk=",
 	"SEED":"(how far the food can seed)\nseed="},
 "TIME":{

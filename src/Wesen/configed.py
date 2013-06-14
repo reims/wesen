@@ -71,6 +71,8 @@ class ConfigEd(object):
 							value = self.configParser.getint(entry[0],option[0]);
 						elif(option[1] == bool):
 							value = self.configParser.getboolean(entry[0],option[0]);
+						elif(option[1] == float):
+							value = self.configParser.getfloat(entry[0], option[0]);
 						if(value == None):
 							exec("value = DEFAULT_%s_%s;" % (upper(entry[0]), upper(option[0])));
 						exec("result[\"%s\"][option[0]] = value;" % entry[0]);
@@ -172,6 +174,8 @@ class ConfigEd(object):
 			print("[range]");
 			self.configParser.set("range","look", str(self.def_input(DEFAULT_RANGE_LOOK,
                              STRING_CONFIGED["RANGE"]["LOOK"])));
+			self.configParser.set("range","closer_look", str(self.def_input(DEFAULT_RANGE_CLOSER_LOOK,
+                             STRING_CONFIGED["RANGE"]["CLOSER_LOOK"])));
 			self.configParser.set("range","talk", str(self.def_input(DEFAULT_RANGE_TALK,
                              STRING_CONFIGED["RANGE"]["TALK"])));
 			self.configParser.set("range","seed", str(self.def_input(DEFAULT_RANGE_SEED,

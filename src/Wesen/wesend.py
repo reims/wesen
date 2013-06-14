@@ -122,9 +122,9 @@ class Wesend:
 			["wesen", [("sources",str), ("count",int), ("energy",int),\
 					("maxage",int)]],\
 			["food", [("count",int), ("energy",int), ("maxamount",int),\
-					("seedrate",int), ("growrate",int),\
+					("seedrate",float), ("growrate",int),\
 					("maxage",int)]],\
-			["range", [("look",int), ("talk",int), ("seed",int)]],\
+			["range", [("look",int), ("closer_look", int), ("talk",int), ("seed",int)]],\
 			["time", [("init",int), ("max",int), ("look",int),\
 					("closerlook",int), ("move",int),\
 					("eat",int), ("talk",int), ("vomit",int),\
