@@ -5,6 +5,7 @@ http://wesen.sourceforge.net for newer versions."""
 
 from .definition import DIMENSIONS;
 from random import randint;
+from math import copysign;
 
 def getRandomPosition(length):
 	"""returns a random n-dimensional position."""
@@ -24,8 +25,8 @@ def signum(number):
 def getNewPosition(position, direction, length):
 	"""returns the position resulting from going into "direction" from "position"."""
 	#return [((position[i] + signum(direction[i]) + length) % length) for i in range(DIMENSIONS)]
-	return [((position[0] + signum(direction[0]) + length) % length),
-                ((position[1] + signum(direction[1]) + length) % length)];
+	return [((position[0] + direction[0]) % length),
+                ((position[1] + direction[1]) % length)];
 
 def positionToDirection(position, newposition, length):
 	"""returns the direction from one point to another one."""
@@ -42,6 +43,11 @@ def positionToDirection(position, newposition, length):
 def getZeroPosition():
 	#return [0 for i in range(DIMENSIONS)];
 	return [0, 0];
+
+def getShortestTranslation(a, b, length):
+	a = [c % length for c in a];
+	b = [c % length for c in b];
+	return [min(b[i]-a[i], -1*copysign(length-abs(b[i]-a[i]),b[i]-a[i]), key=abs) for i in range(len(a))];
 
 
 
