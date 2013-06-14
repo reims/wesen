@@ -8,6 +8,7 @@ from ..point import getZeroPosition, getNewPosition, positionToDirection;
 from .base import WorldObject;
 import sys;
 import importlib;
+from math import copysign
 
 class Wesen(WorldObject):
 	"""Wesen(infoObject) creates a new Wesen instance.
@@ -105,7 +106,7 @@ class Wesen(WorldObject):
 		"""
 		closerLookRange = [];
 		if(self.UseTime("closerlook")):
-			for object in self.getRange(self.infoRange["look"]):
+			for object in self.getRange(self.infoRange["closer_look"]):
 				if(self != object):
 					closerLookRange.append(dict(position=object.position, type=object.objectType,
                                                                     id=id(object), energy=object.energy, age=object.age));
@@ -116,11 +117,13 @@ class Wesen(WorldObject):
 
 	def Move(self, direction):
 		"""moves the wesen into a specified direction"""
-		if(direction != getZeroPosition()):
-			if(self.UseTime("move")):
-				self.ChangePosition(getNewPosition(self.position, direction, self.infoWorld["length"]));
-				return True;
-		return False;
+		real_direction = [min(c, copysign(int(self.getTime() / self.infoTime["move"]), c), key=abs) for c in direction];
+		if real_direction == getZeroPosition():
+			return False;
+		for i in range(abs(max(real_direction, key=abs))):
+			self.UseTime("move");
+		self.ChangePosition(getNewPosition(self.position, real_direction, self.infoWorld["length"]));
+		return True;
 
 	def MoveToPosition(self, position):
 		"""moves the wesen to a specified position"""
@@ -248,7 +251,7 @@ class Wesen(WorldObject):
 		else return false.
 		"""
 		usedTime = self.infoTime[function];
-		if(self.time > usedTime):
+		if(self.time >= usedTime):
 			self.time -= usedTime;
 			return True;
 		return False;
