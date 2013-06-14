@@ -35,4 +35,8 @@ nosetests.xml
 .pydevproject
 
 # Profiling
-.stats
+*.stats
+
+#emacs backup
+*~
+
