@@ -69,7 +69,7 @@ class Food(WorldObject):
 		When too old, die."""
 		WorldObject.main(self);
 		range = self.getRange(2);
-		food_count = 0;
+		food_count = 0; #TODO change according to coding style convention
 		for o in range:
 			if o["type"] == food:
 				food_count += 1;
