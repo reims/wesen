@@ -117,7 +117,7 @@ class Wesen(WorldObject):
 
 	def Move(self, direction):
 		"""moves the wesen into a specified direction"""
-		real_direction = [min(c, copysign(int(self.getTime() / self.infoTime["move"]), c), key=abs) for c in direction];
+		real_direction = [min(int(c), int(copysign(int(self.getTime() / self.infoTime["move"]), c)), key=abs) for c in direction];
 		if real_direction == getZeroPosition():
 			return False;
 		for i in range(abs(max(real_direction, key=abs))):
