@@ -42,6 +42,5 @@ class WesenSource(DefaultWesenSource):
 			if self.position() == old_pos:
 				break;
 			radius = getShortestTranslation(self.mid_point, self.position(), self.infoAllSource["world"]["length"]);
-			self.angle = atan2(radius[1], radius[0])+delta_angle;
-			print("main:", move_pos, old_pos, self.angle, self.mid_point, radius);			
+			self.angle = atan2(radius[1], radius[0])+delta_angle;		
 
