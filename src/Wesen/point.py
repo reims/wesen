@@ -50,6 +50,8 @@ def getShortestTranslation(a, b, length):
 	return [min(b[i]-a[i], -1*copysign(length-abs(b[i]-a[i]),b[i]-a[i]), key=abs) for i in range(len(a))];
 
 
+def getDistInMaxMetric(a, b, length):
+	return abs(max(getShortestTranslation(a,b,length), key=abs));
 
 
 
