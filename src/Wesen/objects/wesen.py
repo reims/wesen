@@ -200,8 +200,9 @@ class Wesen(WorldObject):
 				if(deathOnLowEnergy):
 					self.Die();
 			if(not energy <= 0):
-				infoFood = dict(energy=energy, position=self.position, growrate=0,
-                                            seedrate=0, maxamount=energy+1, maxage=1000, type="food");
+				#TODO the growrate and seedrate here should be configurable
+				infoFood = dict(energy=energy, position=self.position, growrate=1,
+                                            seedrate=0.005, maxamount=energy+1, maxage=1000, type="food");
 				self.AddObject(infoFood);
 				self.energy -= energy;
 				return True;
