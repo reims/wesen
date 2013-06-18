@@ -48,7 +48,7 @@ def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
 		return False;
 
 def acceptableFood(self, object):
-	if(object["energy"] >= self.minimumEnergyToEat):
+	if(object["age"] >= self.minimalGardenAge):
 		if(object["id"] in self.forbiddenTargets):
 			del self.forbiddenTargets[self.forbiddenTargets.index(object["id"])];
 		return True;
@@ -92,12 +92,12 @@ def lookForThreat(self, lookRange=None):
 		lookRange = self.closerLook();
 	return lookForTarget(self, lookRange, "wesen", threateningEnemy, enemyFitness);
 
-def lookAtGarden(self, lookRange=None):
+def lookAtYoungGarden(self, lookRange=None):
 	if(not lookRange):
 		lookRange = self.closerLook();
 	foodCount = 0;
 	for o in lookRange:
-		if(o["type"] == "food"):
+		if(o["type"] == "food" and o["age"] <= self.minimalGardenAge):
 			foodCount += 1;
 	return (foodCount > 10); #TODO magic number
 

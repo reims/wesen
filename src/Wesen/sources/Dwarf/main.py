@@ -13,21 +13,16 @@ class WesenSource(DefaultWesenSource):
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.infoAllSource = infoAllSource;
 		self.active = True;
-		reprFactor = 1.2;
 		self.minimalTime = 20; #TODO should be something to prevent infinite loops!!
-		self.minimumEnergyToEat = 5; # not used
-		self.minimumRoundsOfGardening = 3; # not used
-		self.minimumEnergyToReproduce = 300 * reprFactor;
+		self.minimumEnergyToEat = 1;
+		self.minimalGardenAge = 50;
+		self.minimumEnergyToReproduce = 800;
 		self.minimumEnergyToFight = self.minimumEnergyToReproduce * 0.9;
-		self.maximalNoFoodTimeUntilSeeding = 40; # not used
-		self.lastTimeSeenFood = self.maximalNoFoodTimeUntilSeeding; # not used
-		self.lastTimeSeeded = self.maximalNoFoodTimeUntilSeeding; # not used
 		self.target = None;
 		self.targetType = None;
-		self.forbiddenTargets = []; # not used??
+		self.forbiddenTargets = [];
 
 	def main(self):
-		#TODO the damn thing doesn't eat up its own garden !!!
 		# save age death and reproduce
 		if(self.energy() > self.minimumEnergyToReproduce):
 			self.Reproduce();
@@ -55,7 +50,7 @@ class WesenSource(DefaultWesenSource):
 							# if found, this will be handled next loop iteration!
 						if(not foundEnemy):
 							# nothing to eat, no fights. OK. Time for gardening.
-							if(helper.lookAtGarden(self, lookRange)):
+							if(helper.lookAtYoungGarden(self, lookRange)):
 								# well, wait for the garden to grow!
 								self.target = None; #TODO find out whether necessary
 								break;
