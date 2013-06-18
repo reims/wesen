@@ -31,7 +31,7 @@ class Graph(GuiObject):
 		self.SetResolution(self.width / 2.0);
 
 	def SetResolution(self, resolution):
-		print("Graph resolution:", resolution);
+		#print("Graph resolution:", resolution);
 		self.resolution = float(resolution);
 		self.histlength = int(self.resolution);
 
