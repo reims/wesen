@@ -23,6 +23,7 @@ class Graph(GuiObject):
 	def __init__(self, gui, resolution=1000):
 		GuiObject.__init__(self, gui);
 		self.shadow = True;
+		self.maxValue = 1000; # used to compute y axis scaling
 		self.SetResolution(resolution);
 		self.printer = TextPrinter();
 
@@ -42,13 +43,11 @@ class Graph(GuiObject):
 	def Step(self):
 		for n in range(len(self.history)):
 			self.history[n].AddValue(self.sensors[n]["f"]());
-
-
-
+		self.maxValue=max([sensor.maxValue for sensor in self.history]+[self.maxValue]);
 
 	def DrawPlot(self):
 		glPushMatrix();
-		glScalef(1.0/self.resolution, 0.01, 1.0);
+		glScalef(1.0/self.resolution, 0.8/self.maxValue, 1.0);
 		for i,data in enumerate(self.history):
 			c = self.sensors[i]["color"];
 			glColor4f(c[0], c[1], c[2], 1.0);
@@ -81,6 +80,7 @@ class SensorData(object):
 				   size = 4*2*size);
 		self.previous_index = -1;
 		self.buffer_full = False;
+		self.maxValue = 0;
 
 	def AddValue(self, value):
 		if self.previous_index == self.size - 1 and not(self.buffer_full):
@@ -88,7 +88,7 @@ class SensorData(object):
 		self.previous_index = (self.previous_index +1) % self.size;
 		self.buf[self.previous_index*2+1] = value;
 		self.vbo[self.previous_index*2+1:self.previous_index*2+2] = narray([value],'f');
-
+		self.maxValue = max(self.maxValue, value);
 
 	def Draw(self):
 		self.vbo.bind();
