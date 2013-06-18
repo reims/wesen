@@ -1,7 +1,7 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
+"""Copyright 2003-2013 by Konrad Voelkel and Reimer Backhaus.
 This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
+visit https://github.com/reims/wesen for versions > 2013
+or http://wesen.sourceforge.net for old versions of 2003,2004."""
 
 from .definition import NAMES, VERSIONS, FORMAT_LOGSTRING;
 from .defaults import DEFAULT_GENERAL_CONFIGFILE;
