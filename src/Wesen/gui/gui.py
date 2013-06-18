@@ -25,6 +25,9 @@ cl_freak =     [[0.4, 0.2, 0.6], [0.6, 0.2, 0.4], [0.8, 0.2, 0.2], [0.2, 0.2, 0.
 
 colorList = cl_freak;
 
+glutArgvNormal = "";
+glutArgvDebugging = "--indirect --sync --gldebug";
+
 GRAPHRESOLUTION = 1;
 DEFAULT_GUI_SIZE = 800;
 
@@ -74,8 +77,8 @@ class GUI:
 
 	def initGL(self):
 		"""initializes OpenGL and creates the Window"""
-		glutInit([""]);
-		glutInitDisplayMode(GLUT_DEPTH | GL_DOUBLEBUFFER | GLUT_RGBA);
+		glutInit([glutArgvNormal]);
+		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
 		glutCreateWindow(b'')#"%s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"]));
@@ -85,11 +88,12 @@ class GUI:
 		glutKeyboardFunc(self.HandleKeys);
 		glutSpecialFunc(self.HandleKeys);
 		glutMouseFunc(self.HandleMouse);
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0);
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		#NOTE: the following lines would make sense for fancier graphics:
+		#glEnable(GL_ALPHA_TEST);
+		#glAlphaFunc(GL_GREATER, 0);
+		#glEnable(GL_DEPTH_TEST);
+		#glEnable(GL_BLEND);
+		#glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glClearColor(self.bgcolor[0], self.bgcolor[1], self.bgcolor[2], 0.0);
 
 	def Exit(self):
@@ -165,11 +169,13 @@ class GUI:
 	def HandleKeys(self, key, x, y):
 		"""handle both usual (character) and special (ordinal) keys"""
 		#print("key detection: key="+str(key)+" at (x,y)="+str(x)+","+str(y));
+		#TODO document this functionality somewhere (e.g. in the menu)
 		if(key == b"x" or key == b"q"): self.Exit();
 		elif(key == b"p" or key == b" "): self.Pause();
 		elif(key == b"-"): self.SpeedDown();
 		elif(key == b"+"): self.SpeedUp();
-		elif(key == 13): self.Step(); # <enter>
+		elif(key == b"d"): print(self.infoWorld);
+		elif(key == 13): self.Step(); # <enter> #TODO seems to be broken
 		elif(key == 27): self.Exit(); # <esc>
 		elif(key == 100): self.ModifyFood("delete");   # <leftarrow>
 		elif(key == 101): self.ModifyFood("increase"); # <uparrow>
