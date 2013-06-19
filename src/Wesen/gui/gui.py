@@ -49,9 +49,13 @@ class GUI:
 		self.init = True;
 		self.frame = 0;
 		self.lasttime = 0;
+		self.lastturns = 0;
+		self.turns = 0;
 		self.fps = 0;
+		self.tps = 0;
 		self.speed = 1.0;
 		self.wait = 1;
+		self.dropFrames = 0;
 		self.posX, self.posY = (0, 0);
 		initxy = self.infoGui["pos"];
 		self.initx = int(initxy[:initxy.index(",")]);
@@ -111,6 +115,16 @@ class GUI:
 			self.speed = 0.0;
 		if(self.speed > 1):
 			self.speed = 1.0;
+
+	def DropDown(self):
+		"""decrease framedrops by 1"""
+		self.dropFrames -= 1;
+		if(self.dropFrames < 0):
+			self.dropFrames = 0;
+
+	def DropUp(self):
+		"""increase framedrops by 1"""
+		self.dropFrames += 1;
 
 	def SpeedDown(self):
 		"""decrease Speed by 0.05"""
@@ -174,6 +188,8 @@ class GUI:
 		elif(key == b"p" or key == b" "): self.Pause();
 		elif(key == b"-"): self.SpeedDown();
 		elif(key == b"+"): self.SpeedUp();
+		elif(key == b"i"): self.DropDown();
+		elif(key == b"k"): self.DropUp();
 		elif(key == b"d"): print(self.infoWorld);
 		elif(key == 13): self.Step(); # <enter> #TODO seems to be broken
 		elif(key == 27): self.Exit(); # <esc>
@@ -195,12 +211,12 @@ class GUI:
 
 	def HandleMouse(self, button, state, x, y):
 		"""handles all mouse events as clicks, dragdrops, etc."""
+		#TODO currently without any use
 		if(state == 0):
 			self.mouseFirst = [x,y];
 			posX, posY = self._win2wesenCoord(x, y);
 			if(posX != self.posX or posY != self.posY):
 				self.posX, self.posY = (posX, posY);
-				self.UpdateFieldInformation();
 		if(state == 1):
 			self.mouseLast = [x,y];
 
@@ -213,10 +229,10 @@ class GUI:
 
 	def DrawMap(self):
 		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
-		self.map.SetDescriptor(self.descriptor);
+		if(self.map.visible):
+			self.map.SetDescriptor(self.descriptor);
 		if(self.descriptor[0]["finished"]):
 			self.map.active = False;
-		self.map.Step();
 		self.map.Draw();
 
 	def DrawGraph(self):
@@ -249,24 +265,17 @@ class GUI:
 		glPopMatrix();
 		glutSwapBuffers();
 
-	def UpdateFieldInformation(self):
-		try:
-			descriptorList = self.map.array[self.posX,self.posY].descriptorList;
-		except IndexError:          # IndexError on wrong pos-Values
-			descriptorList = [];
-		except AttributeError:      # AttributeError when map is not ready
-			descriptorList = [];
-		else:
-			self.fieldInformation = descriptorList;
-
 	def CalcFps(self):
-		"""calculates GUI.fps (call every frame)"""
+		"""calculates GUI.fps and GUI.tps (call every frame)"""
 		self.frame += 1;
 		self.actualtime = glutGet(GLUT_ELAPSED_TIME);
-		timenow = self.actualtime-self.lasttime;
-		if(timenow > 100):
+		timenow = self.actualtime - self.lasttime;
+		turnsnow = self.turns - self.lastturns;
+		if(timenow > 1000):
 			self.fps = self.frame*1000.0/timenow;
 			self.lasttime = self.actualtime;
+			self.lastturns = self.turns;
+			self.tps = turnsnow*1000.0/timenow;
 			self.frame = 0;
 
 	def Draw(self):
@@ -274,18 +283,24 @@ class GUI:
 		if((not self.pause) or self.step):
 			if(self.step):
 				self.descriptor = self.GameLoop();
+				self.turns += 1;
+				self.CalcFps();
 				if(not self.descriptor[0]["finished"]):
 					self.graph.Step();
 					self.step = False;
 			else:
 				if(self.wait == int(1.0/self.speed)):
 					self.wait = 1;
-					self.descriptor = self.GameLoop();
-					if(not self.descriptor[0]["finished"]):
-						self.graph.Step();
+					dropped = 0;
+					while(dropped <= self.dropFrames):
+						self.descriptor = self.GameLoop();
+						self.turns += 1;
+						self.CalcFps();
+						if(not self.descriptor[0]["finished"]):
+							self.graph.Step();
+						dropped += 1;
 				else:
 					self.wait += 1;
-			self.CalcFps();
 		if(self.init):
 			self.Pause();
 			self.init = False;

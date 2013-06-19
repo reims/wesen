@@ -40,7 +40,7 @@ class Text(GuiObject):
 				p.PrintLines("%s(%s): %s years old - %s" % (element["source"], element["energy"], element["age"], element["sourcedescriptor"]));
 
 	def DrawGameStats(self, p):
-		p.PrintLn("        global | %s e | %s o |" % (p.fullString(self.world.energy,5), p.fullString(len(self.world.objects),3)));
+		p.PrintLn("              global | %s e | %s o |" % (p.fullString(self.world.energy,8), p.fullString(len(self.world.objects),5)));
 		for source in list(self.world.stats.keys()):
 			energy = self.world.stats[source]["energy"];
 			count = self.world.stats[source]["count"];
@@ -48,8 +48,8 @@ class Text(GuiObject):
 				perWesen = int(energy / count);
 			except ZeroDivisionError:
 				perWesen = 0;
-			p.PrintLn("%s | %s e | %s o | %s e/o |" % (p.fullString(source,14), p.fullString(energy,5),\
-							      p.fullString(count,3), p.fullString(perWesen,4)));
+			p.PrintLn("%s | %s e | %s o | %s e/o |" % (p.fullString(source,20), p.fullString(energy,8),\
+							      p.fullString(count,5), p.fullString(perWesen,5)));
 		if(self.world.winner):
 			p.PrintLn("\nWinner: %s" % (self.world.winner));
 		else:
@@ -62,9 +62,14 @@ class Text(GuiObject):
 			status = "running";
 		if(self.descriptor[0]["finished"]):
 			status += " and finished";
-		p.PrintLn("%s\n\n\t%s fps | %s speed\n\t%s turns | %s sec" % (p.fullString(status,9), p.fullString("%.1f" % self.gui.fps,7), p.fullString(self.gui.speed,4), p.fullString(self.world.turns,5), p.fullString((int(glutGet(GLUT_ELAPSED_TIME)/1000)),6)));
+		p.PrintLn("%s\n" % (p.fullString(status,9)));
+		p.PrintLn("\t%s fps | drawing every %s frames" % (p.fullString("%.1f" % self.gui.fps,7), p.fullString(self.gui.dropFrames+1,3)));
+		#p.PrintLn("\t\t\t\t| manual slowdown: %s percent" % (p.fullString(int(100.0/self.gui.speed),4)));
+		#p.PrintLn("\t%s tps | %s turns | %s sec | overall tps: %s" % (p.fullString("%.1f" % self.gui.tps,7), p.fullString(self.world.turns,5), p.fullString((int(glutGet(GLUT_ELAPSED_TIME)/1000)),6), p.fullString(int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)),6)));
 
 	def DrawText(self):
+		glPushMatrix();
+		glTranslatef(0.02, 0.85, 0.0);
 		p = self.printer;
 		p.PrintLn();
 		self.DrawEngineStats(p);
@@ -72,6 +77,7 @@ class Text(GuiObject):
 		self.DrawGameStats(p);
 		p.PrintLn();
 		self.DrawFieldStats(p);
+		glPopMatrix();
 
 	def Draw(self):
 		GuiObject.Draw(self);
@@ -122,7 +128,7 @@ class TextPrinter(object):
 		self.PrintLn(text);
 
 	def PrintBreak(self):
-		self.rasterPos += self.y;
+		self.rasterPos -= self.y;
 		self.SetColumn();
 
 	def Print(self, text):

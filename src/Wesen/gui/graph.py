@@ -12,8 +12,8 @@ from random import randint;
 from .object import GuiObject;
 from .text import TextPrinter;
 from functools import reduce;
-from OpenGL.arrays import numpymodule
-numpymodule.NumpyHandler.ERROR_ON_COPY = True
+#from OpenGL.arrays import numpymodule
+#numpymodule.NumpyHandler.ERROR_ON_COPY = True
 
 PLOTMODE = GL_LINE_STRIP; # GL_LINES GL_POINTS GL_LINE_STRIP
 import traceback;
@@ -53,9 +53,10 @@ class Graph(GuiObject):
 			glColor4f(c[0], c[1], c[2], 1.0);
 			data.Draw();
 		glPopMatrix();
-			
 
 	def DrawHint(self):
+		glPushMatrix();
+		glTranslatef(0.0, 1.55, 0.0);
 		p = self.printer;
 		border = 24;
 		for n in range(border):
@@ -63,6 +64,7 @@ class Graph(GuiObject):
 		for s in self.sensors:
 			p.PrintLn(p.fullString(s["colorname"],border)+" - "+s["name"]);
 		p.ResetRaster();
+		glPopMatrix();
 
 	def Draw(self):
 		GuiObject.Draw(self);
