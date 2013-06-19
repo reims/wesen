@@ -10,6 +10,7 @@ from .world import World;
 from .configed import ConfigEd;
 from optparse import OptionParser;
 from time import time, sleep;
+from pprint import pprint;
 import re;
 import logging;
 import importlib;
@@ -53,7 +54,7 @@ class Wesend:
 
 	def initGUI(self):
 		"""handing over all control to the gui"""
-		GUI = importlib.import_module(".gui."+self.infoGeneral["guisource"], __package__).GUI;
+		GUI = importlib.import_module(".gui."+self.infoGui["source"], __package__).GUI;
 		infoGui = dict(config=self.infoGeneral, wesend=self, world=self.infoWorld, wesen=self.infoWesen, food=self.infoFood, gui=self.infoGui);
 		self.gui = GUI(infoGui, self.mainLoop, self.world);
 
@@ -113,8 +114,7 @@ class Wesend:
 		"""
 		configEd = ConfigEd(self.configfile);
 		config = configEd.getConfig([\
-			["general", [("enablegui",bool), ("guisource",str),\
-			 		("enablelog",bool), ("logfile",str)]],\
+			["general", [("enablelog",bool), ("logfile",str)]],\
 			["gui", [("enable",bool), ("source",str), ("size",int),\
 					("pos",str), ("map",bool), ("graph",bool),\
 					("text",bool)]],\
@@ -166,9 +166,10 @@ class Wesend:
 	def main(self):
 		while(self.runCondition()):
 			self.run();
-			#if((self.world.turns % 200) == 0):
-			#	print "stats = %s" % (self.world.stats);
+			if((self.world.turns % 50) == 0):
+				print("stats:");
+				pprint(self.world.stats, indent=2, depth=4, width=80);
 		if(self.world.winner):
 			print(("Congratulations, \"%s\" has won the game" % (self.world.winner)));
 		else:
-			print("Sorry, nobody has won the game (maybe error!)");
+			print("Sorry, nobody has won the game");
