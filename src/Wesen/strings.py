@@ -27,8 +27,6 @@ STRING_CONFIGED = {
 	"GRAPH":"\ngraph=",
 	"TEXT":"\ntext="},
 "GENERAL":{
-	"ENABLEGUI (deprecated)":"\nenablegui=",
-	"GUISOURCE (deprecated)":"(destination of your gui sourcecode, leave blank if disabled)\nguisource=",
 	"ENABLELOG":"\nenablelog=",
 	"LOGFILE":"(destination of your logfile, leave blank if disabled)\nlogfile="},
 "WORLD":{
