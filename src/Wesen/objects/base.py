@@ -30,15 +30,10 @@ class WorldObject(object):
 
 	def getRangeObject(self, objectList, radius):
 		"""returns a list with all objects in objectlist in radius."""
-		# most time leeching function in our whole code!
-		x = self.position[0];
-		y = self.position[1];
-		rangeObject = [];
-		for object in objectList:
-			if((abs(object.position[0] - x) <= radius) and
-                           (abs(object.position[1] - y) <= radius)):
-				rangeObject.append(object);
-		return rangeObject;
+		(x,y) = self.position;
+		return [o for o in objectList
+			if ((abs(o.position[0] - x) <= radius) and
+			    (abs(o.position[1] - y) <= radius))];
 
 	def getRange(self, radius):
 		"""returns getRangeObject(MaxRange, radius).
