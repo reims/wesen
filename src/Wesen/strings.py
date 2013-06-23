@@ -59,25 +59,27 @@ STRING_CONFIGED = {
 
 
 STRING_USAGE_LOADER = """usage:
-	python %prog [options]
-	./wesen.py action [options]
+	python3 wesen [options]
+	
+		print this help message
+			--help
+		specify config file to use:
+			--configfile=~/.wesen/conf
+		to start the config editor to write to a configfile:
+			--editconfig
+		to write the default config to a configfile (ignored if --editconfig):
+			--defaultconfig
+		to overwrite certain options from the config file:
+			--enablegui, --disablegui
+			--enablelogger, --disablelogger
+			--logfile=~/.wesen/log
+			--sources=Nightwatch,Dwarf
 
-	action:		d for the daemon, c for the configed, h to print this string, p for profiling
-			cd for config defaults creation, cp for profiling config creation
-			dd for config defaults daemon running
-	options:	are directly passed to the started string
+		all other arguments are passed to OpenGL
+		
+		to get more help, look at
+			https://github.com/reims/wesen
 		""";
-
-STRING_USAGE_WESEND = """usage:
-	python %prog [options]
-	./%prog [options]
-		""";
-STRING_USAGE_WESEND_DISABLEGUI = "don't use a GUI";
-STRING_USAGE_WESEND_ENABLEGUI = "use a GUI";
-STRING_USAGE_WESEND_GUISOURCE = "specify GUI source destination";
-STRING_USAGE_WESEND_QUIET = "stop logging";
-STRING_USAGE_WESEND_LOGFILE = "specify logfile";
-STRING_USAGE_WESEND_CONFIGFILE = "specify configfile";
 
 STRING_LOGGER = {
 "DEATHWESEN":{

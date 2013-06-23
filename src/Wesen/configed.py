@@ -17,7 +17,6 @@ class ConfigEd(object):
 		self.configfile = filename;
 		self.configParser = SafeConfigParser();
 		self.alwaysDefaults = False;
-		self.useProfiling = False;
 
 	def def_input(self,default,msg):
 		"""derived from raw_input,
@@ -46,16 +45,30 @@ class ConfigEd(object):
 		print(".");
 
 
-	def getConfig(self, which):
-		"""getConfig(which) returns the config dict.
+	def getConfig(self):
+		return self.getConfigGeneric([\
+			["general", [("enablelog",bool), ("logfile",str)]],\
+			["gui", [("enable",bool), ("source",str), ("size",int),\
+					("pos",str), ("map",bool), ("graph",bool),\
+					("text",bool)]],\
+			["world", [("length",int)]],\
+			["wesen", [("sources",str), ("count",int), ("energy",int),\
+					("maxage",int)]],\
+			["food", [("count",int), ("energy",int), ("maxamount",int),\
+					("seedrate",float), ("growrate",int),\
+					("maxage",int)]],\
+			["range", [("look",int), ("closer_look", int), ("talk",int), ("seed",int)]],\
+			["time", [("init",int), ("max",int), ("look",int),\
+					("closerlook",int), ("move",int),\
+					("eat",int), ("talk",int), ("vomit",int),\
+					("broadcast",int), ("attack",int),\
+					("donate",int), ("reproduce",int)]]]);
 
-		which must be formatted like this:
-		[[section,[option,option]],[section,[option,option]],..]
-		and this will be returned:
-		{section1:{option1:option2},section2:{option1:option2},..}
+	def getConfigGeneric(self, which):
+		"""getConfigGeneric(which) returns the config dict.
+
 		if a section, option or value is wrong formatted or does not exist,
 		the default values will be returned.
-		keep in mind that section1option1 is a single string "%s%s" % (section1, option1)
 		"""
 		if(exists(self.configfile)):
 			self.configParser.read(self.configfile);
@@ -86,11 +99,6 @@ class ConfigEd(object):
 		self.alwaysDefaults = True;
 		self.edit();
 
-	def writeProfileConfig(self):
-		"""write config file for profiling devtools."""
-		self.useProfiling = True;
-		self.writeDefaults();
-
 	def edit(self):
 		"""Interactive config-file editing;
 
@@ -113,8 +121,9 @@ class ConfigEd(object):
 			if(not self.configParser.has_section("wesen")):
 				self.configParser.add_section("wesen");
 			print("[wesen]");
-			self.configParser.set("wesen","sources", str(self.def_input(DEFAULT_WESEN_SOURCES,
-                             STRING_CONFIGED["WESEN"]["SOURCES"])));
+			self.configParser.set("wesen","sources",
+					      str(self.def_input(DEFAULT_WESEN_SOURCES,
+								 STRING_CONFIGED["WESEN"]["SOURCES"])));
 			self.configParser.set("wesen","count", str(self.def_input(DEFAULT_WESEN_COUNT,
                              STRING_CONFIGED["WESEN"]["COUNT"])));
 			self.configParser.set("wesen","energy", str(self.def_input(DEFAULT_WESEN_ENERGY,
@@ -124,14 +133,12 @@ class ConfigEd(object):
 			if(not self.configParser.has_section("gui")):
 				self.configParser.add_section("gui");
 			print("[gui]");
-			if(self.useProfiling):
-				enablegui = False;
-			else:
-				enablegui = self.def_input(DEFAULT_GUI_ENABLE,\
-					                   str(STRING_CONFIGED["GUI"]["ENABLE"]));
-			self.configParser.set("gui","enable", str(enablegui));
-			self.configParser.set("gui","source", str(self.def_input(DEFAULT_GUI_SOURCE,
-                                                                                 STRING_CONFIGED["GUI"]["SOURCE"])));
+			self.configParser.set("gui","enable",
+					      str(self.def_input(DEFAULT_GUI_ENABLE,
+								 str(STRING_CONFIGED["GUI"]["ENABLE"]))));
+			self.configParser.set("gui","source",
+					      str(self.def_input(DEFAULT_GUI_SOURCE,
+								 STRING_CONFIGED["GUI"]["SOURCE"])));
 			self.configParser.set("gui","size", str(self.def_input(DEFAULT_GUI_SIZE,
                              STRING_CONFIGED["GUI"]["SIZE"])));
 			self.configParser.set("gui","pos", str(self.def_input(DEFAULT_GUI_POS,
