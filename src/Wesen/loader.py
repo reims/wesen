@@ -13,6 +13,7 @@ from .wesend import Wesend;
 from argparse import ArgumentParser, Action;
 from os import execv, environ, mkdir;
 from os.path import exists, join, dirname, expanduser;
+import importlib;
 import sys;
 
 class Loader(object):
@@ -33,11 +34,11 @@ class Loader(object):
 			configEd.printConfig();
 		config = configEd.getConfig();
 		if("_config" in parsedArgs):
-			for section in parsedArgs._config:
-				for key in parsedArgs._config[section]:
-					config[section][key] = parsedArgs._config[section][key];
+			for section, sectionDict in parsedArgs._config.items():
+				config[section].update(sectionDict);
 		if(len(extraArgs)>0):
 			print("handing over the following command-line arguments to OpenGL: ", " ".join(extraArgs));
+		self.checkSourcesAvailability(config['wesen']['sources']);
 		Wesend(config);
 
 	def enableCustomSourcesFolder(self):
@@ -86,6 +87,17 @@ class Loader(object):
 		parser.add_argument('-s', '--sources', section='wesen', dest='sources',
 				    action=OverwriteConfigAction);
 		return parser.parse_known_args();
+
+	def checkSourcesAvailability(self, sourcesList):
+		"""imports all source classes which are specified by the config."""
+		sources = sourcesList.split(",");
+		for source in sources:
+			try:
+				sourceClass = importlib.import_module(".sources."+source+".main", __package__).WesenSource;
+			except ImportError as e:
+				print(e);
+				print("The source code for one of your AIs could not be loaded: ", source);
+				sys.exit();
 
 class OverwriteConfigAction(Action):
 	def __init__(self, option_strings, dest, section, nargs=1):
