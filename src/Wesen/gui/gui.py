@@ -1,8 +1,3 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from ..definition import NAMES, VERSIONS;
 from .map import Map;
 from .text import Text;
@@ -25,7 +20,6 @@ cl_freak =     [[0.4, 0.2, 0.6], [0.6, 0.2, 0.4], [0.8, 0.2, 0.2], [0.2, 0.2, 0.
 
 colorList = cl_freak;
 
-glutArgvNormal = "";
 glutArgvDebugging = "--indirect --sync --gldebug";
 
 GRAPHRESOLUTION = 1;
@@ -33,7 +27,8 @@ DEFAULT_GUI_SIZE = 800;
 
 class GUI:
 
-	def __init__(self, infoGUI, GameLoop, world):
+	def __init__(self, infoGUI, GameLoop, world, extraArgs):
+		"""infoGUI should be a dict, GameLoop a method, world a World object and extraArgs is a string which is passed to OpenGL"""
 		self.GameLoop = GameLoop;
 		self.config = infoGUI["config"];
 		self.wesend = infoGUI["wesend"];
@@ -66,7 +61,7 @@ class GUI:
 		self.bgcolor = [0.0, 0.0, 0.05];
 		self.fgcolor = [0.0, 0.1, 0.2];
 		self._SetColorDescriptor();
-		self.graph = Graph(self);
+		self.graph = Graph(self, self.world);
 		self.map = Map(self, self.infoWorld, self.colorDescriptor);
 		self.text = Text(self, self.descriptor, self.world, self.infoWorld);
 		self.text.SetAspect(2,1); # aspect ratio x:y is 2:1
@@ -75,17 +70,17 @@ class GUI:
 		if(not self.infoGui["map"]): self.map.ChangeVisibility();
 		if(not self.infoGui["text"]): self.text.ChangeVisibility();
 		if(not self.infoGui["graph"]): self.graph.ChangeVisibility();
-		self.initGL();
+		self.initGL(extraArgs);
 		self.initMenu();
 		glutMainLoop();
 
-	def initGL(self):
+	def initGL(self, extraArgs):
 		"""initializes OpenGL and creates the Window"""
-		glutInit([glutArgvNormal]);
+		glutInit([extraArgs]);
 		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
-		glutCreateWindow(b'')#"%s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"]));
+		glutCreateWindow(NAMES["PROJECT"]+" "+VERSIONS["PROJECT"]);
 		glutDisplayFunc(self.Draw);
 		glutIdleFunc(glutPostRedisplay);
 		glutReshapeFunc(self.Reshape);
@@ -302,6 +297,9 @@ class GUI:
 				else:
 					self.wait += 1;
 		if(self.init):
+			for objectType in self.world.stats.keys():
+				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["count"],color=[randint(0,260)/260.0,1.0,0.0],colorname=str(randint(0,260)),name=objectType+" count"));
+				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["energy"],color=[randint(0,260)/260.0,1.0,0.0],colorname=str(randint(0,260)),name=objectType+" energy"));
 			self.Pause();
 			self.init = False;
 		try:

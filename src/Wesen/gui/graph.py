@@ -12,16 +12,15 @@ from random import randint;
 from .object import GuiObject;
 from .text import TextPrinter;
 from functools import reduce;
-#from OpenGL.arrays import numpymodule
-#numpymodule.NumpyHandler.ERROR_ON_COPY = True
 
 PLOTMODE = GL_LINE_STRIP; # GL_LINES GL_POINTS GL_LINE_STRIP
 import traceback;
 
 class Graph(GuiObject):
 
-	def __init__(self, gui, resolution=1000):
+	def __init__(self, gui, world, resolution=1000):
 		GuiObject.__init__(self, gui);
+		self.world = world;
 		self.shadow = True;
 		self.maxValue = 1000; # used to compute y axis scaling
 		self.SetResolution(resolution);
@@ -40,9 +39,15 @@ class Graph(GuiObject):
 		self.sensors = sensors;
 		self.history = [SensorData(self.histlength) for n in range(len(self.sensors))];
 
+	def AddSensor(self, sensor):
+		""" sensor = dict(f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy")
+		where f has to be a function which takes a variable self and expects there to be self.world."""
+		self.sensors.append(sensor);
+		self.history = [SensorData(self.histlength) for n in range(len(self.sensors))];
+
 	def Step(self):
 		for n in range(len(self.history)):
-			self.history[n].AddValue(self.sensors[n]["f"]());
+			self.history[n].AddValue(self.sensors[n]["f"](self.world));
 		self.maxValue=max([sensor.maxValue for sensor in self.history]+[self.maxValue]);
 
 	def DrawPlot(self):
@@ -116,8 +121,8 @@ class SensorData(object):
 				glDrawArrays(GL_LINE_STRIP,
 					     0,
 					     (self.previous_index +1));
-		except:
-			print("exception");
+		except Exception err:
+			print(err);
 			print(traceback.format_exc());
 		finally:
 			glDisableClientState(GL_VERTEX_ARRAY);
@@ -131,27 +136,7 @@ class SensorSystem(object):
 		graph.SetSensors(self.getSensors());
 
 	def getSensors(self):
-		sensors = [dict(f=self.getGlobalEnergy,color=[1.0,1.0,1.0],colorname="white",name="global energy"), \
-			   dict(f=self.getGlobalObjects,color=[0.5,0.5,0.5],colorname="grey",name="object count"), \
-			   dict(f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy"), \
-			   dict(f=self.getFoodObjects,color=[0.0,0.5,0.0],colorname="dark green",name="food count"), \
-			   dict(f=self.getFps,color=[1.0,0.0,1.0],colorname="magenta",name="frames per second")];
+		sensors = [\
+			   #dict(f=lambda world : world.getEnergy(),color=[0.5,0.5,0.5],colorname="grey",name="global energy"), \
+			   ];
 		return sensors;
-
-	def breakDown(self, value, base=100):
-		return value / float(base);
-
-	def getGlobalEnergy(self):
-		return self.breakDown(self.world.getEnergy());
-
-	def getGlobalObjects(self):
-		return self.breakDown(len(self.world.objects), 1);
-
-	def getFoodEnergy(self):
-		return self.breakDown(self.world.stats["food"]["energy"]);
-
-	def getFoodObjects(self):
-		return self.breakDown(self.world.stats["food"]["count"], 1);
-
-	def getFps(self):
-		return self.breakDown(self.gui.fps, 1);
