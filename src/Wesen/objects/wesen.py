@@ -127,7 +127,7 @@ class Wesen(WorldObject):
 
 	def MoveToPosition(self, position):
 		"""moves the wesen to a specified position"""
-		return self.Move(positionToDirection(self.position, position, self.infoWorld["length"]));
+		return self.Move(positionToDirection(self.position, position));
 
 	def Talk(self, wesenid, message):
 		"""calls Receive(message) in the wesen specified by wesenid when in range."""

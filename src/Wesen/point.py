@@ -28,17 +28,17 @@ def getNewPosition(position, direction, length):
 	return [((position[0] + direction[0]) % length),
                 ((position[1] + direction[1]) % length)];
 
-def positionToDirection(position, newposition, length):
+def positionToDirection(position, newposition):
 	"""returns the direction from one point to another one."""
-	direction = [];
-	for i in range(DIMENSIONS):
-		if(newposition[i] < position[i]):
-			direction.append(-1);
-		elif(newposition[i] > position[i]):
-			direction.append(1);
-		else:
-			direction.append(0);
-	return direction;
+	return [signum(c-p) for (c,p) in zip(newposition, position)];
+#	for i in range(DIMENSIONS):
+#		if(newposition[i] < position[i]):
+#			direction.append(-1);
+#		elif(newposition[i] > position[i]):
+#			direction.append(1);
+#		else:
+#			direction.append(0);
+#	return direction;
 
 def getZeroPosition():
 	#return [0 for i in range(DIMENSIONS)];
