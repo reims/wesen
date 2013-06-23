@@ -1,5 +1,7 @@
 """string definitions"""
 
+from .defaults import DEFAULT_GENERAL_CONFIGFILE;
+
 # for I18N, insert here a stringtable-loader or replace this file.
 
 STRING_ERROR_NOTSAMEPATH = "There is a path problem. The program could not find the desired files.";
@@ -80,6 +82,13 @@ STRING_USAGE_LOADER = """usage:
 		to get more help, look at
 			https://github.com/reims/wesen
 		""";
+STRING_USAGE_DESCRIPTION = 'Predator-prey simulation for learning python and AI. See also https://github.com/reims/wesen';
+STRING_USAGE_CONFIGFILE = 'specify the configfile to use, defaults to '+DEFAULT_GENERAL_CONFIGFILE;
+STRING_USAGE_EDITCONFIG = 'start the config editor';
+STRING_USAGE_DEFAULTCONFIG = 'write the default config';
+STRING_USAGE_PRINTCONFIG = 'print the config (without changes from command-line options)';
+STRING_USAGE_OVERWRITE = 'overwrite corresponding setting in the config file';
+STRING_USAGE_EPILOG = 'all other arguments are passed to OpenGL';
 
 STRING_LOGGER = {
 "DEATHWESEN":{

@@ -2,8 +2,8 @@ from .definition import *;
 from .defaults import *;
 from .strings import *;
 from configparser import SafeConfigParser;
-from os.path import exists;
 from sys import argv;
+import os.path;
 
 def upper(str):
         return str.upper()
@@ -12,8 +12,6 @@ class ConfigEd(object):
 	"""ConfigEd(filename) creates a full powered config editor for wesen"""
 
 	def __init__(self,filename):
-		if(__name__ == "__main__"):
-			print((("%s %s %s %s") % (NAMES["PROJECT"], VERSIONS["PROJECT"], NAMES["CONFIGED"], VERSIONS["CONFIGED"])));
 		self.configfile = filename;
 		self.configParser = SafeConfigParser();
 		self.alwaysDefaults = False;
@@ -70,7 +68,7 @@ class ConfigEd(object):
 		if a section, option or value is wrong formatted or does not exist,
 		the default values will be returned.
 		"""
-		if(exists(self.configfile)):
+		if(os.path.exists(self.configfile)):
 			self.configParser.read(self.configfile);
 			result = {};
 			for entry in which:
@@ -108,7 +106,7 @@ class ConfigEd(object):
 		"""
 		if(self.alwaysDefaults):
 			overwrite = True;
-		elif(exists(self.configfile)):
+		elif(os.path.exists(self.configfile)):
 			if(input(STRING_ERROR_FILEEXISTS % self.configfile)=="y"):
 				overwrite = True;
 			else:

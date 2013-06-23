@@ -4,7 +4,6 @@ from .definition import DIMENSIONS;
 from os.path import expanduser, join;
 
 DEFAULT_GENERAL_CONFIGFILE = join(expanduser("~"),".wesen","conf"); # this configfile is _always_ used before any other specified!
-DEFAULT_GENERAL_CONFIGFILE_PROFILE = join(expanduser("~"),".wesen","conf_profile"); # used for profiling devtools
 # these default values are used in configed for the defaults in the editor and when no values are specified in the configfile.
 # I recommend to use the calculated values as they are.
 

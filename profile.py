@@ -8,7 +8,7 @@ import sys;
 print("You can supply an alternative config file on the command-line");
 print("You can stop profiling by Ctrl+C");
 
-sys.argv.append('d'); #TODO change to '--disablegui' after Loader command-line parser re-write
+sys.argv.append('--disablegui');
 cProfile.run("Loader()", "profile.stats");
 
 stats = pstats.Stats('profile.stats')

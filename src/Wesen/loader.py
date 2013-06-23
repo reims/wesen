@@ -5,11 +5,12 @@ This program is distributed under the terms of the GNU General Public License.
 visit https://github.com/reims/wesen for versions > 2013
 or http://wesen.sourceforge.net for old versions of 2003,2004."""
 
-from .wesend import Wesend;
-from .defaults import DEFAULT_GENERAL_CONFIGFILE, DEFAULT_GENERAL_CONFIGFILE_PROFILE;
-from .strings import STRING_ERROR_NOTSAMEPATH, STRING_USAGE_LOADER;
+from .definition import NAMES, VERSIONS;
+from .defaults import DEFAULT_GENERAL_CONFIGFILE, DEFAULT_GENERAL_LOGFILE;
+from .strings import *;
 from .configed import ConfigEd;
-from optparse import OptionParser;
+from .wesend import Wesend;
+from argparse import ArgumentParser, Action;
 from os import execv, environ, mkdir;
 from os.path import exists, join, dirname, expanduser;
 import sys;
@@ -21,25 +22,25 @@ class Loader(object):
 		self.main();
 
 	def main(self):
-		"""control flow:
-		if --help was given, print the usage string and quit
-		check whether config file was supplied in args
-		 check whether it exists
-		  if, use it and continue parsing commandline
-		  if not, cry and quit
-		 if no config file supplied, use default location
-		  if exists, use it and continue parsing commandline
-		  if not, create it (write defaults to it) and then use it and continue parsing
-		check whether the option to edit the config was given
-		 if, launch the editor
-		 if not, see if the option to write default config was given,
-		  write the default config to the configfile in use
-		read the configfile we decided to use
-		manipulate the config info according to
-		 --(enable|disable)(gui|logger) and --logfile and --sources
-		run wesend with this config and remaining args (for OpenGL).
-		"""
-		#TODO rewrite following code according to flow described above
+		self.enableCustomSourcesFolder();
+		(parsedArgs, extraArgs) = self.parseArgs();
+		configEd = ConfigEd(parsedArgs.configfile);
+		if(parsedArgs.invoke_defaultconfig):
+			configEd.writeDefaults();
+		if(parsedArgs.invoke_editconfig):
+			configEd.edit();
+		if(parsedArgs.invoke_printconfig):
+			configEd.printConfig();
+		config = configEd.getConfig();
+		if("_config" in parsedArgs):
+			for section in parsedArgs._config:
+				for key in parsedArgs._config[section]:
+					config[section][key] = parsedArgs._config[section][key];
+		if(len(extraArgs)>0):
+			print("handing over the following command-line arguments to OpenGL: ", " ".join(extraArgs));
+		Wesend(config);
+
+	def enableCustomSourcesFolder(self):
 		configroot = join(expanduser("~"),".wesen");
 		sourcefolder = join(configroot, "sources");
 		if(not exists(configroot)):
@@ -47,28 +48,68 @@ class Loader(object):
 		if(not exists(sourcefolder)):
 			mkdir(sourcefolder);
 		sys.path.append(sourcefolder);
-		args = sys.argv;
-		if len(args) >= 2:
-			argument = args[1];
-			if argument == "c":
-				from .configed import ConfigEd;
-				if len(args)==4:
-					configEd=ConfigEd(args[2]);
-				else:
-					configEd=ConfigEd(DEFAULT_GENERAL_CONFIGFILE);
-					configEd.edit();
-				if "-e" in args or "--edit" in args:
-					configEd.edit();
-				if "-d" in args or "--defaults" in args:
-					configEd.writeDefaults();
-				if "-g" in args or "--get" in args:
-					configEd.printConfig();
-			elif argument == "d":
-				wesend = Wesend(self.readConfig());
-			else:
-				print(STRING_USAGE_LOADER);
-		else:
-			print(STRING_USAGE_LOADER);
 
-	def readConfig(self, configfile=DEFAULT_GENERAL_CONFIGFILE):
-		return ConfigEd(configfile).getConfig();
+	def parseArgs(self):
+		parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
+					epilog=STRING_USAGE_EPILOG);
+		parser.add_argument('--version', action='version',
+				    version='%(prog)s ('+NAMES["PROJECT"]+') '+VERSIONS['PROJECT']);
+		parser.add_argument('-c', '--configfile', action='store', dest='configfile',
+				    default=DEFAULT_GENERAL_CONFIGFILE,
+				    help=STRING_USAGE_CONFIGFILE);
+		group = parser.add_mutually_exclusive_group();
+		group.add_argument('-e', '--editconfig', action='store_true', dest='invoke_editconfig',
+				    default=False,
+				    help=STRING_USAGE_EDITCONFIG);
+		group.add_argument('--defaultconfig', action='store_true', dest='invoke_defaultconfig',
+				    default=False,
+				    help=STRING_USAGE_DEFAULTCONFIG);
+		parser.add_argument('--printconfig', action='store_true', dest='invoke_printconfig',
+				    default=False,
+				    help=STRING_USAGE_PRINTCONFIG);
+		group = parser.add_mutually_exclusive_group();
+		group.add_argument('--enablegui', section='gui', dest='enable',
+				    storeValue=True,
+				    action=OverwriteConfigActionBool);
+		group.add_argument('--disablegui', section='gui', dest='enable',
+				    storeValue=False,
+				    action=OverwriteConfigActionBool);
+		group = parser.add_mutually_exclusive_group();
+		group.add_argument('--enablelogger', section='general', dest='enablelog',
+				    storeValue=True,
+				    action=OverwriteConfigActionBool);
+		group.add_argument('--disablelogger', section='general', dest='enablelog',
+				    storeValue=False,
+				    action=OverwriteConfigActionBool);
+		parser.add_argument('-l', '--logfile', section='general', dest='logfile',
+				    action=OverwriteConfigAction);
+		parser.add_argument('-s', '--sources', section='wesen', dest='sources',
+				    action=OverwriteConfigAction);
+		return parser.parse_known_args();
+
+class OverwriteConfigAction(Action):
+	def __init__(self, option_strings, dest, section, nargs=1):
+		super(OverwriteConfigAction, self).__init__(option_strings=option_strings, dest=dest, nargs=nargs, const=False, default=None, required=False, help=STRING_USAGE_OVERWRITE);
+		self.section = section;
+
+	def __call__(self, parser, namespace, values, option_string=None):
+		if(len(values) != 1):
+			raise ValueError("wrong number of values for config option to overwrite: [",self.section, "]", self.dest, "=",",".join(values));
+		else:
+			print("Overwritten config option: [",self.section, "]", self.dest, "=", values[0]);
+			if(not "_config" in namespace):
+				namespace._config = dict();
+			if(not self.section in namespace._config.keys()):
+				namespace._config[self.section] = dict();
+			namespace._config[self.section][self.dest] = values[0];
+		
+
+class OverwriteConfigActionBool(OverwriteConfigAction):
+	def __init__(self, option_strings, dest, section, storeValue=None):
+		super(OverwriteConfigActionBool, self).__init__(option_strings=option_strings, dest=dest, section=section, nargs=0);
+		self.storeValue = storeValue;
+
+	def __call__(self, parser, namespace, values, option_string=None):
+		if(self.storeValue != None):
+			values = [self.storeValue];
+		super(OverwriteConfigActionBool, self).__call__(parser, namespace, values);
