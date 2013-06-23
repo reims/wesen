@@ -19,7 +19,6 @@ class Food(WorldObject):
 		self.growrate = self.infoObject["growrate"];
 		self.rangeseed = self.infoRange["seed"];
 		self.maxamount = self.infoObject["maxamount"];
-		#self.marange = self.getMarange();
 
 	def __repr__(self):
 		return "<food id=%s static=%s pos=%s energy=%s>" % (id(self), (self.growrate==0), self.position, self.energy);
@@ -60,19 +59,13 @@ class Food(WorldObject):
 		if(self.energy < 0):
 			self.energy = 0;
 			print("warning: food energy lower than zero detected");
-                        
-	#def getMarange(self):
-	#	return self.getRangeObject(self.worldObjects, self.rangeseed);
 
 	def main(self):
 		"""randomly grow or seed, based on growrate and seedrate.
 		When too old, die."""
 		WorldObject.main(self);
-		range = self.getRange(2);
-		food_count = 0; #TODO change according to coding style convention
-		for o in range:
-			if o["type"] == food:
-				food_count += 1;
-		if uniform(0,1) < self.seedrate and self.age > 5 and food_count < 40: #TODO 5 and 20 should be a config option
-			self.Seed();
+		if(self.age > 10): #TODO numbers should be a config option
+			if(uniform(0,1) < self.seedrate):
+				if(len([None for o in self.getRange(3) if o["type"]==food]) <= 10):
+					self.Seed();
 		self.Grow();
