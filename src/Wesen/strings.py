@@ -6,12 +6,12 @@ from .defaults import DEFAULT_GENERAL_CONFIGFILE;
 
 STRING_ERROR_NOTSAMEPATH = "There is a path problem. The program could not find the desired files.";
 STRING_ERROR_FILEEXISTS = "file %s already exists, overwrite? (y, n) ";
-STRING_ERROR_NOTWROTE = "didn't write %s";
+STRING_ERROR_NOTWROTE = "didn't write file %s";
 
 
-STRING_MESSAGE_WROTE = "	wrote %s";
-STRING_MESSAGE_PROCESSING = "	processing %s";
-STRING_MESSAGE_REMOVED = "	removed %s";
+STRING_MESSAGE_WROTE = "wrote file %s";
+STRING_MESSAGE_PROCESSING = "processing file %s";
+STRING_MESSAGE_REMOVED = "removed file %s";
 
 
 STRING_CONFIGED = {
