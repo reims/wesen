@@ -121,8 +121,7 @@ class SensorData(object):
 				glDrawArrays(GL_LINE_STRIP,
 					     0,
 					     (self.previous_index +1));
-		except Exception err:
-			print(err);
+		except Exception:
 			print(traceback.format_exc());
 		finally:
 			glDisableClientState(GL_VERTEX_ARRAY);
