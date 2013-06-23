@@ -76,7 +76,7 @@ class GUI:
 
 	def initGL(self, extraArgs):
 		"""initializes OpenGL and creates the Window"""
-		glutInit([extraArgs]);
+		glutInit(extraArgs.split(" "));
 		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
