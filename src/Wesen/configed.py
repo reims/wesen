@@ -90,7 +90,7 @@ class ConfigEd(object):
 			return result;
 		else:
 			self.writeDefaults();
-			return self.getConfig(which);
+			return self.getConfigGeneric(which);
 
 	def writeDefaults(self):
 		"""write config defaults to file."""
@@ -115,10 +115,10 @@ class ConfigEd(object):
 			overwrite = True;
 		if overwrite:
 			self.configParser.read(self.configfile);
-			print((self.configfile));
+			#print((self.configfile));
 			if(not self.configParser.has_section("wesen")):
 				self.configParser.add_section("wesen");
-			print("[wesen]");
+			#print("[wesen]");
 			self.configParser.set("wesen","sources",
 					      str(self.def_input(DEFAULT_WESEN_SOURCES,
 								 STRING_CONFIGED["WESEN"]["SOURCES"])));
@@ -130,7 +130,7 @@ class ConfigEd(object):
                              STRING_CONFIGED["WESEN"]["MAXAGE"])));
 			if(not self.configParser.has_section("gui")):
 				self.configParser.add_section("gui");
-			print("[gui]");
+			#print("[gui]");
 			self.configParser.set("gui","enable",
 					      str(self.def_input(DEFAULT_GUI_ENABLE,
 								 str(STRING_CONFIGED["GUI"]["ENABLE"]))));
@@ -149,19 +149,19 @@ class ConfigEd(object):
                              STRING_CONFIGED["GUI"]["TEXT"])));
 			if(not self.configParser.has_section("general")):
 				self.configParser.add_section("general");
-			print("[general]");
+			#print("[general]");
 			self.configParser.set("general","enablelog",
                              str(self.def_input(DEFAULT_GENERAL_ENABLELOG,STRING_CONFIGED["GENERAL"]["ENABLELOG"])));
 			self.configParser.set("general","logfile", str(self.def_input(DEFAULT_GENERAL_LOGFILE,
                              STRING_CONFIGED["GENERAL"]["LOGFILE"])));
 			if(not self.configParser.has_section("world")):
 				self.configParser.add_section("world");
-			print("[world]");
+			#print("[world]");
 			self.configParser.set("world","length", str(self.def_input(DEFAULT_WORLD_LENGTH,
                              STRING_CONFIGED["WORLD"]["LENGTH"])));
 			if(not self.configParser.has_section("food")):
 				self.configParser.add_section("food");
-			print("[food]");
+			#print("[food]");
 			self.configParser.set("food","count", str(self.def_input(DEFAULT_FOOD_COUNT,
                              STRING_CONFIGED["FOOD"]["COUNT"])));
 			self.configParser.set("food","energy", str(self.def_input(DEFAULT_FOOD_AMOUNT,
@@ -176,7 +176,7 @@ class ConfigEd(object):
                              STRING_CONFIGED["FOOD"]["GROWRATE"])));
 			if(not self.configParser.has_section("range")):
 				self.configParser.add_section("range");
-			print("[range]");
+			#print("[range]");
 			self.configParser.set("range","look", str(self.def_input(DEFAULT_RANGE_LOOK,
                              STRING_CONFIGED["RANGE"]["LOOK"])));
 			self.configParser.set("range","closer_look", str(self.def_input(DEFAULT_RANGE_CLOSER_LOOK,
@@ -187,7 +187,7 @@ class ConfigEd(object):
                              STRING_CONFIGED["RANGE"]["SEED"])));
 			if(not self.configParser.has_section("time")):
 				self.configParser.add_section("time");
-			print("[time]");
+			#print("[time]");
 			self.configParser.set("time","init", str(self.def_input(DEFAULT_TIME_INIT,
                              STRING_CONFIGED["TIME"]["INIT"])));
 			self.configParser.set("time","max", str(self.def_input(DEFAULT_TIME_MAX,
@@ -212,7 +212,7 @@ class ConfigEd(object):
                              STRING_CONFIGED["TIME"]["DONATE"])));
 			self.configParser.set("time","reproduce", str(self.def_input(DEFAULT_TIME_REPRODUCE,
                              STRING_CONFIGED["TIME"]["REPRODUCE"])));
-			print(".");
+			#print(".");
 			self.configParser.write(open(self.configfile,"w"));
 			print((STRING_MESSAGE_WROTE % self.configfile));
 		else:
