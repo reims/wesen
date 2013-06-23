@@ -80,7 +80,7 @@ class GUI:
 		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
-		glutCreateWindow(NAMES["PROJECT"]+" "+VERSIONS["PROJECT"]);
+		glutCreateWindow((NAMES["PROJECT"]+" "+VERSIONS["PROJECT"]).encode("ascii"));
 		glutDisplayFunc(self.Draw);
 		glutIdleFunc(glutPostRedisplay);
 		glutReshapeFunc(self.Reshape);
