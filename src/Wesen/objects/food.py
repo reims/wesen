@@ -15,6 +15,7 @@ class Food(WorldObject):
 
 	def __init__(self, infoAllWorld):
 		WorldObject.__init__(self, infoAllWorld);
+		self.source = "food";
 		self.seedrate = self.infoObject["seedrate"];
 		self.growrate = self.infoObject["growrate"];
 		self.rangeseed = self.infoRange["seed"];
