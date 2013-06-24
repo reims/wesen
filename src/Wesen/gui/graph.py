@@ -136,6 +136,6 @@ class SensorSystem(object):
 
 	def getSensors(self):
 		sensors = [\
-			   #dict(f=lambda world : world.getEnergy(),color=[0.5,0.5,0.5],colorname="grey",name="global energy"), \
+			   dict(f=lambda world : world.getEnergy(),color=[0.5,0.5,0.5],colorname="grey",name="global energy"), \
 			   ];
 		return sensors;
