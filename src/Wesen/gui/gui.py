@@ -9,7 +9,7 @@ from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 import math;
-from random import uniform;
+from numpy.random import uniform;
 from time import time;
 import sys;
 import traceback;

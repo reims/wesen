@@ -1,4 +1,4 @@
-from random import randint, uniform;
+from numpy.random import randint, uniform;
 
 #TODO try to extract a sensible helper.py and move some of this back to the main source...
 

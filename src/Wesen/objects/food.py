@@ -6,7 +6,7 @@ http://wesen.sourceforge.net for newer versions."""
 from .base import WorldObject;
 from ..point import *;
 from ..strings import STRING_LOGGER;
-from random import randint, uniform;
+from numpy.random import uniform;
 
 class Food(WorldObject):
 	"""unlike wesen, who are programmable and capable of intelligence,

@@ -1,7 +1,7 @@
 from . import helper;
 from ...defaultwesensource import DefaultWesenSource;
 from ...point import *;
-from random import randint, uniform;
+from numpy.random import randint, uniform;
 from sys import exit;
 
 class WesenSource(DefaultWesenSource):
