@@ -68,16 +68,12 @@ class World(object):
 		stillActive = False;
 		self.turns += 1;
 		sources = dict(food=dict(count=0,energy=0));
+		for source in self.infoWesen["sources"]:
+			sources[source]=dict(count=0,energy=0);
 		globalEnergy = 0;
 		for object in self.objects:
 			globalEnergy += object.energy;
 			if(type(object) is Wesen):
-				try:
-					sources[object.source];
-				except KeyError:
-					sources[object.source] = {};
-					sources[object.source]["count"] = 0;
-					sources[object.source]["energy"] = 0;
 				sources[object.source]["count"] += 1;
 				sources[object.source]["energy"] += object.energy;
 				stillActive = True;
@@ -87,7 +83,7 @@ class World(object):
 			object.main();
 		self.energy = globalEnergy;
 		self.stats = sources;
-		if(len(list(sources.keys())) == 2):
-                        self.winner = [s for s in sources if s != "food"][0]
+		#if(len(list(sources.keys())) == 2):
+                #        self.winner = [s for s in sources if s != "food"][0]
 		if(not (stillActive)):
 			self.finished = True;
