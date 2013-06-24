@@ -23,6 +23,8 @@ class WorldObject(object):
 		self.AddObject = self.infoWorld["AddObject"];
 		self.worldObjects = self.infoWorld["objects"];
 		self.age = 0;
+		self.time = 0;
+		self.source = "";
 		self.position = self.infoObject.get("position", getRandomPosition(self.infoWorld["length"]));
 
 	def __repr__(self):
