@@ -20,10 +20,10 @@ def CatchTarget(self, Action, actionTime):
 	return result;
 
 def EatObject(self, object):
-	return self.Eat(object["id"]) or True;
+	return self.Eat(object["id"]);
 
 def AttackObject(self, object):
-	return self.Attack(object["id"]) or True;
+	return self.Attack(object["id"]);
 
 def EatTarget(self):
 	return CatchTarget(self, EatObject, self.infoTime["attack"]+1);
