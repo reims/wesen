@@ -9,7 +9,7 @@ from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 import math;
-from random import randint;
+from random import uniform;
 from time import time;
 import sys;
 import traceback;
@@ -246,7 +246,7 @@ class GUI:
 
 	def RenderScene(self):
 		"""draws the actual descriptor"""
-		glClear(GL_COLOR_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
 		self.ResetView();
 		glPushMatrix();
@@ -298,8 +298,18 @@ class GUI:
 					self.wait += 1;
 		if(self.init):
 			for objectType in self.world.stats.keys():
-				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["count"],color=[randint(0,260)/260.0,1.0,0.0],colorname=str(randint(0,260)),name=objectType+" count"));
-				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["energy"],color=[randint(0,260)/260.0,1.0,0.0],colorname=str(randint(0,260)),name=objectType+" energy"));
+				red = uniform(0,1);
+				green = uniform(0,1);
+				blue = uniform(0,1);
+				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["count"],
+							  color=[red,green,blue],
+							  colorname=str(int(red*255))+" "+str(int(green*255))+" "+str(int(blue*255)),
+							  name=objectType+" count"));
+				blue = uniform(0,1);
+				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["energy"],
+							  color=[red,green,blue],
+							  colorname=str(int(red*255))+" "+str(int(green*255))+" "+str(int(blue*255)),
+							  name=objectType+" energy"));
 			self.Pause();
 			self.init = False;
 		try:
