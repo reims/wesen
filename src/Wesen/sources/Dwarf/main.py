@@ -15,9 +15,9 @@ class WesenSource(DefaultWesenSource):
 		self.active = True;
 		self.minimalTime = 20; #TODO should be something to prevent infinite loops!!
 		self.minimumEnergyToEat = 1;
-		self.minimalGardenAge = 50;
-		self.minimumEnergyToReproduce = 800;
-		self.minimumEnergyToFight = self.minimumEnergyToReproduce * 0.9;
+		self.minimalGardenAge = 15;
+		self.minimumEnergyToReproduce = 1800;
+		self.minimumEnergyToFight = 300;
 		self.target = None;
 		self.targetType = None;
 		self.forbiddenTargets = [];
@@ -27,13 +27,13 @@ class WesenSource(DefaultWesenSource):
 		if(self.energy() > self.minimumEnergyToReproduce):
 			self.Reproduce();
 		helper.recoverAge(self);
+		lookRange = self.closerLook(); # could be done in-loop...
 		# action loop
 		while((self.time() > self.minimalTime) and self.active):
 			# try to finish something that already started:
 			helper.HandleTarget(self);
 			# nothing to do? OK, find something to do.
 			if(not self.target):
-				lookRange = self.closerLook();
 				foundFood = helper.lookForFoodTarget(self, lookRange);
 				if(foundFood):
 					# fine, this will be handled next loop iteration!
@@ -55,9 +55,13 @@ class WesenSource(DefaultWesenSource):
 								self.target = None; #TODO find out whether necessary
 								break;
 							else:
-								if(randint(0,1)==0): #TODO move magic number to constants above
+								decision = randint(0,9);
+								if(decision==0): #TODO move magic number to constants above
 									# seed out!
 									helper.seedOut(self);
-								else:
+								elif(decision <= 5):
 									# move away!
 									helper.ScannerMove(self, scanVector=__class__.globalScanVector);
+								else:
+									# move back!
+									helper.ScannerMove(self, scanVector=[-c for c in __class__.globalScanVector]);

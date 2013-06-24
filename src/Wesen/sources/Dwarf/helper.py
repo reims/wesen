@@ -11,21 +11,20 @@ def recoverAge(self):
 		self.Donate(self.energy(),child);
 
 def CatchTarget(self, Action, actionTime):
-	result = False;
-	self.MoveToPosition(self.target["position"]);
-	if(self.target["position"] == self.position() and self.time() >= actionTime):
-		result = Action(self, self.target);
-		if(not result):
-			if(not self.target["id"] in self.forbiddenTargets):
+	if(self.MoveToPosition(self.target["position"])):
+		if(self.target["position"] == self.position() and self.time() >= actionTime):
+			if(Action(self, self.target)):
+				return True; 
+			elif(not self.target["id"] in self.forbiddenTargets):
 				self.forbiddenTargets.append(self.target["id"]);
-		self.target = None;
-	return result;
+			self.target = None;
+	return False;
 
-def EatObject(self, object): #TODO one shouldn't use the variable name object anywhere ... :-(
-	return self.Eat(object["id"]) or True;
+def EatObject(self, o):
+	return self.Eat(o["id"]);
 
-def AttackObject(self, object):
-	return self.Attack(object["id"]) or True;
+def AttackObject(self, o):
+	return self.Attack(o["id"]);
 
 def EatTarget(self):
 	return CatchTarget(self, EatObject, self.infoTime["eat"]+1);
@@ -34,11 +33,7 @@ def AttackTarget(self):
 	return CatchTarget(self, AttackObject, self.infoTime["attack"]+1);
 
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
-	matchingObjects = [];
-	for object in lookRange:
-		if(object["type"] == objectType):
-			if(objectCondition(self, object)):
-				matchingObjects.append(object);
+	matchingObjects = [o for o in lookRange if (o["type"]==objectType and objectCondition(self, o))];
 	if(matchingObjects):
 		matchingObjects.sort(key = objectFitness);
 		self.target = matchingObjects[0];
