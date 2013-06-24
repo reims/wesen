@@ -58,11 +58,10 @@ class Loader(object):
 		parser.add_argument('-c', '--configfile', action='store', dest='configfile',
 				    default=DEFAULT_GENERAL_CONFIGFILE,
 				    help=STRING_USAGE_CONFIGFILE);
-		group = parser.add_mutually_exclusive_group();
-		group.add_argument('-e', '--editconfig', action='store_true', dest='invoke_editconfig',
+		parser.add_argument('-e', '--editconfig', action='store_true', dest='invoke_editconfig',
 				    default=False,
 				    help=STRING_USAGE_EDITCONFIG);
-		group.add_argument('--defaultconfig', action='store_true', dest='invoke_defaultconfig',
+		parser.add_argument('--defaultconfig', action='store_true', dest='invoke_defaultconfig',
 				    default=False,
 				    help=STRING_USAGE_DEFAULTCONFIG);
 		parser.add_argument('--printconfig', action='store_true', dest='invoke_printconfig',
