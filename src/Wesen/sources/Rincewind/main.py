@@ -56,8 +56,7 @@ class WesenSource(DefaultWesenSource):
 			self.state = self.protectFood;
 		else:
 			self.midPoint = None;
-			helper.ScannerMove(self);
-			if not self.hasTime("move"):
+			if not helper.ScannerMove(self):
 				self.state = "pass";
 
 	def protectFood(self):
@@ -66,7 +65,7 @@ class WesenSource(DefaultWesenSource):
 			self.state = self.searchFood;
 			return;
 		if not self.midPoint:
-			totalEnergy = sum(map(lambda o: o["energy"], foods));
+			totalEnergy = sum(map(lambda o: o["energy"], foods)) + 1; # to avoid divbyzero
 			self.midPoint = reduce(lambda a,b: [a[i] + float(b["energy"])/float(totalEnergy)*b["position"][i]
 							    for i in range(len(a))], foods, [0,0]);
 			self.midPoint = [int(c) % self.infoAllSource["world"]["length"] for c in self.midPoint]

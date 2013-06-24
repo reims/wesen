@@ -91,4 +91,4 @@ def HandleTarget(self):
 		return False;
 
 def ScannerMove(self):
-	self.Move([2,int(randint(0,3)/2)]);
+	return self.Move([2,int(randint(0,3)/2)]);
