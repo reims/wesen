@@ -4,11 +4,10 @@ visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
 from ..strings import STRING_LOGGER;
-from ..point import getZeroPosition, getNewPosition, positionToDirection;
+from ..point import ZERO_POSITION, getNewPosition, positionToDirection;
 from .base import WorldObject;
 import sys;
 import importlib;
-from math import copysign
 
 class Wesen(WorldObject):
 	"""Wesen(infoObject) creates a new Wesen instance.
@@ -21,7 +20,6 @@ class Wesen(WorldObject):
 		"""imports the sourcecode of WesenSource and links the capabilities."""
 		WorldObject.__init__(self, infoAllObject);
 		self.infoTime = self.infoAllObject["time"];
-		self.time = 0;
 		self.source = self.infoObject["source"];
 		WesenSource = self.getSource();
 		infoSource = dict(source=self.source);
@@ -93,41 +91,53 @@ class Wesen(WorldObject):
 		"""returns a list of dictionaries with all visible WorldObjects position,
 		objecttype and python id.
 		"""
-		lookRange = [];
 		if(self.UseTime("look")):
-			for object in self.getRange(self.infoRange["look"]):
-				if(self != object):
-					lookRange.append(dict(position=object.position, type=object.objectType, id=id(object)));
-		return lookRange;
+			return [dict(position=o.position, type=o.objectType, id=id(o))
+				for o in self.getRange(self.infoRange["look"])
+				if self != o];
+		else:
+			return [];
 
 	def closerLook(self):
 		"""returns look() and a few more information, as
 		energy, age, time, source (which equals to friend/foe).
 		"""
-		closerLookRange = [];
 		if(self.UseTime("closerlook")):
-			for object in self.getRange(self.infoRange["closer_look"]):
-				if(self != object):
-					closerLookRange.append(dict(position=object.position, type=object.objectType,
-                                                                    id=id(object), energy=object.energy, age=object.age));
-					if(object.objectType == "wesen"):
-						closerLookRange[-1]["time"] = object.time;
-						closerLookRange[-1]["source"] = object.source;
-		return closerLookRange;
+			return [dict(position=o.position, type=o.objectType, id=id(o),
+				     energy=o.energy, age=o.age, time=o.time, source=o.source)
+				for o in self.getRange(self.infoRange["closer_look"])
+				if self != o];
+		else:
+			return [];
+			#for object in self.getRange(self.infoRange["closer_look"]):
+			#	if(self != object):
+			#		closerLookRange.append(dict(position=object.position, type=object.objectType,
+                        #                                            id=id(object), energy=object.energy, age=object.age));
+			#		if(object.objectType == "wesen"):
+			#			closerLookRange[-1]["time"] = object.time;
+			#			closerLookRange[-1]["source"] = object.source;
+		#return closerLookRange;
 
 	def Move(self, direction):
 		"""moves the wesen into a specified direction"""
-		real_direction = [min(int(c), int(copysign(int(self.getTime() / self.infoTime["move"]), c)), key=abs) for c in direction];
-		if real_direction == getZeroPosition():
+		direction = [int(dc) for dc in direction];
+		if direction == ZERO_POSITION:
 			return False;
-		for i in range(abs(max(real_direction, key=abs))):
-			self.UseTime("move");
-		self.ChangePosition(getNewPosition(self.position, real_direction, self.infoWorld["length"]));
-		return True;
+		usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
+		if(self.time >= usedTime):
+			self.time -= usedTime;
+			self.ChangePosition(getNewPosition(self.position, direction, self.infoWorld["length"]));
+			return True;
+		else:
+			return False;
 
 	def MoveToPosition(self, position):
 		"""moves the wesen to a specified position"""
-		return self.Move(positionToDirection(self.position, position));
+		position = [int(pc) for pc in position];
+		while(self.position != position):
+			if not self.Move(positionToDirection(self.position, position)):
+				return False;
+		return True;
 
 	def Talk(self, wesenid, message):
 		"""calls Receive(message) in the wesen specified by wesenid when in range."""
@@ -277,10 +287,9 @@ class Wesen(WorldObject):
                                            (self.infoRange["look"] + (self.time / self.infoTime["move"])));
 
 	def RoundInit(self):
-		WorldObject.RoundInit(self);
 		self.time += self.infoTime["init"];
-		if(self.time > self.infoTime["max"]):
-			self.time = self.infoTime["max"];
+		self.time = min(self.time, self.infoTime["max"]);
+		WorldObject.RoundInit(self);
 
 	def main(self):
 		"""runs one turn of wesen code and it's AI code"""

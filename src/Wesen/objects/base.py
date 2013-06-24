@@ -53,7 +53,6 @@ class WorldObject(object):
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""
-		self.energy = 0;
 		self.DeleteObject(id(self));
 
 	def getDescriptor(self):
