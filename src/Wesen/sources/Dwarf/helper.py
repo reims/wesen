@@ -35,8 +35,8 @@ def AttackTarget(self):
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
 	matchingObjects = [o for o in lookRange if (o["type"]==objectType and objectCondition(self, o))];
 	if(matchingObjects):
-		matchingObjects.sort(key = objectFitness);
-		self.target = matchingObjects[0];
+		#matchingObjects.sort(key = objectFitness);
+		self.target = matchingObjects[randint(len(matchingObjects))];
 		self.targetType = objectType;
 		return True;
 	else:

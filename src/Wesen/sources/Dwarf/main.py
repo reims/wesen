@@ -26,6 +26,8 @@ class WesenSource(DefaultWesenSource):
 		# save age death and reproduce
 		if(self.energy() > self.minimumEnergyToReproduce):
 			self.Reproduce();
+			for i in range(5):
+				helper.ScannerMove(self, scanVector=__class__.globalScanVector);
 		helper.recoverAge(self);
 		lookRange = self.closerLook(); # could be done in-loop...
 		# action loop
