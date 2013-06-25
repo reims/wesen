@@ -77,9 +77,9 @@ class Wesend:
 			except KeyboardInterrupt:
 				print(" got keyboard interrupt, stopping now.");
 				break;
-			if((self.world.turns % 30) == 0):
-				print("stats:");
-				pprint(self.world.stats, indent=2, depth=4, width=80);
+			if((self.world.turns % 100) == 0):
+				print("turn",self.world.turns,"stats:");
+				pprint(self.world.stats, indent=3, depth=4, width=80);
 		if(self.world.winner):
 			print(("Congratulations, \"%s\" has won the game" % (self.world.winner)));
 		else:
