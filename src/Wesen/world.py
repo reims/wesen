@@ -35,9 +35,9 @@ class World(object):
 
 	def DeleteObject(self, objectid):
 		"""removes an object from the world."""
-		for object in self.objects:
-			if(id(object) == objectid):
-				del(self.objects[self.objects.index(object)]);
+		for o in self.objects:
+			if(o.id == objectid):
+				del(self.objects[self.objects.index(o)]);
 				return True;
 		return False;
 
