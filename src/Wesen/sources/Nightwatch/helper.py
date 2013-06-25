@@ -1,4 +1,4 @@
-from random import randint;
+from numpy.random import randint;
 
 def DrunkenSailor(self):
 	self.Move([randint(-1,1),randint(-1,1)]);
