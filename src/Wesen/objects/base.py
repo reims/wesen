@@ -25,35 +25,47 @@ class WorldObject(object):
 		self.age = 0;
 		self.time = 0;
 		self.source = "";
+		self.id = id(self);
 		self.position = self.infoObject.get("position", getRandomPosition(self.infoWorld["length"]));
 
 	def __repr__(self):
-		return "<worldobject id=%s pos=%s energy=%s>" % (id(self), self.position, self.energy);
+		return "<worldobject id=%s pos=%s energy=%s>" % (self.id, self.position, self.energy);
+
+	def getRangeObjectWithCondition(self, objectList, radius, condition):
+		"""returns a list with all objects in objectlist in radius,
+		   which match the condition"""
+		(x,y) = self.position;
+		return [o for o in objectList
+		# the following is a more efficient but equivalent to that:
+		#	if ((abs(o.position[0] - x) <= radius) and
+		#	    (abs(o.position[1] - y) <= radius))];
+			if(condition(o)
+			   and (    (((o.position[0] < x) and (x-o.position[0] <= radius))
+				     or ((o.position[0] > x) and (o.position[0]-x <= radius))
+				     or ((o.position[0] == x)))
+				and (((o.position[1] < y) and (y-o.position[1] <= radius))
+				     or ((o.position[1] > y) and (o.position[1]-y <= radius))
+				     or ((o.position[1] == y)))))];
+
 
 	def getRangeObject(self, objectList, radius):
 		"""returns a list with all objects in objectlist in radius."""
-		(x,y) = self.position;
-		return [o for o in objectList
-			if ((abs(o.position[0] - x) <= radius) and
-			    (abs(o.position[1] - y) <= radius))];
-
-	def getRange(self, radius):
-		"""returns getRangeObject(MaxRange, radius).
-		This is faster than always using a list of all Wesen.
-		"""
-		return self.getRangeObject(self.maxRange, radius);
-
-	def ChangePosition(self, newPosition):
-		"""changes the position to newPosition.
-		currently, this function does nothing than
-		self.position = newPosition;
-		but it could be used for more complex game features.
-		"""
-		self.position = newPosition;
+		return self.getRangeObjectWithCondition(objectList, radius, lambda x : True);
+#		(x,y) = self.position;
+#		return [o for o in objectList
+#		# the following is a more efficient but equivalent to that:
+#		#	if ((abs(o.position[0] - x) <= radius) and
+#		#	    (abs(o.position[1] - y) <= radius))];
+#			if ((   ((o.position[0] < x) and (x-o.position[0] <= radius))
+#			     or ((o.position[0] > x) and (o.position[0]-x <= radius))
+#			     or ((o.position[0] == x)))
+#			    and (   ((o.position[1] < y) and (y-o.position[1] <= radius))
+#				 or ((o.position[1] > y) and (o.position[1]-y <= radius))
+#				 or ((o.position[1] == y))))];
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""
-		self.DeleteObject(id(self));
+		self.DeleteObject(self.id);
 
 	def getDescriptor(self):
 		"""return descriptive data for the gui,
@@ -69,16 +81,8 @@ class WorldObject(object):
 		"""virtual function, look in wesen or food"""
 		pass;
 
-	def getMaxRange(self):
-		"""virtual function, look in wesen or food"""
-		return [];
-
-	def RoundInit(self):
+	def main(self):
+		"""run one turn of object code"""
 		self.EnergyCheck();
 		self.age += 1;
 		self.AgeCheck();
-		self.maxRange = self.getMaxRange();
-
-	def main(self):
-		"""run one turn of object code"""
-		self.RoundInit();

@@ -4,7 +4,6 @@ visit http://www.sourceforge.net/projects/wesen or
 http://wesen.sourceforge.net for newer versions."""
 
 from ..strings import STRING_LOGGER;
-from ..point import ZERO_POSITION, getNewPosition, positionToDirection;
 from .base import WorldObject;
 import sys;
 import importlib;
@@ -32,15 +31,11 @@ class Wesen(WorldObject):
 		self.PutInterface(self.wesenSource);
 
 	def getSource(self): #TODO this might import multiple times...?
-		try:
-			result = importlib.import_module("..sources."+self.source+".main", __package__).WesenSource;
-		except ImportError as e:
-			print(("%s could not been loaded:\n%s" % (self.source, e)));
-			sys.exit();
+		result = importlib.import_module("..sources."+self.source+".main", __package__).WesenSource;
 		return result;
 
 	def __repr__(self):
-		return "<wesen id=%s pos=%s energy=%s source=%s %s>" % (id(self), self.position, self.energy,
+		return "<wesen id=%s pos=%s energy=%s source=%s %s>" % (self.id, self.position, self.energy,
                                                                         self.source, repr(self.wesenSource));
 
 	def PutInterface(self, source):
@@ -50,7 +45,6 @@ class Wesen(WorldObject):
 		source.position = self.getPosition;
 		source.energy = self.getEnergy;
 		source.time = self.getTime;
-		source.hasTime = self.hasTime;
 		source.look = self.look;
 		source.closerLook = self.closerLook;
 		source.Move = self.Move;
@@ -72,18 +66,9 @@ class Wesen(WorldObject):
 
 	def getPosition(self): return self.position;
 
-	def getId(self): return id(self);
+	def getId(self): return self.id;
 
 	def getAge(self): return self.age;
-
-	def hasTime(self, actions):
-		"""hasTime(actions) returns True if there is enough time for all actions"""
-		timeneed = 0;
-		if(type(actions) != list):
-			actions = [actions];
-		for action in actions:
-			timeneed += self.infoTime[action];
-		return (self.time >= timeneed);
 
 	# standard capabilities
 
@@ -92,9 +77,8 @@ class Wesen(WorldObject):
 		objecttype and python id.
 		"""
 		if(self.UseTime("look")):
-			return [dict(position=o.position, type=o.objectType, id=id(o))
-				for o in self.getRange(self.infoRange["look"])
-				if self != o];
+			return [dict(position=o.position, type=o.objectType, id=o.id)
+				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["look"], condition = lambda x : self != x)];
 		else:
 			return [];
 
@@ -103,58 +87,76 @@ class Wesen(WorldObject):
 		energy, age, time, source (which equals to friend/foe).
 		"""
 		if(self.UseTime("closerlook")):
-			return [dict(position=o.position, type=o.objectType, id=id(o),
+			return [dict(position=o.position, type=o.objectType, id=o.id,
 				     energy=o.energy, age=o.age, time=o.time, source=o.source)
-				for o in self.getRange(self.infoRange["closer_look"])
-				if self != o];
+				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["closer_look"], condition = lambda x : self != x)];
 		else:
 			return [];
-			#for object in self.getRange(self.infoRange["closer_look"]):
-			#	if(self != object):
-			#		closerLookRange.append(dict(position=object.position, type=object.objectType,
-                        #                                            id=id(object), energy=object.energy, age=object.age));
-			#		if(object.objectType == "wesen"):
-			#			closerLookRange[-1]["time"] = object.time;
-			#			closerLookRange[-1]["source"] = object.source;
-		#return closerLookRange;
 
 	def Move(self, direction):
-		"""moves the wesen into a specified direction"""
+		"""moves the wesen into a specified direction, returns true if any position change happened."""
 		direction = [int(dc) for dc in direction];
-		if direction == ZERO_POSITION:
-			return False;
-		usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
+		# the following code is a more time-efficient way to do
+		#usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
+		if(direction[0] < 0):
+			if(direction[1] < 0):
+				usedTime = (self.infoTime["move"]
+					    * -1 * (direction[0] + direction[1]));
+			elif(direction[1] > 0):
+				usedTime = (self.infoTime["move"]
+					    * (direction[1] - direction[0]));
+			else:
+				usedTime = (self.infoTime["move"]
+					    * -1 * direction[0]);
+		elif(direction[0] > 0):
+			if(direction[1] < 0):
+				usedTime = (self.infoTime["move"]
+					    * (direction[0] - direction[1]));
+			elif(direction[1] > 0):
+				usedTime = (self.infoTime["move"]
+					    * (direction[1] + direction[0]));
+			else:
+				usedTime = (self.infoTime["move"]
+					    * direction[0]);
+		else:
+			if(direction[1] < 0):
+				usedTime = (self.infoTime["move"]
+					    * -1 * direction[1]);
+			elif(direction[1] > 0):
+				usedTime = (self.infoTime["move"]
+					    * direction[1]);
+			else:
+				return False;
 		if(self.time >= usedTime):
 			self.time -= usedTime;
-			self.ChangePosition(getNewPosition(self.position, direction, self.infoWorld["length"]));
+			self.position =  [(pc+dc) % self.infoWorld["length"] for (pc,dc) in zip(self.position,direction)]
 			return True;
 		else:
 			return False;
 
-	def MoveToPosition(self, position):
+	def MoveToPosition(self, newPosition):
 		"""moves the wesen to a specified position"""
-		position = [int(pc) for pc in position];
-		while(self.position != position):
-			if not self.Move(positionToDirection(self.position, position)):
+		newPosition = [int(pc) for pc in newPosition];
+		while(self.position != newPosition):
+			if not self.Move([-1 if nc < pc else 1 if nc > pc else 0
+					   for (nc,pc) in zip(newPosition, self.position)]):
 				return False;
 		return True;
 
 	def Talk(self, wesenid, message):
 		"""calls Receive(message) in the wesen specified by wesenid when in range."""
-		for object in self.getRange(self.infoRange["look"]):
-			if((id(object) == wesenid) and (object.objectType == "wesen")):
-				if(self.UseTime("talk")):
-					object.wesenSource.Receive(message);
-					return True;
+		if(self.UseTime("talk")):
+			for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["look"], condition = lambda x : ((o.id == wesenid) and (o.objectType == "wesen"))):
+				object.wesenSource.Receive(message);
+				return True;
 		return False;
 
 	def Eat(self, foodid):
 		"""if it's at the same position, eat the food with python object id foodid."""
-		for object in self.maxRange:
-			if((id(object) == foodid) and (object.position == self.position) and
-                           (object.objectType == "food")):
+		for o in self.maxRange:
+			if((o.id == foodid) and (o.position == self.position) and (o.objectType == "food")):
 				if(self.UseTime("eat")):
-					self.energy += object.getEaten();
+					self.energy += o.getEaten();
 					return True;
 		return False;
 
@@ -163,18 +165,17 @@ class Wesen(WorldObject):
 		which is then subtracted from the reproducing wesen.
 		"""
 		if(self.UseTime("reproduce")):
-			childEnergy = int(self.energy / 2.0 + 0.5);
+			childEnergy = int(self.energy / 2);
 			infoWesen = self.infoObject.copy();
 			infoWesen["energy"] = childEnergy;
 			infoWesen["source"] = self.source;
 			infoWesen["position"] = self.position;
 			child = self.AddObject(infoWesen);
-			child.RoundInit();
 			self.maxRange.append(child);
-			self.energy = childEnergy;
+			self.energy -= childEnergy;
 			self.age = 0;
 			self.EnergyCheck();
-			return id(child);
+			return child.id;
 		return False;
 
 	def Attack(self, wesenid):
@@ -183,12 +184,12 @@ class Wesen(WorldObject):
 		so the one who had more energy than his enemy can survive.
 		The other Wesen dies.
 		"""
-		for object in self.maxRange:
-			if((object.objectType == "wesen") and (object != self) and
-                           (object.position == self.position) and (id(object) == wesenid)):
-				if(self.UseTime("attack")):
-					self.energy -= int(object.getAttacked(self.energy)*0.5);
-					return (not self.EnergyCheck());
+		for o in self.maxRange:
+			if(o.id == wesenid):
+				if((o.objectType == "wesen") and (o.position == self.position)):
+					if(self.UseTime("attack")):
+						self.energy -= int(o.getAttacked(self.energy)*0.5);
+						return (not self.EnergyCheck());
 		return False;
 
 	def getAttacked(self, energy):
@@ -220,14 +221,14 @@ class Wesen(WorldObject):
 
 	def Donate(self, energy, wesenid):
 		"""transfer energy from this wesen to another specified by wesenid"""
-		for object in self.maxRange:
-			if((id(object)==wesenid) and (object.objectType == "wesen") and
-                           (object.position == self.position)):
+		for o in self.maxRange:
+			if((o.id==wesenid) and (o.objectType == "wesen") and
+                           (o.position == self.position)):
 				if(self.UseTime("donate")):
 					if(energy > self.energy):
 						energy = self.energy;
 					if(not energy <= 0):
-						object.energy += energy;
+						o.energy += energy;
 						self.energy -= energy;
 						self.EnergyCheck();
 						return True;
@@ -236,10 +237,8 @@ class Wesen(WorldObject):
 	def Broadcast(self, message):
 		"""calls Talk(message) with all wesen in range"""
 		if(self.UseTime("broadcast")):
-			for object in self.getRange(self.infoRange["talk"]):
-				if(self != object):
-					if(object.objectType == "wesen"):
-						object.Receive(message);
+			for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["talk"], condition = lambda x : self != x and x.objectType == "wesen"):
+				o.Receive(message);
 			return True;
 		return False;
 
@@ -281,18 +280,12 @@ class Wesen(WorldObject):
 			return True;
 		return False;
 
-	def getMaxRange(self):
-		"""returns the maximal reachable range in this turn"""
-		return self.getRangeObject(self.worldObjects,
-                                           (self.infoRange["look"] + (self.time / self.infoTime["move"])));
-
-	def RoundInit(self):
-		self.time += self.infoTime["init"];
-		self.time = min(self.time, self.infoTime["max"]);
-		WorldObject.RoundInit(self);
-
 	def main(self):
 		"""runs one turn of wesen code and it's AI code"""
 		WorldObject.main(self);
-		self.wesenSource.main();
 		self.energy -= 1;
+		self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
+		self.maxRange = self.getRangeObject(self.worldObjects,
+						    (self.infoRange["look"]
+						     + (self.time / self.infoTime["move"])));
+		self.wesenSource.main();

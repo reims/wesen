@@ -1,8 +1,3 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from .base import WorldObject;
 from ..point import *;
 from ..strings import STRING_LOGGER;
@@ -22,15 +17,14 @@ class Food(WorldObject):
 		self.maxamount = self.infoObject["maxamount"];
 
 	def __repr__(self):
-		return "<food id=%s static=%s pos=%s energy=%s>" % (id(self), (self.growrate==0), self.position, self.energy);
+		return "<food id=%s growrate=%s pos=%s energy=%s>" % (self.id, self.growrate, self.position, self.energy);
 
 	def getDescriptor(self):
 		"""currently doing nothing than returning the WorldObjects getDescriptor."""
 		return WorldObject.getDescriptor(self);
 
 	def getEaten(self):
-		"""(seeds new food) * seedrate,
-		dies and returns energy amount before.
+		"""dies and returns energy amount.
 		"""
 		energy = self.energy;
 		if(energy):
@@ -38,8 +32,8 @@ class Food(WorldObject):
 		return energy;
 
 	def Grow(self):
-		"""increment energy by growrate."""
-		self.energy += self.growrate;
+		"""increment energy by some amount."""
+		self.energy += int(uniform(0,2)*self.growrate);
 
 	def Seed(self):
 		"""create a new Food instance in seedrange."""
@@ -50,15 +44,15 @@ class Food(WorldObject):
 
 	def AgeCheck(self):
 		if(self.age >= self.infoObject["maxage"]):
-			self.logger.info(STRING_LOGGER["DEATHFOOD"]["AGE"] % id(self));
+			self.logger.info(STRING_LOGGER["DEATHFOOD"]["AGE"] % self.id);
 			self.Die();
 
 	def EnergyCheck(self):
 		if(self.energy >= self.infoObject["maxamount"]):
 			self.energy = self.infoObject["maxamount"];
-			self.growrate = 0;
-		if(self.energy < 0):
+		elif(self.energy < 0):
 			self.energy = 0;
+			# this happens only if one manipulates food via the GUI
 			print("warning: food energy lower than zero detected");
 
 	def main(self):
@@ -67,6 +61,6 @@ class Food(WorldObject):
 		WorldObject.main(self);
 		if(self.age > 10): #TODO numbers should be a config option
 			if(uniform(0,1) < self.seedrate):
-				if(len([None for o in self.getRange(3) if o["type"]==food]) <= 10):
+				if(len(self.getRangeObjectWithCondition(self.worldObjects, self.rangeseed, condition = lambda o : o.source == "food")) <= 10):
 					self.Seed();
 		self.Grow();
