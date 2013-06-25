@@ -8,7 +8,7 @@ from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 from OpenGL.arrays import vbo;
-from random import randint;
+from numpy.random import randint;
 from .object import GuiObject;
 from .text import TextPrinter;
 from functools import reduce;

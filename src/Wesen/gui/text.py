@@ -2,7 +2,6 @@ from OpenGL.GL import *;
 from OpenGL.GLU import *;
 from OpenGL.GLUT import *;
 import math;
-from random import randint; # funny stuff, can be deleted!!
 from ..objects.wesen import Wesen;
 from .object import GuiObject;
 

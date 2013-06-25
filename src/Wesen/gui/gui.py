@@ -136,9 +136,9 @@ class GUI:
 	def ModifyFood(self, action):
 		"""action can be "delete" "add" "increase" "decrease" """
 		if(action == "delete"):
-			for object in self.world.objects:
-				if(type(object) == Food):
-					if(self.world.DeleteObject(id(object))):
+			for o in self.world.objects:
+				if(type(o) == Food):
+					if(self.world.DeleteObject(o.id)):
 						break;
 		if(action == "add"):
 			infoFood = self.infoFood;
