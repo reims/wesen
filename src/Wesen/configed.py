@@ -53,7 +53,7 @@ class ConfigEd(object):
 			["wesen", [("sources",str), ("count",int), ("energy",int),\
 					("maxage",int)]],\
 			["food", [("count",int), ("energy",int), ("maxamount",int),\
-					("seedrate",float), ("growrate",int),\
+					("seedrate",float), ("growrate",float),\
 					("maxage",int)]],\
 			["range", [("look",int), ("closer_look", int), ("talk",int), ("seed",int)]],\
 			["time", [("init",int), ("max",int), ("look",int),\
