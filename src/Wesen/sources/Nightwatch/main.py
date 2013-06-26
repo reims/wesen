@@ -8,23 +8,27 @@ class WesenSource(DefaultWesenSource):
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.infoAllSource = infoAllSource;
 		self.minimumEnergyToEat = 0;
-		self.minimumEnergyToReproduce = 300;
+		self.minimumEnergyToReproduce = 500;
 		self.minimumEnergyToFight = self.minimumEnergyToReproduce * 0.75;
 		self.target = None;
 		self.targetType = None;
+		self.lookFunction = helper.lookForFoodTarget;
 		self.forbiddenTargets = [];
+
+	def __str__(self):
+		return "<Nightwatch protects the city>";
 
 	def main(self):
 		while(self.time() >= self.infoTime["reproduce"]):
 			helper.recoverAge(self);
 			if(self.energy() > self.minimumEnergyToReproduce):
 				self.Reproduce();
+			lookRange = self.closerLook();
+			if(not self.lookFunction(self, lookRange=lookRange)):
+				helper.ScannerMove(self);
 			helper.HandleTarget(self);
 			if(not self.target):
-				lookRange = self.closerLook();
 				if(self.energy() < self.minimumEnergyToFight):
-					lookFunction = helper.lookForFoodTarget;
+					self.lookFunction = helper.lookForFoodTarget;
 				else:
-					lookFunction = helper.lookForEnemyTarget;
-				if(not lookFunction(self, lookRange=lookRange)):
-					helper.ScannerMove(self);
+					self.lookFunction = helper.lookForEnemyTarget;

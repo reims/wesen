@@ -10,12 +10,16 @@ class WesenSource(DefaultWesenSource):
 		"""Do all initialization stuff."""
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.movecount = 0;
-		#self.reproductionEnergy = 100;
+		self.reproductionEnergy = 500;
+
+	def __str__(self):
+		return "<Ordinary Scanner>";
 
 	def Scanner(self):
-		for object in self.look():
-			if(object["type"] == "food" and object["position"] == self.position()):
-				self.Eat(object["id"]);
+		for o in self.look():
+			if(o["type"] == "food"
+			   and o["position"] == self.position()):
+				self.Eat(o["id"]);
 		if(self.movecount >= self.worldlength):
 			self.Move([1,1]);
 			self.movecount = 1;
@@ -25,6 +29,6 @@ class WesenSource(DefaultWesenSource):
 
 	def main(self):
 		while(self.time() > self.infoTime["move"]):
-			#if(self.energy() >= self.reproductionEnergy):
-			#	self.Reproduce();
+			if(self.energy() >= self.reproductionEnergy):
+				self.Reproduce();
 			self.Scanner();

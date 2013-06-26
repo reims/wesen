@@ -11,13 +11,15 @@ def recoverAge(self):
 		self.Donate(self.energy(),child);
 
 def CatchTarget(self, Action, actionTime):
-	if(self.MoveToPosition(self.target["position"])):
-		if(self.target["position"] == self.position() and self.time() >= actionTime):
-			if(Action(self, self.target)):
-				return True; 
-			elif(not self.target["id"] in self.forbiddenTargets):
-				self.forbiddenTargets.append(self.target["id"]);
+	targ = self.target;
+	if(self.MoveToPosition(targ["position"])):
+		if(targ["position"] == self.position()
+		   and self.time() >= actionTime):
 			self.target = None;
+			if(Action(self, targ)):
+				return True; 
+			elif(not targ["id"] in self.forbiddenTargets):
+				self.forbiddenTargets.append(targ["id"]);
 	return False;
 
 def EatObject(self, o):
@@ -33,19 +35,23 @@ def AttackTarget(self):
 	return CatchTarget(self, AttackObject, self.infoTime["attack"]+1);
 
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
-	matchingObjects = [o for o in lookRange if (o["type"]==objectType and objectCondition(self, o))];
+	matchingObjects = [o for o in lookRange
+			   if (o["type"]==objectType and
+			       objectCondition(self, o))];
 	if(matchingObjects):
 		#matchingObjects.sort(key = objectFitness);
 		self.target = matchingObjects[randint(len(matchingObjects))];
 		self.targetType = objectType;
 		return True;
 	else:
+		self.target = None;
+		self.targetType = None;
 		return False;
 
-def acceptableFood(self, object):
-	if(object["age"] >= self.minimalGardenAge):
-		if(object["id"] in self.forbiddenTargets):
-			del self.forbiddenTargets[self.forbiddenTargets.index(object["id"])];
+def acceptableFood(self, o):
+	if(o["age"] >= self.minimalGardenAge):
+		if(o["id"] in self.forbiddenTargets):
+			del self.forbiddenTargets[self.forbiddenTargets.index(o["id"])];
 		return True;
 	else:
 		return False;
@@ -53,21 +59,19 @@ def acceptableFood(self, object):
 def foodFitness(a):
         return a["energy"]
 
-def acceptableEnemy(self, object):
-	if(object["source"] != self.source):
-		if(object["energy"] <= (self.energy() + self.minimumEnergyToFight)):
+def acceptableEnemy(self, o):
+	if(o["source"] != self.source):
+		if(o["energy"] <= (self.energy() + self.minimumEnergyToFight)):
 			return True;
-		else:
-			self.minimumEnergyToFight = int(((self.energy() + self.minimumEnergyToFight) + object["energy"]) / 2); #TODO improve magic 
-			return False;
-	else:
-		return False;
+		#else:
+		#	self.minimumEnergyToFight = int(((self.energy() + self.minimumEnergyToFight) + o["energy"]) / 2); #TODO improve magic 
+	return False;
 
-def threateningEnemy(self, object):
-	if(object["source"] == self.source):
+def threateningEnemy(self, o):
+	if(o["source"] == self.source):
 		return False;
 	else:
-		return object["energy"] > self.energy()*1.2; #TODO remove magic
+		return o["energy"] > self.energy()*1.2; #TODO remove magic
 
 def enemyFitness(a):
 	return a["energy"]
@@ -111,7 +115,8 @@ def ScannerMove(self, scanVector=(1,0), scanSpeed=3, randomization=0.2):
 	self.Move([int(randomization*uniform(-1,1)+scanSpeed*coordinate) for coordinate in scanVector]);
 
 def Flee(self):
-	ScannerMove(self,scanVector=[-4*c for c in self.target["position"]]);
+	for i in range(0,5):
+		ScannerMove(self,scanVector=[-1*(tc-pc) for (tc,pc) in zip(self.target["position"],self.position())]);
 
 def seedOut(self):
 	newFoodObjects = [];

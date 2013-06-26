@@ -1,7 +1,5 @@
 from ...defaultwesensource import DefaultWesenSource;
-from ...point import *;
-from random import randint;
-from sys import exit;
+from numpy.random import randint;
 
 class WesenSource(DefaultWesenSource):
 
@@ -9,15 +7,16 @@ class WesenSource(DefaultWesenSource):
 		"""Do all initialization stuff."""
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.infoAllSource = infoAllSource;
-		self.active = True;
 		self.normal = True;
 
 	def main(self):
-		while(self.time() >= 20 and self.active):
+		while(self.time() >= 20):
 			if(self.normal and self.position() != [5,5]):
 				self.MoveToPosition([5,5]);
 			else:
 				lookRange = self.closerLook();
-				for object in lookRange:
-					pass;
+				for o in lookRange:
+					if(o["type"] == "food"):
+						if(self.MoveToPosition(o["position"])):
+							self.Eat(o["id"]);
 				self.normal = False;

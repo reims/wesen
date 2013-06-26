@@ -1,8 +1,6 @@
 from . import helper;
 from ...defaultwesensource import DefaultWesenSource;
-from ...point import *;
 from numpy.random import randint, uniform;
-from sys import exit;
 
 class WesenSource(DefaultWesenSource):
 
@@ -12,27 +10,34 @@ class WesenSource(DefaultWesenSource):
 		"""Do all initialization stuff."""
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.infoAllSource = infoAllSource;
-		self.active = True;
 		self.minimalTime = 20; #TODO should be something to prevent infinite loops!!
 		self.minimumEnergyToEat = 1;
 		self.minimalGardenAge = 15;
-		self.minimumEnergyToReproduce = 1800;
+		self.minimumEnergyToReproduce = 1600;
 		self.minimumEnergyToFight = 300;
 		self.target = None;
 		self.targetType = None;
 		self.forbiddenTargets = [];
 
+	def __str__(self):
+		return "<Dwarf Fighter, coming out of the Broken Drum>";
+
 	def main(self):
 		# save age death and reproduce
 		if(self.energy() > self.minimumEnergyToReproduce):
 			self.Reproduce();
-			for i in range(5):
-				helper.ScannerMove(self, scanVector=__class__.globalScanVector);
+			for i in range(6):
+				helper.ScannerMove(self, scanVector=[__class__.globalScanVector[1],__class__.globalScanVector[0]]);
 		helper.recoverAge(self);
 		lookRange = self.closerLook(); # could be done in-loop...
 		# action loop
-		while((self.time() > self.minimalTime) and self.active):
+		while(self.time() > self.minimalTime):
 			# try to finish something that already started:
+			if(self.targetType == "food"):
+				helper.lookForFoodTarget(self, lookRange);
+			elif(self.targetType == "wesen"):
+				helper.lookForEnemyTarget(self, lookRange);
+			#TODO the 4 lines above this comment are wrong.
 			helper.HandleTarget(self);
 			# nothing to do? OK, find something to do.
 			if(not self.target):

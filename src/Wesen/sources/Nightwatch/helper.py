@@ -9,46 +9,51 @@ def recoverAge(self):
 		self.Donate(self.energy(),child);
 
 def CatchTarget(self, Action, actionTime):
-	result = False;
-	self.MoveToPosition(self.target["position"]);
-	if(self.target["position"] == self.position() and self.time() >= actionTime):
-		result = Action(self, self.target);
-		if(not result):
-			if(not self.target["id"] in self.forbiddenTargets):
-				self.forbiddenTargets.append(self.target["id"]);
-		self.target = None;
-	return result;
+	targ = self.target;
+	if(self.MoveToPosition(targ["position"])):
+		if(targ["position"] == self.position()
+		   and self.time() >= actionTime):
+			self.target = None;
+			if(Action(self, targ)):
+				return True; 
+			elif(not targ["id"] in self.forbiddenTargets):
+				self.forbiddenTargets.append(targ["id"]);
+	return False;
 
-def EatObject(self, object):
-	return self.Eat(object["id"]);
+def EatObject(self, o):
+	return self.Eat(o["id"]);
 
-def AttackObject(self, object):
-	return self.Attack(object["id"]);
+def AttackObject(self, o):
+	return self.Attack(o["id"]);
 
 def EatTarget(self):
-	return CatchTarget(self, EatObject, self.infoTime["attack"]+1);
+	return CatchTarget(self, EatObject, self.infoTime["eat"]+1);
 
 def AttackTarget(self):
-	return CatchTarget(self, AttackObject, self.infoTime["eat"]+1);
+	return CatchTarget(self, AttackObject, self.infoTime["attack"]+1);
 
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
-	matchingObjects = [];
-	for object in lookRange:
-		if(object["type"] == objectType):
-			if(objectCondition(self, object)):
-				matchingObjects.append(object);
+	matchingObjects = [o for o in lookRange if o["type"] == objectType and objectCondition(self, o)];
 	if(matchingObjects):
+		if(self.target and
+		   self.targetType == objectType):
+			for o in matchingObjects:
+				if(o["id"] == self.target["id"]):
+					self.target = o;
+					return True;
 		matchingObjects.sort(key = objectFitness);
 		self.target = matchingObjects[0];
 		self.targetType = objectType;
 		return True;
 	else:
+		self.target = None;
+		self.targetType = None;
 		return False;
 
-def acceptableFood(self, object):
-	if(object["energy"] >= self.minimumEnergyToEat):
-		if(object["id"] in self.forbiddenTargets):
-			del self.forbiddenTargets[self.forbiddenTargets.index(object["id"])];
+def acceptableFood(self, o):
+	if(o["energy"] >= self.minimumEnergyToEat):
+		if(o["id"] in self.forbiddenTargets):
+			del self.forbiddenTargets[self.forbiddenTargets.index(o["id"])];
 		return True;
 	else:
 		return False;
@@ -56,12 +61,12 @@ def acceptableFood(self, object):
 def foodFitness(a):
         return a["energy"]
 
-def acceptableEnemy(self, object):
-	if(object["source"] != self.source):
-		if(object["energy"] <= (self.energy() + self.minimumEnergyToFight)):
+def acceptableEnemy(self, o):
+	if(o["source"] != self.source):
+		if(o["energy"] <= (self.energy() + self.minimumEnergyToFight)):
 			return True;
 		else:
-			self.minimumEnergyToFight = int(((self.energy() + self.minimumEnergyToFight) + object["energy"]) / 2);
+			self.minimumEnergyToFight = int(((self.energy() + self.minimumEnergyToFight) + o["energy"]) / 2);
 			return False;
 	else:
 		return False;

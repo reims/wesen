@@ -7,6 +7,9 @@ class WesenSource(DefaultWesenSource):
 		"""Do all initialization stuff."""
 		DefaultWesenSource.__init__(self, infoAllSource);
 
+	def __str__(self):
+		return "<unspecified WesenSource>";
+
 	def getDescriptor(self):
 		descriptor = DefaultWesenSource.getDescriptor();
 		return descriptor;
@@ -27,19 +30,6 @@ class WesenSource(DefaultWesenSource):
 	def main(self):
 		"""A.I. code here, this method is run every time when
 		the worlds main() command is used - every 'turn'.
+		Please try to write code with low runtime complexity.
 		"""
 		pass;
-
-
-
-
-
-
-
-
-
-
-
-
-
-

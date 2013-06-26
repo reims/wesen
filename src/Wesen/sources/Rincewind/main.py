@@ -30,6 +30,9 @@ class WesenSource(DefaultWesenSource):
 		self.resumeState = self.searchFood;
 		self.radius = 20;
 
+	def __str__(self):
+		return "<Sorccerer>";
+
 	def continueOnCircle(self):
 		r = self.radius;
 		delta_angle = 2*pi/50;
@@ -74,8 +77,8 @@ class WesenSource(DefaultWesenSource):
 			self.Reproduce();
 		bestFood = self.bestFoodInRange(foods);
 		if bestFood:
-			self.MoveToPosition(bestFood["position"]);
-			self.Eat(bestFood["id"])
+			if(self.MoveToPosition(bestFood["position"])):
+				self.Eat(bestFood["id"])
 		if not self.continueOnCircle():
 			self.state = "pass"
 
