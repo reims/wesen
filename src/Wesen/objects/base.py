@@ -1,8 +1,3 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from ..point import getRandomPosition;
 
 class WorldObject(object):
@@ -31,11 +26,11 @@ class WorldObject(object):
 	def __repr__(self):
 		return "<worldobject id=%s pos=%s energy=%s>" % (self.id, self.position, self.energy);
 
-	def getRangeObjectWithCondition(self, objectList, radius, condition):
+	def getRangeObjectWithCondition(self, objects, radius, condition):
 		"""returns a list with all objects in objectlist in radius,
 		   which match the condition"""
 		(x,y) = self.position;
-		return [o for o in objectList
+		return {i:o for (i,o) in objects.items()
 		# the following is a more efficient but equivalent to that:
 		#	if ((abs(o.position[0] - x) <= radius) and
 		#	    (abs(o.position[1] - y) <= radius))];
@@ -45,23 +40,12 @@ class WorldObject(object):
 				     or ((o.position[0] == x)))
 				and (((o.position[1] < y) and (y-o.position[1] <= radius))
 				     or ((o.position[1] > y) and (o.position[1]-y <= radius))
-				     or ((o.position[1] == y)))))];
+				     or ((o.position[1] == y)))))};
 
 
-	def getRangeObject(self, objectList, radius):
+	def getRangeObject(self, objects, radius):
 		"""returns a list with all objects in objectlist in radius."""
-		return self.getRangeObjectWithCondition(objectList, radius, lambda x : True);
-#		(x,y) = self.position;
-#		return [o for o in objectList
-#		# the following is a more efficient but equivalent to that:
-#		#	if ((abs(o.position[0] - x) <= radius) and
-#		#	    (abs(o.position[1] - y) <= radius))];
-#			if ((   ((o.position[0] < x) and (x-o.position[0] <= radius))
-#			     or ((o.position[0] > x) and (o.position[0]-x <= radius))
-#			     or ((o.position[0] == x)))
-#			    and (   ((o.position[1] < y) and (y-o.position[1] <= radius))
-#				 or ((o.position[1] > y) and (o.position[1]-y <= radius))
-#				 or ((o.position[1] == y))))];
+		return self.getRangeObjectWithCondition(objects, radius, lambda x : True);
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""

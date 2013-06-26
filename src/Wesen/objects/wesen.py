@@ -8,6 +8,10 @@ from .base import WorldObject;
 import sys;
 import importlib;
 
+class RuleException(Exception):
+	def __init__(self, ruleDescription):
+		super(RuleException, self).__init__(ruleDescription);
+
 class Wesen(WorldObject):
 	"""Wesen(infoObject) creates a new Wesen instance.
 	infoObject is a Dictionary of Dictionaries, time,range,world,etc.
@@ -35,8 +39,7 @@ class Wesen(WorldObject):
 		return result;
 
 	def __repr__(self):
-		return "<wesen id=%s pos=%s energy=%s source=%s %s>" % (self.id, self.position, self.energy,
-                                                                        self.source, repr(self.wesenSource));
+		return "<wesen id=%s pos=%s energy=%s source=%s>" % (self.id, self.position, self.energy, str(self.wesenSource));
 
 	def PutInterface(self, source):
 		"""maps the source functions to the corresponding wesen functions."""
@@ -78,7 +81,7 @@ class Wesen(WorldObject):
 		"""
 		if(self.UseTime("look")):
 			return [dict(position=o.position, type=o.objectType, id=o.id)
-				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["look"], condition = lambda x : self != x)];
+				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["look"], condition = lambda x : self != x).values()];
 		else:
 			return [];
 
@@ -89,7 +92,7 @@ class Wesen(WorldObject):
 		if(self.UseTime("closerlook")):
 			return [dict(position=o.position, type=o.objectType, id=o.id,
 				     energy=o.energy, age=o.age, time=o.time, source=o.source)
-				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["closer_look"], condition = lambda x : self != x)];
+				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["closer_look"], condition = lambda x : self != x).values()];
 		else:
 			return [];
 
@@ -153,11 +156,20 @@ class Wesen(WorldObject):
 
 	def Eat(self, foodid):
 		"""if it's at the same position, eat the food with python object id foodid."""
-		for o in self.maxRange:
-			if((o.id == foodid) and (o.position == self.position) and (o.objectType == "food")):
+		if(foodid in self.maxRange.keys()):
+			o = self.maxRange[foodid];
+#		for o in self.maxRange.values():
+			if((o.position == self.position) and
+#			   (o.id == foodid) and 
+			   (o.objectType == "food")):
 				if(self.UseTime("eat")):
 					self.energy += o.getEaten();
 					return True;
+			else:
+				if(o.position != self.position):
+					raise RuleException("In order to eat something, one has to be at the same position. Keep in mind that wesen move and you have to look where they are each turn, as the information from looking around becomes stale quickly!");
+				if(o.objectType != "food"):
+					raise RuleException("In order to eat something, it has to be food.");
 		return False;
 
 	def Reproduce(self):
@@ -171,7 +183,7 @@ class Wesen(WorldObject):
 			infoWesen["source"] = self.source;
 			infoWesen["position"] = self.position;
 			child = self.AddObject(infoWesen);
-			self.maxRange.append(child);
+			self.maxRange[child.id] = child;
 			self.energy -= childEnergy;
 			self.age = 0;
 			self.EnergyCheck();
@@ -184,12 +196,19 @@ class Wesen(WorldObject):
 		so the one who had more energy than his enemy can survive.
 		The other Wesen dies.
 		"""
-		for o in self.maxRange:
-			if(o.id == wesenid):
-				if((o.objectType == "wesen") and (o.position == self.position)):
-					if(self.UseTime("attack")):
-						self.energy -= int(o.getAttacked(self.energy)*0.5);
-						return (not self.EnergyCheck());
+		if(wesenid in self.maxRange.keys()):
+			o = self.maxRange[wesenid];
+			if((o.objectType == "wesen") and
+			   (o.position == self.position)):
+				if(self.UseTime("attack")):
+					self.energy -= int(o.getAttacked(self.energy)*0.5);
+					return (not self.EnergyCheck());
+#		for o in self.maxRange:
+#			if(o.id == wesenid):
+#				if((o.objectType == "wesen") and (o.position == self.position)):
+#					if(self.UseTime("attack")):
+#						self.energy -= int(o.getAttacked(self.energy)*0.5);
+#						return (not self.EnergyCheck());
 		return False;
 
 	def getAttacked(self, energy):
@@ -221,8 +240,11 @@ class Wesen(WorldObject):
 
 	def Donate(self, energy, wesenid):
 		"""transfer energy from this wesen to another specified by wesenid"""
-		for o in self.maxRange:
-			if((o.id==wesenid) and (o.objectType == "wesen") and
+		if(wesenid in self.maxRange.keys()):
+			o = self.maxRange[wesenid];
+#		for o in self.maxRange:
+			if((o.objectType == "wesen") and
+#			   (o.id==wesenid) and
                            (o.position == self.position)):
 				if(self.UseTime("donate")):
 					if(energy > self.energy):
