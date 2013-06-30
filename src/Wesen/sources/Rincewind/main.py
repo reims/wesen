@@ -1,7 +1,7 @@
 from . import helper;
 from ...defaultwesensource import DefaultWesenSource;
 from ...point import *;
-from numpy.math import cos, sin, pi, atan2;
+from math import cos, sin, pi, atan2;
 from functools import reduce;
 
 class WesenSource(DefaultWesenSource):
