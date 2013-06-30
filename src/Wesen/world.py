@@ -32,13 +32,16 @@ class World(object):
 		self.winner = None;
 		self.objects = dict();
 		self.turns = 0;
-		self.infoWorld.update(dict(DeleteObject=self.DeleteObject, AddObject=self.AddObject, objects=self.objects));
+		self.infoWorld.update({"DeleteObject":self.DeleteObject,
+				       "AddObject":self.AddObject,
+				       "objects":self.objects});
 		self.infoFood["type"] = "food";
 		self.infoWesen["type"] = "wesen";
 		for entry in self.infoWesen["sources"]:
 			for i in range(self.infoWesen["count"]):
 				self.infoWesen["source"] = entry;
 				self.AddObject(make_dictproxy(self.infoWesen));
+		self.initStats();
 		for i in range(self.infoFood["count"]):
 			self.AddObject(self.infoFood);
 
@@ -57,7 +60,11 @@ class World(object):
 
 	def AddObject(self, infoObject):
 		"""adds an object to the world."""
-		infoAllObject = dict(world=self.infoWorld, range=self.infoRange, object=infoObject, time=self.infoTime, food=self.infoFood);
+		infoAllObject = {"world":self.infoWorld,
+				 "range":self.infoRange,
+				 "time":self.infoTime,
+				 "food":self.infoFood,
+				 "object":infoObject};
 		if(infoObject["type"] == "wesen"):
 			newObject = Wesen(infoAllObject);
 		elif(infoObject["type"] == "food"):
@@ -72,32 +79,36 @@ class World(object):
 		"""returns a list of description information for the GUI,
 		[{"finished":Boolean}[...]]
 		where [...] is a list of all objects descriptors in the world."""
-		return [dict(finished=self.finished), [object.getDescriptor() for object in self.objects.values()]];
+		return [{"finished":self.finished}, [o.getDescriptor() for o in self.objects.values()]];
 
 	def getEnergy(self):
 		return self.energy;
+
+	def initStats(self):
+		stats = {"food":{"count":0,"energy":0}};
+		for source in self.infoWesen["sources"]:
+			stats[source]={"count":0,"energy":0};
+		self.stats = stats;
 
 	def main(self):
 		"""runs one turn of Game code (and all objects code, including the AI)"""
 		stillActive = False;
 		self.turns += 1;
-		sources = dict(food=dict(count=0,energy=0));
-		for source in self.infoWesen["sources"]:
-			sources[source]=dict(count=0,energy=0);
+		self.initStats();
+		stats = self.stats;
 		globalEnergy = 0;
 		for o in self.objects.copy().values():
-			globalEnergy += o.energy;
 			if(o.objectType == "wesen"):
-				sources[o.source]["count"] += 1;
-				sources[o.source]["energy"] += o.energy;
-				stillActive = True;
+				stats[o.source]["count"] += 1;
+				stats[o.source]["energy"] += o.energy;
+				#stillActive = True;
 			else:
-				sources["food"]["count"] += 1;
-				sources["food"]["energy"] += o.energy;
+				stats["food"]["count"] += 1;
+				stats["food"]["energy"] += o.energy;
 			o.main();
-		self.energy = globalEnergy;
-		self.stats = sources;
+		self.energy = sum([objectType["energy"] for objectType in stats.values()]);
+		self.stats = stats;
 		#if(len(list(sources.keys())) == 2):
                 #        self.winner = [s for s in sources if s != "food"][0]
-		if(not (stillActive)):
-			self.finished = True;
+		#if(not (stillActive)):
+		#	self.finished = True;
