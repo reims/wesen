@@ -46,29 +46,24 @@ class WesenSource(DefaultWesenSource):
 					# fine, this will be handled next loop iteration!
 					pass;
 				else:
-					# Mh, no food in sight; maybe move away?
-					foundThreat = helper.lookForThreat(self, lookRange);
-					if(foundThreat):
-						helper.Flee(self);
-					else:
-						foundEnemy = False;
-						if(self.energy() > self.minimumEnergyToFight):
-							foundEnemy = helper.lookForEnemyTarget(self, lookRange);
-							# if found, this will be handled next loop iteration!
-						if(not foundEnemy):
-							# nothing to eat, no fights. OK. Time for gardening.
-							if(helper.lookAtYoungGarden(self, lookRange)):
-								# well, wait for the garden to grow!
-								self.target = None; #TODO find out whether necessary
-								break;
+					foundEnemy = False;
+					if(self.energy() > self.minimumEnergyToFight):
+						foundEnemy = helper.lookForEnemyTarget(self, lookRange);
+						# if found, this will be handled next loop iteration!
+					if(not foundEnemy):
+						# nothing to eat, no fights. OK. Time for gardening.
+						if(helper.lookAtYoungGarden(self, lookRange)):
+							# well, wait for the garden to grow!
+							self.target = None; #TODO find out whether necessary
+							break;
+						else:
+							decision = randint(0,9);
+							if(decision==0): #TODO move magic number to constants above
+								# seed out!
+								helper.seedOut(self);
+							elif(decision <= 5):
+								# move away!
+								helper.ScannerMove(self, scanVector=__class__.globalScanVector);
 							else:
-								decision = randint(0,9);
-								if(decision==0): #TODO move magic number to constants above
-									# seed out!
-									helper.seedOut(self);
-								elif(decision <= 5):
-									# move away!
-									helper.ScannerMove(self, scanVector=__class__.globalScanVector);
-								else:
-									# move back!
-									helper.ScannerMove(self, scanVector=[-c for c in __class__.globalScanVector]);
+								# move back!
+								helper.ScannerMove(self, scanVector=[-c for c in __class__.globalScanVector]);
