@@ -67,7 +67,7 @@ class Graph(GuiObject):
 		for n in range(border):
 			p.PrintLn();
 		for s in self.sensors:
-			p.PrintLn(p.fullString(s["colorname"],border)+" - "+s["name"]);
+			p.PrintLn(s["colorname"]+" - "+s["name"]);
 		p.ResetRaster();
 		glPopMatrix();
 

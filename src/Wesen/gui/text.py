@@ -19,9 +19,13 @@ class Text(GuiObject):
 		self.world = world;
 		self.infoWorld = infoWorld;
 		self.printer = TextPrinter();
+		self.givenText = None;
 
 	def Step(self):
 		self.printer.ResetRaster();
+
+	def Print(self, line):
+		self.givenText = line;
 
 	def Reshape(self, x, y):
 		GuiObject.Reshape(self, x, y);
@@ -34,21 +38,28 @@ class Text(GuiObject):
 		p.PrintLn("Field %s information:" % (fieldInformation[0]["position"]));
 		for element in fieldInformation:
 			if(element["type"] == "food"):
-				p.PrintLn("Food(%s): %s years old" % (p.fullString(element["energy"],6), p.fullString(element["age"],4)));
+				p.PrintLn("Food(%6d): %4d years old" % (element["energy"], element["age"]));
 			elif(element["type"] == "wesen"):
-				p.PrintLines("%s(%s): %s years old - %s" % (element["source"], element["energy"], element["age"], element["sourcedescriptor"]));
+				p.PrintLines("%s(%6d): %4d years old - %s" % (element["source"], element["energy"], element["age"], element["sourcedescriptor"]));
 
 	def DrawGameStats(self, p):
-		p.PrintLn("              global | %s e | %s o |" % (p.fullString(self.world.energy,8), p.fullString(len(self.world.objects),5)));
+		statString = "%-20s | %9s | %9s | %14s |";
+		p.PrintLn(statString % 
+			  ("","energy","count","energy/object"));
+		energy = self.world.energy;
+		count = len(self.world.objects);
+		perObject = energy//count;
+		p.PrintLn(statString % 
+			  ("all", energy, count, perObject));
 		for source in list(self.world.stats.keys()):
 			energy = self.world.stats[source]["energy"];
 			count = self.world.stats[source]["count"];
-			try:
-				perWesen = int(energy / count);
-			except ZeroDivisionError:
+			if(count == 0):
 				perWesen = 0;
-			p.PrintLn("%s | %s e | %s o | %s e/o |" % (p.fullString(source,20), p.fullString(energy,8),\
-							      p.fullString(count,5), p.fullString(perWesen,5)));
+			else:
+				perWesen = int(energy / count);
+			p.PrintLn(statString % 
+				  (source, energy, count, perWesen));
 		if(self.world.winner):
 			p.PrintLn("\nWinner: %s" % (self.world.winner));
 		else:
@@ -61,10 +72,15 @@ class Text(GuiObject):
 			status = "running";
 		if(self.descriptor[0]["finished"]):
 			status += " and finished";
-		p.PrintLn("%s\n" % (p.fullString(status,9)));
-		p.PrintLn("\t%s fps | drawing every %s frames" % (p.fullString("%.1f" % self.gui.fps,7), p.fullString(self.gui.dropFrames+1,3)));
-		#p.PrintLn("\t\t\t\t| manual slowdown: %s percent" % (p.fullString(int(100.0/self.gui.speed),4)));
-		#p.PrintLn("\t%s tps | %s turns | %s sec | overall tps: %s" % (p.fullString("%.1f" % self.gui.tps,7), p.fullString(self.world.turns,5), p.fullString((int(glutGet(GLUT_ELAPSED_TIME)/1000)),6), p.fullString(int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)),6)));
+		p.PrintLn("%10s\n" % (status));
+		p.PrintLn("\t%3.1f fps | %8d turns" % (self.gui.fps, self.world.turns));
+		#p.PrintLn("\t%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));
+		#p.PrintLn("\t\t\t\t| manual slowdown: %3d percent" % (int(100.0/self.gui.speed)));
+		#p.PrintLn("\t%.1f tps | %5d turns | %10d sec | overall tps: %s" % (self.gui.tps, self.world.turns, int(glutGet(GLUT_ELAPSED_TIME)/1000), int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
+
+	def DrawGivenText(self, p):
+		if(self.givenText is not None):
+			p.PrintLn(self.givenText);
 
 	def DrawText(self):
 		glPushMatrix();
@@ -76,6 +92,8 @@ class Text(GuiObject):
 		self.DrawGameStats(p);
 		p.PrintLn();
 		self.DrawFieldStats(p);
+		p.PrintLn();
+		self.DrawGivenText(p);
 		glPopMatrix();
 
 	def Draw(self):
@@ -106,16 +124,6 @@ class TextPrinter(object):
 
 	def SetColor(self):
 		glColor3f(self.color[0], self.color[1], self.color[2]);
-
-	def fullString(self, string="", length=4, fillChar=" "):
-		"""
-		fullString([string=""[, length=4[, fillChar="0"]]]) => "0000"
-		fullString(25,6) => "000025"
-		fullString("test",8," ") => "    test"
-		"""
-		while(len(str(string)) < length):
-			string = fillChar + str(string);
-		return string;
 
 	def PrintLn(self, text=""):
 		self.Print(" "+text+"\n");

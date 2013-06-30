@@ -51,6 +51,7 @@ class GUI:
 		self.speed = 1.0;
 		self.wait = 1;
 		self.dropFrames = 0;
+		self.movieMode = False;
 		self.posX, self.posY = (0, 0);
 		initxy = self.infoGui["pos"];
 		self.initx = int(initxy[:initxy.index(",")]);
@@ -76,10 +77,10 @@ class GUI:
 
 	def initGL(self, extraArgs):
 		"""initializes OpenGL and creates the Window"""
-		glutInit(extraArgs.split(" "));
-		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+		glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
+		glutInit(extraArgs.split(" "));
 		glutCreateWindow((NAMES["PROJECT"]+" "+VERSIONS["PROJECT"]).encode("ascii"));
 		glutDisplayFunc(self.Draw);
 		glutIdleFunc(glutPostRedisplay);
@@ -159,6 +160,7 @@ class GUI:
 		glutAddMenuEntry(b"change map visibility",0);
 		glutAddMenuEntry(b"change graph visibility",25);
 		glutAddMenuEntry(b"change text visibility",50);
+		glutAddMenuEntry(b"display key bindings",55);
 		glutAddMenuEntry(b"pause   (space)",100);
 		glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -169,6 +171,8 @@ class GUI:
 			self.graph.ChangeVisibility();
 		elif(action == 50):
 			self.text.ChangeVisibility();
+		elif(action == 55):
+			self.text.Print("key bindings:\nx|q|esc: exit\n p|space: pause\n+-:speed\nik:frame drop rate\nm:movie mode\nd:debug info\narrows: modify food, left/right: del/add, up/down: inc/dec."); #TODO put that string somewhere else
 		elif(action == 100):
 			self.Pause();
 		else:
@@ -185,6 +189,7 @@ class GUI:
 		elif(key == b"+"): self.SpeedUp();
 		elif(key == b"i"): self.DropDown();
 		elif(key == b"k"): self.DropUp();
+		elif(key == b"m"): self.ToggleMovie();
 		elif(key == b"d"): print(self.infoWorld);
 		elif(key == 13): self.Step(); # <enter> #TODO seems to be broken
 		elif(key == 27): self.Exit(); # <esc>
@@ -192,6 +197,9 @@ class GUI:
 		elif(key == 101): self.ModifyFood("increase"); # <uparrow>
 		elif(key == 102): self.ModifyFood("add");      # <rightarrow>
 		elif(key == 103): self.ModifyFood("decrease"); # <downarrow>
+
+	def ToggleMovie(self):
+		self.movieMode = not self.movieMode;
 
 	def _win2glCoord(self, x, y):
 		posX = (2.0 * x / self.windowSize[0]);
@@ -206,7 +214,6 @@ class GUI:
 
 	def HandleMouse(self, button, state, x, y):
 		"""handles all mouse events as clicks, dragdrops, etc."""
-		#TODO currently without any use
 		if(state == 0):
 			self.mouseFirst = [x,y];
 			posX, posY = self._win2wesenCoord(x, y);
@@ -214,6 +221,23 @@ class GUI:
 				self.posX, self.posY = (posX, posY);
 		if(state == 1):
 			self.mouseLast = [x,y];
+			image = self.takeScreenshot();
+			image.save('screenshot.png');
+
+	def takeScreenshot(self):
+		"""takes a screenshot of the map region"""
+		(width,height) = self.windowSize;
+		buffer = ( GLubyte * (3*width*height) )(0);
+		glReadPixels(0,0,width,height,
+			     GL_RGB,GL_UNSIGNED_BYTE, buffer);
+		from PIL import Image;
+		image = Image.fromstring(mode="RGB",
+					size=(width, height),
+					data=buffer);
+		image = image.transpose(Image.FLIP_TOP_BOTTOM);
+		image = image.crop((0,0,width//2,height//2));
+		image = image.resize((800,800),Image.ANTIALIAS);
+		return image;
 
 	def Reshape(self, x, y):
 		"""warning: symmetrical x/y reshape not implemented yet"""
@@ -259,6 +283,9 @@ class GUI:
 		self.DrawText();
 		glPopMatrix();
 		glutSwapBuffers();
+		if(self.movieMode):
+			self.takeScreenshot().save(("m%08d.png" % (self.turns)));
+
 
 	def CalcFps(self):
 		"""calculates GUI.fps and GUI.tps (call every frame)"""
@@ -300,11 +327,6 @@ class GUI:
 			for objectType in self.world.stats.keys():
 				red = uniform(0,1);
 				green = uniform(0,1);
-				blue = uniform(0,1);
-				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["count"],
-							  color=[red,green,blue],
-							  colorname=str(int(red*255))+" "+str(int(green*255))+" "+str(int(blue*255)),
-							  name=objectType+" count"));
 				blue = uniform(0,1);
 				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["energy"],
 							  color=[red,green,blue],
