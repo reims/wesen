@@ -1,14 +1,10 @@
 """fixed values"""
 
-from os.path import expanduser, join;
+# change these values only here, they are not included in any configfiles!
 
 NAMES =    {"PROJECT":"wesen",     "WESEND":"wesend",
             "CONFIGED":"configed", "GUI":"gui"};
 VERSIONS = {"PROJECT":"0.6.dev",   "WESEND":"0.6",
             "CONFIGED":"0.6",      "GUI":"0.6"};
 
-# change these values only here, they are not included in any configfiles!
-DIMENSIONS = 2; # this is a relict. it will probably never be 3.
 FORMAT_LOGSTRING = "%(asctime)s %(levelname)s %(message)s";
-
-PROFILE_WESEND = join(expanduser("~"),".wesen","profiletemp~");

@@ -1,18 +1,11 @@
-#! /usr/bin/python3
-
-"""Copyright 2003-2013 by Konrad Voelkel and Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit https://github.com/reims/wesen for versions > 2013
-or http://wesen.sourceforge.net for old versions of 2003,2004."""
-
 from .definition import NAMES, VERSIONS;
-from .defaults import DEFAULT_GENERAL_CONFIGFILE, DEFAULT_GENERAL_LOGFILE;
+from .defaults import DEFAULT_GENERAL_CONFIGFILE;
 from .strings import *;
 from .configed import ConfigEd;
 from .wesend import Wesend;
 from argparse import ArgumentParser, Action;
-from os import execv, environ, mkdir;
-from os.path import exists, join, dirname, expanduser;
+from os import mkdir;
+from os.path import exists, join, expanduser;
 import importlib;
 import sys;
 
@@ -92,7 +85,7 @@ class Loader(object):
 		sources = sourcesList.split(",");
 		for source in sources:
 			try:
-				sourceClass = importlib.import_module(".sources."+source+".main", __package__).WesenSource;
+				importlib.import_module(".sources."+source+".main", __package__).WesenSource;
 			except ImportError as e:
 				print(e);
 				print("The source code for one of your AIs could not be loaded: ", source);

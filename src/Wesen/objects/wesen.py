@@ -1,11 +1,5 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from ..strings import STRING_LOGGER;
 from .base import WorldObject;
-import sys;
 import importlib;
 
 class RuleException(Exception):

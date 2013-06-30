@@ -1,5 +1,5 @@
 from .base import WorldObject;
-from ..point import *;
+from ..point import getRandomPositionInRadius;
 from ..strings import STRING_LOGGER;
 from numpy.random import uniform;
 

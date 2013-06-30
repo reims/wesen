@@ -1,12 +1,10 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from .objects.wesen import Wesen;
 from .objects.food import Food;
+
+#BEGIN code for dictproxys:
 from ctypes import pythonapi, py_object;
 from _ctypes import PyObj_FromPtr;
+
 DictProxy = pythonapi.PyDictProxy_New;
 DictProxy.argtypes = (py_object,);
 DictProxy.rettype = py_object;
@@ -14,6 +12,7 @@ DictProxy.rettype = py_object;
 def make_dictproxy(obj):
 	assert isinstance(obj,dict);
 	return PyObj_FromPtr(DictProxy(obj));
+#END code for dictproxys.
 
 class World(object):
 	"""World(infoObject) creates a World instance.
@@ -30,7 +29,7 @@ class World(object):
 		self.logger = self.infoWorld["logger"];
 		self.finished = False;
 		self.winner = None;
-		self.objects = dict();
+		self.objects = {};
 		self.turns = 0;
 		self.infoWorld.update({"DeleteObject":self.DeleteObject,
 				       "AddObject":self.AddObject,
@@ -52,11 +51,6 @@ class World(object):
 			return True;
 		else:
 			return False;
-		#for o in self.objects.values():
-		#	if(o.id == objectid):
-		#		del(self.objects[self.objects.index(o)]);
-		#		return True;
-		#return False;
 
 	def AddObject(self, infoObject):
 		"""adds an object to the world."""
@@ -92,11 +86,10 @@ class World(object):
 
 	def main(self):
 		"""runs one turn of Game code (and all objects code, including the AI)"""
-		stillActive = False;
+		#stillActive = False;
 		self.turns += 1;
 		self.initStats();
 		stats = self.stats;
-		globalEnergy = 0;
 		for o in self.objects.copy().values():
 			if(o.objectType == "wesen"):
 				stats[o.source]["count"] += 1;

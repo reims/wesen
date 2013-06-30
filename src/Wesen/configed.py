@@ -1,8 +1,6 @@
-from .definition import *;
 from .defaults import *;
 from .strings import *;
 from configparser import SafeConfigParser;
-from sys import argv;
 import os.path;
 
 def upper(str):

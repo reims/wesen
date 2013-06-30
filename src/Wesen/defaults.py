@@ -1,6 +1,5 @@
 """config defaults"""
 
-from .definition import DIMENSIONS;
 from os.path import expanduser, join;
 from math import sqrt;
 

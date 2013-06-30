@@ -1,8 +1,5 @@
 from OpenGL.GL import *;
-from OpenGL.GLU import *;
-from OpenGL.GLUT import *;
-import math;
-from numpy import array as numericArray;
+#from OpenGL.GLUT import *;
 from .object import GuiObject;
 
 class Map(GuiObject):

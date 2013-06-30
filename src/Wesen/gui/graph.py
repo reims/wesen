@@ -1,9 +1,8 @@
 from numpy import array as narray;
 from OpenGL.GL import *;
-from OpenGL.GLU import *;
-from OpenGL.GLUT import *;
+#from OpenGL.GLU import *;
+#from OpenGL.GLUT import *;
 from OpenGL.arrays import vbo;
-from numpy.random import randint;
 from .object import GuiObject;
 from .text import TextPrinter;
 from functools import reduce;
@@ -36,10 +35,10 @@ class Graph(GuiObject):
 		self.sensors = sensors;
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
-	def AddSensor(self, sensor):
+	def AddSensor(self, newSensor):
 		""" sensor = {f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy"}
 		where f has to be a function which takes a variable self and expects there to be self.world."""
-		self.sensors.append(sensor);
+		self.sensors.append(newSensor);
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
 	def Step(self):

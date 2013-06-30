@@ -1,8 +1,5 @@
 from OpenGL.GL import *;
-from OpenGL.GLU import *;
-from OpenGL.GLUT import *;
-import math;
-from ..objects.wesen import Wesen;
+from OpenGL.GLUT import glutBitmapCharacter, GLUT_BITMAP_8_BY_13;
 from .object import GuiObject;
 
 color3white = [1,1,1];
@@ -76,7 +73,7 @@ class Text(GuiObject):
 		if(self.descriptor[0]["finished"]):
 			status += " and finished";
 		p.PrintLn("%10s\n" % (status));
-		p.PrintLn("\t%3.1f fps | %8d turns" % (self.gui.fps, self.world.turns));
+		p.PrintLn("\t%3.1f fps,  %8d turns" % (self.gui.fps, self.world.turns));
 		#p.PrintLn("\t%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));
 		#p.PrintLn("\t\t\t\t| manual slowdown: %3d percent" % (int(100.0/self.gui.speed)));
 		#p.PrintLn("\t%.1f tps | %5d turns | %10d sec | overall tps: %s" % (self.gui.tps, self.world.turns, int(glutGet(GLUT_ELAPSED_TIME)/1000), int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));

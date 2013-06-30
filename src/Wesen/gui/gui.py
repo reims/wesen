@@ -4,14 +4,9 @@ from .text import Text;
 from .graph import Graph;
 from .graph import SensorSystem;
 from .graph import SENSORFCT_FROMSTATS_ENERGY;
-from ..objects.food import Food;
-from ..objects.wesen import Wesen;
 from OpenGL.GL import *;
-from OpenGL.GLU import *;
+from OpenGL.GLU import GLubyte;
 from OpenGL.GLUT import *;
-import math;
-from numpy.random import uniform;
-from time import time;
 import sys;
 import traceback;
 
@@ -25,10 +20,7 @@ cl_freak =     [("lilablue",[0.4, 0.2, 0.6]), ("redlila",[0.6, 0.2, 0.4]),
 
 colorList = cl_default;
 
-glutArgvDebugging = "--indirect --sync --gldebug";
-
-GRAPHRESOLUTION = 1;
-DEFAULT_GUI_SIZE = 800;
+#glutArgvDebugging = "--indirect --sync --gldebug";
 
 class GUI:
 

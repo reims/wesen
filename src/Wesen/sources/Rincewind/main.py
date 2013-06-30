@@ -1,10 +1,8 @@
 from . import helper;
 from ...defaultwesensource import DefaultWesenSource;
 from ...point import *;
-from random import randint;
-from sys import exit;
-from math import cos, sin, pi, atan2, sqrt;
-from functools import reduce
+from numpy.math import cos, sin, pi, atan2;
+from functools import reduce;
 
 class WesenSource(DefaultWesenSource):
 
@@ -45,8 +43,9 @@ class WesenSource(DefaultWesenSource):
 		return self.position() != oldPos;
 
 	def bestFoodInRange(self, foods):
-		movingRange = int((self.time() - self.infoAllSource["time"]["eat"]) / self.infoAllSource["time"]["move"])
-		suitableFoods = filter(lambda f: f["age"] > 100, foods);
+		movingRange = int((self.time() - self.infoAllSource["time"]["eat"]) / self.infoAllSource["time"]["move"]);
+		#TODO movingRange is not used after assignment!
+		suitableFoods = [f for f in foods if f["age"] > 100];
 		reachableFoods = list(filter(lambda f: getDistInMaxMetric(self.position(), f["position"], self.infoAllSource["world"]["length"]), suitableFoods));
 		if len(reachableFoods) > 0:
 			return max(reachableFoods, key = lambda f: f["energy"]);
@@ -54,7 +53,7 @@ class WesenSource(DefaultWesenSource):
 			return None;
 
 	def searchFood(self):
-		foods = list(filter(lambda o: o["type"] == "food",self.range));
+		foods = [o for o in self.range if o["type"] == "food"];
 		if len(foods) > 0:
 			self.state = self.protectFood;
 		else:
@@ -63,12 +62,12 @@ class WesenSource(DefaultWesenSource):
 				self.state = "pass";
 
 	def protectFood(self):
-		foods = list(filter(lambda o: o["type"] == "food", self.range));
+		foods = [o for o in self.range if o["type"] == "food"];
 		if len(foods) == 0:
 			self.state = self.searchFood;
 			return;
 		if not self.midPoint:
-			totalEnergy = sum(map(lambda o: o["energy"], foods)) + 1; # to avoid divbyzero
+			totalEnergy = sum(map(lambda o: o["energy"], foods)) + 1; # +1 to avoid divbyzero
 			self.midPoint = reduce(lambda a,b: [a[i] + float(b["energy"])/float(totalEnergy)*b["position"][i]
 							    for i in range(len(a))], foods, [0,0]);
 			self.midPoint = [int(c) % self.infoAllSource["world"]["length"] for c in self.midPoint]
@@ -82,10 +81,6 @@ class WesenSource(DefaultWesenSource):
 		if not self.continueOnCircle():
 			self.state = "pass"
 
-			
-
-			
-
 	def main(self):
 		self.range = self.closerLook();
 		self.state = self.resumeState;
@@ -93,4 +88,3 @@ class WesenSource(DefaultWesenSource):
 			self.resumeState = self.state;
 #			print("main:", self.state.__name__);
 			self.state();
-

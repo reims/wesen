@@ -1,5 +1,4 @@
 from ...defaultwesensource import DefaultWesenSource;
-from numpy.random import randint;
 
 class WesenSource(DefaultWesenSource):
 
