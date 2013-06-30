@@ -3,6 +3,7 @@ from .map import Map;
 from .text import Text;
 from .graph import Graph;
 from .graph import SensorSystem;
+from .graph import SENSORFCT_FROMSTATS_ENERGY;
 from ..objects.food import Food;
 from ..objects.wesen import Wesen;
 from OpenGL.GL import *;
@@ -14,11 +15,15 @@ from time import time;
 import sys;
 import traceback;
 
-cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [1.0, 1.0, 0.0], [0.0, 1.0, 1.0],\
-		[0.5, 0.0, 0.0], [0.0, 0.0, 0.5], [0.5, 0.0, 0.5], [0.5, 0.5, 0.0], [0.0, 0.5, 0.5]];
-cl_freak =     [[0.4, 0.2, 0.6], [0.6, 0.2, 0.4], [0.8, 0.2, 0.2], [0.2, 0.2, 0.8]];
+cl_default =   [("red",[1.0, 0.0, 0.0]), ("blue",[0.0, 0.0, 1.0]),
+		("violet",[1.0, 0.0, 1.0]), ("brown",[1.0, 1.0, 0.0]),
+		("cyan",[0.0, 1.0, 1.0]), ("light red",[0.5, 0.0, 0.0]),
+		("light blue",[0.0, 0.0, 0.5]), ("light violet",[0.5, 0.0, 0.5]),
+		("light brown",[0.5, 0.5, 0.0]), ("light cyan",[0.0, 0.5, 0.5])];
+cl_freak =     [("lilablue",[0.4, 0.2, 0.6]), ("redlila",[0.6, 0.2, 0.4]),
+		("red",[0.8, 0.2, 0.2]), ("blue",[0.2, 0.2, 0.8])];
 
-colorList = cl_freak;
+colorList = cl_default;
 
 glutArgvDebugging = "--indirect --sync --gldebug";
 
@@ -58,16 +63,16 @@ class GUI:
 		self.inity = int(initxy[initxy.index(",")+1:]);
 		self.fieldInformation = [];
 		self.step = False;
-		self.descriptor = [dict(),[]];
+		self.descriptor = [{},[]];
 		self.bgcolor = [0.0, 0.0, 0.05];
 		self.fgcolor = [0.0, 0.1, 0.2];
-		self._SetColorDescriptor();
 		self.graph = Graph(self, self.world);
+		SensorSystem(self, self.graph, self.world);
+		self._SetColorDescriptor();
 		self.map = Map(self, self.infoWorld, self.colorDescriptor);
 		self.text = Text(self, self.descriptor, self.world, self.infoWorld);
 		self.text.SetAspect(2,1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];
-		SensorSystem(self, self.graph, self.world);
 		if(not self.infoGui["map"]): self.map.ChangeVisibility();
 		if(not self.infoGui["text"]): self.text.ChangeVisibility();
 		if(not self.infoGui["graph"]): self.graph.ChangeVisibility();
@@ -137,8 +142,8 @@ class GUI:
 	def ModifyFood(self, action):
 		"""action can be "delete" "add" "increase" "decrease" """
 		if(action == "delete"):
-			for o in self.world.objects:
-				if(type(o) == Food):
+			for o in self.world.objects.values():
+				if(o.objectType == "food"):
 					if(self.world.DeleteObject(o.id)):
 						break;
 		if(action == "add"):
@@ -147,13 +152,13 @@ class GUI:
 				del infoFood["position"];
 			self.world.AddObject(infoFood);
 		if(action == "increase"):
-			for object in self.world.objects:
-				if(type(object) == Food):
-					object.energy += 10;
+			for o in self.world.objects.values():
+				if(o.objectType == "food"):
+					o.energy += 10;
 		if(action == "decrease"):
-			for object in self.world.objects:
-				if(type(object) == Food):
-					object.energy -= 10;
+			for o in self.world.objects.values():
+				if(o.objectType == "food"):
+					o.energy -= 10;
 
 	def initMenu(self):
 		self.menu = glutCreateMenu(self.HandleAction);
@@ -324,14 +329,6 @@ class GUI:
 				else:
 					self.wait += 1;
 		if(self.init):
-			for objectType in self.world.stats.keys():
-				red = uniform(0,1);
-				green = uniform(0,1);
-				blue = uniform(0,1);
-				self.graph.AddSensor(dict(f=lambda world : world.stats[objectType]["energy"],
-							  color=[red,green,blue],
-							  colorname=str(int(red*255))+" "+str(int(green*255))+" "+str(int(blue*255)),
-							  name=objectType+" energy"));
 			self.Pause();
 			self.init = False;
 		try:
@@ -344,9 +341,15 @@ class GUI:
 		return 1
 
 	def _SetColorDescriptor(self):
-		colorDescriptor = dict();
+		colorDescriptor = {};
 		sourceList = self.infoWesen["sources"];
 		sourceList.sort();
-		for i in range(len(sourceList)):
-			colorDescriptor[sourceList[i]] = colorList[i % len(colorList)];
+		enoughColors = colorList * int(1+len(sourceList)/len(colorList));
+		for (wesenSource,colorInfo) in zip(sourceList, enoughColors):
+			colorDescriptor[wesenSource] = colorInfo[1];
+			self.graph.AddSensor({"f":SENSORFCT_FROMSTATS_ENERGY,
+					      "color":colorInfo[1],
+					      "colorname":colorInfo[0],
+					      "statskey":wesenSource,
+					      "name":wesenSource+" energy"});
 		self.colorDescriptor = colorDescriptor;

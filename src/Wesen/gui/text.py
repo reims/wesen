@@ -48,7 +48,10 @@ class Text(GuiObject):
 			  ("","energy","count","energy/object"));
 		energy = self.world.energy;
 		count = len(self.world.objects);
-		perObject = energy//count;
+		if(count == 0):
+			perObject = 0;
+		else:
+			perObject = energy // count;
 		p.PrintLn(statString % 
 			  ("all", energy, count, perObject));
 		for source in list(self.world.stats.keys()):
@@ -57,7 +60,7 @@ class Text(GuiObject):
 			if(count == 0):
 				perWesen = 0;
 			else:
-				perWesen = int(energy / count);
+				perWesen = energy // count;
 			p.PrintLn(statString % 
 				  (source, energy, count, perWesen));
 		if(self.world.winner):

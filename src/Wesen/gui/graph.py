@@ -1,8 +1,3 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 from numpy import array as narray;
 from OpenGL.GL import *;
 from OpenGL.GLU import *;
@@ -13,7 +8,9 @@ from .object import GuiObject;
 from .text import TextPrinter;
 from functools import reduce;
 
+SENSORFCT_FROMSTATS_ENERGY = lambda world : lambda x : world.stats[x]["energy"];
 PLOTMODE = GL_LINE_STRIP; # GL_LINES GL_POINTS GL_LINE_STRIP
+
 import traceback;
 
 class Graph(GuiObject):
@@ -37,25 +34,25 @@ class Graph(GuiObject):
 
 	def SetSensors(self, sensors):
 		self.sensors = sensors;
-		self.history = [SensorData(self.histlength) for n in range(len(self.sensors))];
+		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
 	def AddSensor(self, sensor):
 		""" sensor = dict(f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy")
 		where f has to be a function which takes a variable self and expects there to be self.world."""
 		self.sensors.append(sensor);
-		self.history = [SensorData(self.histlength) for n in range(len(self.sensors))];
+		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
 	def Step(self):
-		for n in range(len(self.history)):
-			self.history[n].AddValue(self.sensors[n]["f"](self.world));
+		for i,sensor in enumerate(self.history):
+			sensor.AddValue(self.sensors[i]["f"](self.world)(self.sensors[i]["name"].split(" ")[0]));
 		self.maxValue=max([sensor.maxValue for sensor in self.history]+[self.maxValue]);
 
 	def DrawPlot(self):
 		glPushMatrix();
 		glScalef(1.0/self.resolution, 0.8/self.maxValue, 1.0);
 		for i,data in enumerate(self.history):
-			c = self.sensors[i]["color"];
-			glColor4f(c[0], c[1], c[2], 1.0);
+			(r,g,b) = self.sensors[i]["color"];
+			glColor4f(r, g, b, 1.0);
 			data.Draw();
 		glPopMatrix();
 
@@ -67,7 +64,7 @@ class Graph(GuiObject):
 		for n in range(border):
 			p.PrintLn();
 		for s in self.sensors:
-			p.PrintLn(s["colorname"]+" - "+s["name"]);
+			p.PrintLn("%-10s - %20s" % (s["colorname"], s["name"]));
 		p.ResetRaster();
 		glPopMatrix();
 
@@ -121,7 +118,8 @@ class SensorData(object):
 				glDrawArrays(GL_LINE_STRIP,
 					     0,
 					     (self.previous_index +1));
-		except Exception:
+		except Exception as e:
+			print("exception:", e);
 			print(traceback.format_exc());
 		finally:
 			glDisableClientState(GL_VERTEX_ARRAY);
@@ -135,7 +133,12 @@ class SensorSystem(object):
 		graph.SetSensors(self.getSensors());
 
 	def getSensors(self):
-		sensors = [\
-			   dict(f=lambda world : world.getEnergy(),color=[0.5,0.5,0.5],colorname="grey",name="global energy"), \
-			   ];
+		sensors = [{"f":lambda world : lambda x : world.getEnergy(),
+			    "statskey":None,
+			    "color":[0.5,0.5,0.5],"colorname":"grey",
+			    "name":"global energy"},
+			   {"f":SENSORFCT_FROMSTATS_ENERGY,
+			    "statskey":"food",
+			    "color":[0.0,1.0,0.0],"colorname":"green",
+			    "name":"food energy"}];
 		return sensors;
