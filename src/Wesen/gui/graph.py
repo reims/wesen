@@ -37,7 +37,7 @@ class Graph(GuiObject):
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
 	def AddSensor(self, sensor):
-		""" sensor = dict(f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy")
+		""" sensor = {f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy"}
 		where f has to be a function which takes a variable self and expects there to be self.world."""
 		self.sensors.append(sensor);
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];

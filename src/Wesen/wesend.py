@@ -43,7 +43,9 @@ class Wesend:
 	def initGUI(self, extraArgs):
 		"""handing over all control to the gui"""
 		GUI = importlib.import_module(".gui."+self.infoGui["source"], __package__).GUI;
-		infoGui = dict(config=self.infoGeneral, wesend=self, world=self.infoWorld, wesen=self.infoWesen, food=self.infoFood, gui=self.infoGui);
+		infoGui = {"config":self.infoGeneral, "wesend":self,
+			   "world":self.infoWorld, "wesen":self.infoWesen,
+			   "food":self.infoFood, "gui":self.infoGui};
 		self.gui = GUI(infoGui, self.mainLoop, self.world, extraArgs);
 
 	def __del__(self):

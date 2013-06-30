@@ -55,7 +55,10 @@ class WorldObject(object):
 		"""return descriptive data for the gui,
 		included by the world in World.getDescriptor.
 		"""
-		return dict(position=self.position, energy=self.energy, age=self.age, type=self.objectType);
+		return {"position":self.position,
+			"energy":self.energy,
+			"age":self.age,
+			"type":self.objectType};
 
 	def AgeCheck(self):
 		"""virtual function, look in wesen or food"""

@@ -11,7 +11,8 @@ class GuiObject(object):
 
 	def __init__(self, gui):
 		self.gui = gui;
-		self.frame = dict(frame=3, color=[0.75, 0.75, 0.75], plastic=0.5, aspect=1);
+		self.frame = {"frame":3, "color":[0.75, 0.75, 0.75],
+			      "plastic":0.5, "aspect":1};
 		self.shadow = False;
 		self.visible = True;
 		self.active = True;

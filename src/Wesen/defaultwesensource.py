@@ -1,8 +1,3 @@
-"""Copyright 2003 by Konrad Voelkel Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit http://www.sourceforge.net/projects/wesen or
-http://wesen.sourceforge.net for newer versions."""
-
 class DefaultWesenSource(object):
 	"""default sourcecode for a wesen,
 	newly created wesen should be created with
@@ -24,7 +19,7 @@ class DefaultWesenSource(object):
 		self.source = self.infoSource["source"];
 
 	def getDescriptor(self):
-		return dict();
+		return {};
 
 	def Receive(self, message):
 		pass;

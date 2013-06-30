@@ -25,12 +25,14 @@ class Wesen(WorldObject):
 		self.infoTime = self.infoAllObject["time"];
 		self.source = self.infoObject["source"];
 		WesenSource = self.getSource();
-		infoSource = dict(source=self.source);
+		infoSource = {"source":self.source};
 		infoSourceWorld = self.infoWorld.copy();
 		del infoSourceWorld["objects"];
 		del infoSourceWorld["AddObject"];
 		del infoSourceWorld["DeleteObject"];
-		infoAllSource = dict(world=infoSourceWorld, source=infoSource, time=self.infoTime, range=self.infoRange, wesen=self.infoObject, food=self.infoAllObject["food"]);
+		infoAllSource = {"world":infoSourceWorld, "source":infoSource,
+				 "time":self.infoTime, "range":self.infoRange,
+				 "wesen":self.infoObject, "food":self.infoAllObject["food"]};
 		self.wesenSource = WesenSource(infoAllSource);
 		self.PutInterface(self.wesenSource);
 
@@ -80,7 +82,7 @@ class Wesen(WorldObject):
 		objecttype and python id.
 		"""
 		if(self.UseTime("look")):
-			return [dict(position=o.position, type=o.objectType, id=o.id)
+			return [{"position":o.position, "type":o.objectType, "id":o.id}
 				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["look"], condition = lambda x : self != x).values()];
 		else:
 			return [];
@@ -90,8 +92,8 @@ class Wesen(WorldObject):
 		energy, age, time, source (which equals to friend/foe).
 		"""
 		if(self.UseTime("closerlook")):
-			return [dict(position=o.position, type=o.objectType, id=o.id,
-				     energy=o.energy, age=o.age, time=o.time, source=o.source)
+			return [{"position":o.position, "type":o.objectType, "id":o.id,
+				 "energy":o.energy, "age":o.age, "time":o.time, "source":o.source}
 				for o in self.getRangeObjectWithCondition(self.maxRange, self.infoRange["closer_look"], condition = lambda x : self != x).values()];
 		else:
 			return [];
@@ -231,8 +233,10 @@ class Wesen(WorldObject):
 					self.Die();
 			if(not energy <= 0):
 				#TODO the magic numbers here should be configurable
-				infoFood = dict(energy=energy, position=self.position, growrate=2,
-                                            seedrate=0.005, maxamount=energy+1000, maxage=1000, type="food");
+				infoFood = {"energy":energy, "position":self.position,
+					    "growrate":1, "seedrate":0.001,
+					    "maxamount":energy+1000, "maxage":1000,
+					    "type":"food"};
 				self.AddObject(infoFood);
 				self.energy -= energy;
 				return True;
@@ -273,7 +277,8 @@ class Wesen(WorldObject):
 
 	def getDescriptor(self):
 		"""returns a dictionary with descriptive information about the wesen for the GUI"""
-		descriptor = dict(source=self.source, sourcedescriptor=self.wesenSource.getDescriptor());
+		descriptor = {"source":self.source,
+			      "sourcedescriptor":self.wesenSource.getDescriptor()};
 		descriptor.update(WorldObject.getDescriptor(self));
 		return descriptor;
 

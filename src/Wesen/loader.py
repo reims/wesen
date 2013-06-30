@@ -109,9 +109,9 @@ class OverwriteConfigAction(Action):
 		else:
 			print("Overwritten config option: [",self.section, "]", self.dest, "=", values[0]);
 			if(not "_config" in namespace):
-				namespace._config = dict();
+				namespace._config = {};
 			if(not self.section in namespace._config.keys()):
-				namespace._config[self.section] = dict();
+				namespace._config[self.section] = {};
 			namespace._config[self.section][self.dest] = values[0];
 		
 
