@@ -18,7 +18,7 @@ STRING_CONFIGED = {
 "WESEN":{
 	"SOURCES":"(comma-seperated wesen sources)\nsources=",
 	"COUNT":"(how much wesen are created during startup from each source)\ncount=",
-	"ENERGY":"(starting energy of every wesen)\nenergy=",
+	"ENERGY":"(starting energy of every wesen at the beginning)\nenergy=",
 	"MAXAGE":"(maximum age of wesen until they die)\nmaxage="},
 "GUI":{
 	"ENABLE":"\nenable=",
@@ -30,13 +30,13 @@ STRING_CONFIGED = {
 	"TEXT":"\ntext="},
 "GENERAL":{
 	"ENABLELOG":"\nenablelog=",
-	"LOGFILE":"(destination of your logfile, leave blank if disabled)\nlogfile="},
+	"LOGFILE":"(destination of your logfile)\nlogfile="},
 "WORLD":{
-	"LENGTH":"(length of the worlds x-axis and y-axis and perhaps other, too)\nlength="},
+	"LENGTH":"(length of the worlds x-axis and y-axis)\nlength="},
 "FOOD":{
 	"COUNT":"(how many food places at start)\ncount=",
-	"AMOUNT":"(starting energy of every food place)\namount=",
-	"MAXAMOUNT":"(maximum food amount without self-destruction)\nmaxamount=",
+	"ENERGY":"(starting energy of every food place at the beginning)\namount=",
+	"MAXAMOUNT":"(maximum food amount without growth stop)\nmaxamount=",
 	"MAXAGE":"(maximum age without self-destruction)\nmaxage=",
 	"SEEDRATE":"(in %, 100 means every, 1 means every 100th round)\nseedrate=",
 	"GROWRATE":"(in %, 100 means every, 1 means every 100th round)\ngrowrate="},
@@ -46,42 +46,19 @@ STRING_CONFIGED = {
 	"TALK":"(how \"far\" the wesen can talk)\ntalk=",
 	"SEED":"(how far the food can seed)\nseed="},
 "TIME":{
-	"INIT":"(time a wesen gets when it's \"born\")\ninit=",
-	"MAX":"(maximum time a wesen can have)\nmax=",
-	"LOOK":"(time needed for looking)\nlook=",
+	"INIT":"(time a wesen gets each turn)\ninit=",
+	"MAX":"(maximum time a wesen can have in a turn)\nmax=",
+	"LOOK":"(time needed for looking around)\nlook=",
 	"CLOSERLOOK":"(time needed for a closer look)\ncloserlook=",
 	"MOVE":"(time needed for moving)\nmove=",
 	"EAT":"(time needed for eating)\neat=",
-	"TALK":"(time needed for moving)\ntalk=",
+	"TALK":"(time needed for talking)\ntalk=",
 	"VOMIT":"(time needed for vomiting)\nvomit=",
 	"ATTACK":"(time needed for attacking)\nattack=",
-	"BROADCAST":"(time needed for moving)\nbroadcast=",
-	"DONATE":"(time needed for moving)\ndonate=",
-	"REPRODUCE":"(time needed for reproduce)\nreproduce="}};
+	"BROADCAST":"(time needed for broadcasting)\nbroadcast=",
+	"DONATE":"(time needed for donations)\ndonate=",
+	"REPRODUCE":"(time needed for reproduction)\nreproduce="}};
 
-
-STRING_USAGE_LOADER = """usage:
-	python3 wesen [options]
-	
-		print this help message
-			--help
-		specify config file to use:
-			--configfile=~/.wesen/conf
-		to start the config editor to write to a configfile:
-			--editconfig
-		to write the default config to a configfile (ignored if --editconfig):
-			--defaultconfig
-		to overwrite certain options from the config file:
-			--enablegui, --disablegui
-			--enablelogger, --disablelogger
-			--logfile=~/.wesen/log
-			--sources=Nightwatch,Dwarf
-
-		all other arguments are passed to OpenGL
-		
-		to get more help, look at
-			https://github.com/reims/wesen
-		""";
 STRING_USAGE_DESCRIPTION = 'Predator-prey simulation for learning python and AI. See also https://github.com/reims/wesen';
 STRING_USAGE_CONFIGFILE = 'specify the configfile to use, defaults to '+DEFAULT_GENERAL_CONFIGFILE;
 STRING_USAGE_EDITCONFIG = 'start the config editor';
