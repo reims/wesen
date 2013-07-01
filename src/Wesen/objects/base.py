@@ -1,3 +1,5 @@
+"""model and controller for single objects in the simulation"""
+
 from ..point import getRandomPosition;
 
 class WorldObject(object):
@@ -6,10 +8,10 @@ class WorldObject(object):
 	"""
 
 	def __init__(self, infoAllObject):
-		self.infoAllObject = infoAllObject;
-		self.infoWorld = self.infoAllObject["world"]
-		self.infoObject = self.infoAllObject["object"];
-		self.infoRange = self.infoAllObject["range"];
+		#self.infoAllObject = infoAllObject;
+		self.infoWorld = infoAllObject["world"];
+		self.infoObject = infoAllObject["object"];
+		self.infoRange = infoAllObject["range"];
 		self.objectType = self.infoObject["type"];
 		self.logger = self.infoWorld["logger"];
 		self.Debug = self.infoWorld["Debug"];
@@ -21,19 +23,21 @@ class WorldObject(object):
 		self.time = 0;
 		self.source = "";
 		self.id = id(self);
-		self.position = self.infoObject.get("position", getRandomPosition(self.infoWorld["length"]));
+		self.position = self.infoObject.get("position",
+						    getRandomPosition(self.infoWorld["length"]));
 
 	def __repr__(self):
-		return "<worldobject id=%s pos=%s energy=%s>" % (self.id, self.position, self.energy);
+		return ("<worldobject id=%s pos=%s energy=%s>" %
+			(self.id, self.position, self.energy));
 
-	def getRangeObjectWithCondition(self, objects, radius, condition):
+	def getRange(self, objects, radius, condition=lambda x : True):
 		"""returns a list with all objects in objectlist in radius,
 		   which match the condition"""
-		(x,y) = self.position;
-		return {i:o for (i,o) in objects.items()
-		# the following is a more efficient but equivalent to that:
+		(x, y) = self.position;
+		return {i:o for (i, o) in objects.items()
+		# the following is more efficient but equivalent to:
 		#	if ((abs(o.position[0] - x) <= radius) and
-		#	    (abs(o.position[1] - y) <= radius))];
+		#	    (abs(o.position[1] - y) <= radius) and condition(o));
 			if(condition(o)
 			   and (    (((o.position[0] < x) and (x-o.position[0] <= radius))
 				     or ((o.position[0] > x) and (o.position[0]-x <= radius))
@@ -41,11 +45,6 @@ class WorldObject(object):
 				and (((o.position[1] < y) and (y-o.position[1] <= radius))
 				     or ((o.position[1] > y) and (o.position[1]-y <= radius))
 				     or ((o.position[1] == y)))))};
-
-
-	def getRangeObject(self, objects, radius):
-		"""returns a list with all objects in objectlist in radius."""
-		return self.getRangeObjectWithCondition(objects, radius, lambda x : True);
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""

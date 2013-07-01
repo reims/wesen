@@ -6,7 +6,6 @@ class WesenSource(DefaultWesenSource):
 	def __init__(self, infoAllSource):
 		"""Do all initialization stuff."""
 		DefaultWesenSource.__init__(self, infoAllSource);
-		self.infoAllSource = infoAllSource;
 		self.minimumEnergyToEat = 0;
 		self.minimumEnergyToReproduce = 500;
 		self.minimumEnergyToFight = self.minimumEnergyToReproduce * 0.75;
@@ -19,6 +18,11 @@ class WesenSource(DefaultWesenSource):
 		return "<Nightwatch protects the city>";
 
 	def main(self):
+		"""reproduces as soon as an energy limit is reached,
+		if it is low on energy,
+		it looks for food,
+		otherwise for enemies.
+		If nothing is found, it scans the world."""
 		while(self.time() >= self.infoTime["reproduce"]):
 			helper.recoverAge(self);
 			if(self.energy() > self.minimumEnergyToReproduce):

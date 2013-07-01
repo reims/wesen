@@ -1,9 +1,7 @@
+"""defines an interface for AI code"""
+
 class DefaultWesenSource(object):
-	"""default sourcecode for a wesen,
-	newly created wesen should be created with
-	class WesenSource(DefaultWesenSource):
-	to ensure it gets a working interface.
-	"""
+	"""each AI code should subclass this class."""
 
 	def __init__(self, infoAllSource):
 		"""links a few variables to infoAllSource contents."""
@@ -19,10 +17,13 @@ class DefaultWesenSource(object):
 		self.source = self.infoSource["source"];
 
 	def getDescriptor(self):
+		"""currently unused, designed for debugging"""
 		return {};
 
 	def Receive(self, message):
+		"""message should be a dict"""
 		pass;
 
 	def main(self):
+		"""called every turn"""
 		pass;

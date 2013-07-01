@@ -1,3 +1,10 @@
+"""This is a place to collect helpful functions,
+which sometimes are more like methods,
+such that the AI main method
+contains more high-level strategy.
+
+Beware: this code is likely to move somewhere else."""
+
 from numpy.random import randint;
 
 def DrunkenSailor(self):
@@ -33,7 +40,9 @@ def AttackTarget(self):
 	return CatchTarget(self, AttackObject, self.infoTime["attack"]+1);
 
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
-	matchingObjects = [o for o in lookRange if o["type"] == objectType and objectCondition(self, o)];
+	matchingObjects = [o for o in lookRange
+			   if (o["type"] == objectType
+			       and objectCondition(self, o))];
 	if(matchingObjects):
 		if(self.target and
 		   self.targetType == objectType):
@@ -59,14 +68,16 @@ def acceptableFood(self, o):
 		return False;
 
 def foodFitness(a):
-        return a["energy"]
+	return a["energy"];
 
 def acceptableEnemy(self, o):
 	if(o["source"] != self.source):
 		if(o["energy"] <= (self.energy() + self.minimumEnergyToFight)):
 			return True;
 		else:
-			self.minimumEnergyToFight = int(((self.energy() + self.minimumEnergyToFight) + o["energy"]) / 2);
+			self.minimumEnergyToFight = (self.energy()
+						     + self.minimumEnergyToFight
+						     + o["energy"]) // 2;
 			return False;
 	else:
 		return False;

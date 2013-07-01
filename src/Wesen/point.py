@@ -1,3 +1,7 @@
+"""These are some helping functions,
+that come handy in writing an AI.
+In future, this code might move elsewhere."""
+
 from numpy.random import randint;
 from math import copysign;
 
@@ -7,13 +11,15 @@ def getRandomPosition(length):
 
 def getRandomPositionInRadius(position, radius, length):
 	"""x + random(-radius,+radius)"""
-	return [(length + pc + randint(-radius,radius)) % length for pc in position];
+	return [(length + pc + randint(-radius,radius)) % length
+		for pc in position];
 
 def signum(number):
 	return -1 if number < 0 else 1 if number > 0 else 0;
 
 def getShortestTranslation(a, b, length):
-	return [min(c,-1*copysign(length-c,c),key=abs) for c in [(bc-ac) % length for (ac,bc) in zip(a,b)]];
+	return [min(c,-1*copysign(length-c,c),key=abs)
+		for c in [(bc-ac) % length for (ac,bc) in zip(a,b)]];
 
 def getDistInMaxMetric(a, b, length):
 	return abs(max(getShortestTranslation(a,b,length), key=abs));
