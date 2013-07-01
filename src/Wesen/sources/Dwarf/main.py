@@ -11,9 +11,9 @@ class WesenSource(DefaultWesenSource):
 		DefaultWesenSource.__init__(self, infoAllSource);
 		self.infoAllSource = infoAllSource;
 		self.minimalTime = 20; #TODO should be something to prevent infinite loops!!
-		self.minimumEnergyToEat = 1;
-		self.minimalGardenAge = 15;
-		self.minimumEnergyToReproduce = 1600;
+		self.minimumEnergyToEat = 2;
+		self.minimalGardenAge = 50;
+		self.minimumEnergyToReproduce = 1500;
 		self.minimumEnergyToFight = 300;
 		self.target = None;
 		self.targetType = None;
@@ -25,9 +25,11 @@ class WesenSource(DefaultWesenSource):
 	def main(self):
 		# save age death and reproduce
 		if(self.energy() > self.minimumEnergyToReproduce):
-			self.Reproduce();
-			for i in range(6):
-				helper.ScannerMove(self, scanVector=[__class__.globalScanVector[1],__class__.globalScanVector[0]]);
+			if(self.Reproduce()):
+				for _ in range(10):
+					helper.ScannerMove(self,
+							   scanVector=[__class__.globalScanVector[1],
+								       -__class__.globalScanVector[0]]);
 		helper.recoverAge(self);
 		lookRange = self.closerLook(); # could be done in-loop...
 		# action loop
@@ -61,7 +63,7 @@ class WesenSource(DefaultWesenSource):
 							if(decision==0): #TODO move magic number to constants above
 								# seed out!
 								helper.seedOut(self);
-							elif(decision <= 5):
+							elif(decision <= 4):
 								# move away!
 								helper.ScannerMove(self, scanVector=__class__.globalScanVector);
 							else:

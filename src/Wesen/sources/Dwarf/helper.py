@@ -1,6 +1,9 @@
 from numpy.random import randint, uniform;
+from ...point import getDistInMaxMetric;
 
 #TODO try to extract a sensible helper.py and move some of this back to the main source...
+#TODO change most magic numbers to something computed from the game's time constraints
+#     like food growth, moving time, etc.
 
 def DrunkenSailor(self):
 	self.Move([randint(-1,1),randint(-1,1)]);
@@ -35,12 +38,16 @@ def AttackTarget(self):
 	return CatchTarget(self, AttackObject, self.infoTime["attack"]+1);
 
 def lookForTarget(self, lookRange, objectType, objectCondition, objectFitness):
+	#TODO now ignores objectFitness, uses positionFitness instead;
 	matchingObjects = [o for o in lookRange
 			   if (o["type"]==objectType and
 			       objectCondition(self, o))];
 	if(matchingObjects):
-		#matchingObjects.sort(key = objectFitness);
-		self.target = matchingObjects[randint(len(matchingObjects))];
+		matchingObjects.sort(key = lambda o : getDistInMaxMetric(o["position"],
+									 self.position(),
+									 self.infoAllSource["world"]["length"]));
+		#self.target = matchingObjects[randint(len(matchingObjects))];
+		self.target = matchingObjects[0];
 		self.targetType = objectType;
 		return True;
 	else:
