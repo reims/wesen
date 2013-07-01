@@ -14,20 +14,42 @@ import traceback;
 
 class Graph(GuiObject):
 
-	def __init__(self, gui, world, resolution=1000):
+	def __init__(self, gui, world, sourceList, colorList, resolution=1000):
 		GuiObject.__init__(self, gui);
 		self.world = world;
+		self.sourceList = sourceList;
+		self.colorList = colorList;
 		self.shadow = True;
 		self.maxValue = 1000; # used to compute y axis scaling
 		self.SetResolution(resolution);
 		self.printer = TextPrinter();
+		self._SetDefaultSensors();
+		self._AddObjectEnergySensors();
+
+	def _SetDefaultSensors(self):
+		"""currently: (global energy, food energy)"""
+		self.sensors = [{"f":SENSORFCT_FROMSTATS_ENERGY,
+				 "statskey":"global",
+				 "color":[0.5,0.5,0.5],"colorname":"grey",
+				 "name":"global energy"},
+				{"f":SENSORFCT_FROMSTATS_ENERGY,
+				 "statskey":"food",
+				 "color":[0.0,1.0,0.0],"colorname":"green",
+				 "name":"food energy"}];
+
+	def _AddObjectEnergySensors(self):
+		for (wesenSource,colorInfo) in zip(self.sourceList, self.colorList):
+			self.AddSensor({"f":SENSORFCT_FROMSTATS_ENERGY,
+					"color":colorInfo[1],
+					"colorname":colorInfo[0],
+					"statskey":wesenSource,
+					"name":wesenSource+" energy"});
 
 	def Reshape(self, x, y):
 		GuiObject.Reshape(self, x, y);
 		self.SetResolution(self.width / 2.0);
 
 	def SetResolution(self, resolution):
-		#print("Graph resolution:", resolution);
 		self.resolution = float(resolution);
 		self.histlength = int(self.resolution);
 
@@ -36,8 +58,11 @@ class Graph(GuiObject):
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
 	def AddSensor(self, newSensor):
-		""" sensor = {f=self.getFoodEnergy,color=[0.0,1.0,0.0],colorname="light green",name="food energy"}
-		where f has to be a function which takes a variable self and expects there to be self.world."""
+		"""newSensor = {f=lambda world : lambda statskey : int,
+				statskey=None,
+				color=[0.0,1.0,0.0],
+				colorname="green",
+				name="food energy"}"""
 		self.sensors.append(newSensor);
 		self.history = [SensorData(self.histlength) for sensor in self.sensors];
 
@@ -123,21 +148,3 @@ class SensorData(object):
 		finally:
 			glDisableClientState(GL_VERTEX_ARRAY);
 			self.vbo.unbind();
-
-class SensorSystem(object):
-
-	def __init__(self, gui, graph, world):
-		self.gui = gui;
-		self.world = world;
-		graph.SetSensors(self.getSensors());
-
-	def getSensors(self):
-		sensors = [{"f":lambda world : lambda x : world.getEnergy(),
-			    "statskey":None,
-			    "color":[0.5,0.5,0.5],"colorname":"grey",
-			    "name":"global energy"},
-			   {"f":SENSORFCT_FROMSTATS_ENERGY,
-			    "statskey":"food",
-			    "color":[0.0,1.0,0.0],"colorname":"green",
-			    "name":"food energy"}];
-		return sensors;

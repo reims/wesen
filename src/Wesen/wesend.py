@@ -67,13 +67,13 @@ class Wesend:
 
 	def mainLoop(self):
 		"""calls world.main() in gui-mode (returns world descriptor)"""
-		if(not (self.world.finished)):
-			self.world.main();
+		self.world.main();
 		return self.world.getDescriptor();
 
 	def main(self):
-		"""calls world.main() in gui-less mode (in a loop until world.finished)"""
-		while(not (self.world.finished)):
+		"""calls world.main() in gui-less mode,
+		until KeyboardInterrupt"""
+		while(True):
 			try:
 				self.world.main();
 			except KeyboardInterrupt:
@@ -82,7 +82,3 @@ class Wesend:
 			if((self.world.turns % 100) == 0):
 				print("turn",self.world.turns,"stats:");
 				pprint(self.world.stats, indent=3, depth=4, width=80);
-		if(self.world.winner):
-			print(("Congratulations, \"%s\" has won the game" % (self.world.winner)));
-		else:
-			print("Sorry, nobody has won the game");

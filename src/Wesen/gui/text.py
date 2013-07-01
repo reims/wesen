@@ -10,11 +10,9 @@ colorset = color3freak;
 
 class Text(GuiObject):
 
-	def __init__(self, gui, descriptor, world, infoWorld):
+	def __init__(self, gui, world):
 		GuiObject.__init__(self, gui);
-		self.SetDescriptor(descriptor);
 		self.world = world;
-		self.infoWorld = infoWorld;
 		self.printer = TextPrinter();
 		self.givenText = None;
 
@@ -43,15 +41,7 @@ class Text(GuiObject):
 		statString = "%-20s | %9s | %9s | %14s |";
 		p.PrintLn(statString % 
 			  ("","energy","count","energy/object"));
-		energy = self.world.energy;
-		count = len(self.world.objects);
-		if(count == 0):
-			perObject = 0;
-		else:
-			perObject = energy // count;
-		p.PrintLn(statString % 
-			  ("all", energy, count, perObject));
-		for source in list(self.world.stats.keys()):
+		for source in self.world.stats.keys():
 			energy = self.world.stats[source]["energy"];
 			count = self.world.stats[source]["count"];
 			if(count == 0):
@@ -60,18 +50,12 @@ class Text(GuiObject):
 				perWesen = energy // count;
 			p.PrintLn(statString % 
 				  (source, energy, count, perWesen));
-		if(self.world.winner):
-			p.PrintLn("\nWinner: %s" % (self.world.winner));
-		else:
-			p.PrintLn();
 
 	def DrawEngineStats(self, p):
 		if(self.gui.pause):
 			status = "paused";
 		else:
 			status = "running";
-		if(self.descriptor[0]["finished"]):
-			status += " and finished";
 		p.PrintLn("%10s\n" % (status));
 		p.PrintLn("\t%3.1f fps,  %8d turns" % (self.gui.fps, self.world.turns));
 		#p.PrintLn("\t%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));

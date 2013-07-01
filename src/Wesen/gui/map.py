@@ -5,9 +5,12 @@ from .object import GuiObject;
 class Map(GuiObject):
 	"""used to draw a map of all objects"""
 
-	def __init__(self, gui, infoWorld, colorDescriptor):
+	def __init__(self, gui, infoWorld, sourceList, colorList):
 		GuiObject.__init__(self, gui);
 		self.infoWorld = infoWorld;
+		colorDescriptor = {};
+		for (wesenSource,colorInfo) in zip(sourceList, colorList):
+			colorDescriptor[wesenSource] = colorInfo[1];
 		self.colorDescriptor = colorDescriptor;
 
 	def DrawMap(self):
@@ -17,7 +20,7 @@ class Map(GuiObject):
                 blockSize = (1.0 - 2*frame) / length;
                 scaleFactor = blockSize;
                 glScale(scaleFactor, scaleFactor, 1.0);
-                for desc in self.descriptor[1]:
+                for desc in self.descriptor:
                         color = self.colorDescriptor[desc["source"]] if desc["type"] == "wesen" else [0.0, 1.0, 0.0];
                         glColor4f(color[0], color[1], color[2], 1.0);
                         glRectf(desc["position"][0], desc["position"][1], desc["position"][0]+1.0, desc["position"][1]-1.0);

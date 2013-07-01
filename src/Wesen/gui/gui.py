@@ -2,8 +2,6 @@ from ..definition import NAMES, VERSIONS;
 from .map import Map;
 from .text import Text;
 from .graph import Graph;
-from .graph import SensorSystem;
-from .graph import SENSORFCT_FROMSTATS_ENERGY;
 from OpenGL.GL import *;
 from OpenGL.GLU import GLubyte;
 from OpenGL.GLUT import *;
@@ -58,11 +56,10 @@ class GUI:
 		self.descriptor = [{},[]];
 		self.bgcolor = [0.0, 0.0, 0.05];
 		self.fgcolor = [0.0, 0.1, 0.2];
-		self.graph = Graph(self, self.world);
-		SensorSystem(self, self.graph, self.world);
-		self._SetColorDescriptor();
-		self.map = Map(self, self.infoWorld, self.colorDescriptor);
-		self.text = Text(self, self.descriptor, self.world, self.infoWorld);
+		self.colorList = colorList * int(1+len(self.infoWesen["sources"])/len(colorList));
+		self.graph = Graph(self, self.world, self.infoWesen["sources"], self.colorList);
+		self.map = Map(self, self.infoWorld, self.infoWesen["sources"], self.colorList);
+		self.text = Text(self, self.world);
 		self.text.SetAspect(2,1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];
 		if(not self.infoGui["map"]): self.map.ChangeVisibility();
@@ -247,8 +244,6 @@ class GUI:
 		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
 		if(self.map.visible):
 			self.map.SetDescriptor(self.descriptor);
-		if(self.descriptor[0]["finished"]):
-			self.map.active = False;
 		self.map.Draw();
 
 	def DrawGraph(self):
@@ -283,7 +278,6 @@ class GUI:
 		if(self.movieMode):
 			self.takeScreenshot().save(("m%08d.png" % (self.turns)));
 
-
 	def CalcFps(self):
 		"""calculates GUI.fps and GUI.tps (call every frame)"""
 		self.frame += 1;
@@ -304,9 +298,8 @@ class GUI:
 				self.descriptor = self.GameLoop();
 				self.turns += 1;
 				self.CalcFps();
-				if(not self.descriptor[0]["finished"]):
-					self.graph.Step();
-					self.step = False;
+				self.graph.Step();
+				self.step = False;
 			else:
 				if(self.wait == int(1.0/self.speed)):
 					self.wait = 1;
@@ -315,8 +308,7 @@ class GUI:
 						self.descriptor = self.GameLoop();
 						self.turns += 1;
 						self.CalcFps();
-						if(not self.descriptor[0]["finished"]):
-							self.graph.Step();
+						self.graph.Step();
 						dropped += 1;
 				else:
 					self.wait += 1;
@@ -331,17 +323,3 @@ class GUI:
 			sys.exit(1);
 			return 0;
 		return 1
-
-	def _SetColorDescriptor(self):
-		colorDescriptor = {};
-		sourceList = self.infoWesen["sources"];
-		sourceList.sort();
-		enoughColors = colorList * int(1+len(sourceList)/len(colorList));
-		for (wesenSource,colorInfo) in zip(sourceList, enoughColors):
-			colorDescriptor[wesenSource] = colorInfo[1];
-			self.graph.AddSensor({"f":SENSORFCT_FROMSTATS_ENERGY,
-					      "color":colorInfo[1],
-					      "colorname":colorInfo[0],
-					      "statskey":wesenSource,
-					      "name":wesenSource+" energy"});
-		self.colorDescriptor = colorDescriptor;
