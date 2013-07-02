@@ -19,8 +19,6 @@ from os.path import exists, join, expanduser;
 import importlib;
 import sys;
 
-_CONFIG = b"_config";
-
 def Loader():
 	"""Calling a Loader object will start a Wesen simulation,
 	if the found configuration allows it.
@@ -42,13 +40,14 @@ def Loader():
 	if(parsedArgs.invoke_printconfig):
 		configEd.printConfig();
 	config = configEd.getConfig();
-	if(_CONFIG in parsedArgs):
-		for section, sectionDict in parsedArgs[_CONFIG].items():
+	if("_config" in parsedArgs):
+		for section, sectionDict in parsedArgs._config.items():
 			config[section].update(sectionDict);
 	if(len(extraArgs)>0):
 		print("handing over the following command-line arguments to OpenGL: ",
 		      " ".join(extraArgs));
 	checkSourcesAvailability(config['wesen']['sources']);
+	print(config);
 	Wesend(config);
 
 def _enableCustomSourcesFolder():
@@ -83,7 +82,7 @@ def _parseArgs():
 			    dest='invoke_printconfig',
 			    default=False,
 			    help=STRING_USAGE_PRINTCONFIG);
-	_addOverwriteBool(parser, 'gui', 'gui', 'enablegui');
+	_addOverwriteBool(parser, 'gui', 'gui', 'enable');
 	_addOverwriteBool(parser, 'logger', 'general', 'enablelog');
 	parser.add_argument('-l', '--logfile', section='general',
 			    dest='logfile',
@@ -123,7 +122,7 @@ def checkSourcesAvailability(sourcesList):
 
 class _OverwriteConfigAction(Action):
 	"""An ArgumentParser Action that stores in a dict
-	called _CONFIG in the namespace
+	called _config in the namespace
 	which config option should be overwritten by command-line."""
 	def __init__(self, option_strings, dest, section, nargs=1):
 		helpMessage = (STRING_USAGE_OVERWRITE % (section, dest));
@@ -145,11 +144,11 @@ class _OverwriteConfigAction(Action):
 			      self.section, "]",
 			      self.dest, "=",
 			      values[0]);
-			if(not _CONFIG in namespace):
-				namespace[_CONFIG] = {};
-			if(not self.section in namespace[_CONFIG].keys()):
-				namespace[_CONFIG][self.section] = {};
-			namespace[_CONFIG][self.section][self.dest] = values[0];
+			if(not "_config" in namespace):
+				namespace._config = {};
+			if(not self.section in namespace._config.keys()):
+				namespace._config[self.section] = {};
+			namespace._config[self.section][self.dest] = values[0];
 		
 
 class _OverwriteConfigActionBool(_OverwriteConfigAction):

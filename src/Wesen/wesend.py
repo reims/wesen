@@ -9,14 +9,18 @@ from pprint import pprint;
 import logging;
 import importlib;
 
-class Wesend:
+class Wesend(object):
 	"""Wesend(config, extraArgs="")
 		Runs one Wesen game directly on initialization, with given config data.
+		This module intruments a World object
+		and, if enabled in the config, a Gui object.
 	"""
 
 	def __init__(self, config, extraArgs=""):
-		"""config should be a dictionary (see loader.py), extraArgs are all passed to OpenGL"""
-		print("%s %s %s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"], NAMES["WESEND"], VERSIONS["WESEND"]));
+		"""config should be a dictionary (see loader.py),
+		extraArgs are all passed to OpenGL"""
+		#TODO change the NAMES,VERSIONS mechanism to something simpler.
+		print("%s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"]));
 		self.infoGeneral = config["general"];
 		self.infoGui = config["gui"];
 		self.infoWorld = config["world"];
@@ -25,7 +29,7 @@ class Wesend:
 		self.infoRange = config["range"];
 		self.infoTime = config["time"];
 		self.uselog = self.infoGeneral["enablelog"];
-		self.initLogger();
+		self.initLogger(); # sets self.logger
 		self.infoWorld["logger"] = self.logger;
 		self.infoWesen["sources"] = self.infoWesen["sources"].split(",");
 		self.infoWorld["Debug"] = self.Debug;
@@ -42,16 +46,18 @@ class Wesend:
 
 	def initGUI(self, extraArgs):
 		"""handing over all control to the gui"""
-		GUI = importlib.import_module(".gui."+self.infoGui["source"], __package__).GUI;
+		GUI = importlib.import_module(".gui."
+					      + self.infoGui["source"],
+					      __package__).GUI;
 		infoGui = {"config":self.infoGeneral, "wesend":self,
 			   "world":self.infoWorld, "wesen":self.infoWesen,
 			   "food":self.infoFood, "gui":self.infoGui};
-		self.gui = GUI(infoGui, self.mainLoop, self.world, extraArgs);
+		GUI(infoGui, self.mainLoop, self.world, extraArgs);
 
 	def __del__(self):
 		"""stops logging."""
 		logging.shutdown();
-		object.__del__();
+		super(Wesend, self).__del__();
 
 	def initLogger(self):
 		"""initializes the logging system."""
@@ -63,7 +69,9 @@ class Wesend:
 		self.logger.setLevel(logging.INFO);
 
 	def Debug(self, message):
-		print("debug message: ",message);
+		"""currently just prints the message."""
+		#TODO change or remove the Debug mechanism.
+		print("debug message: ", message);
 
 	def mainLoop(self):
 		"""calls world.main() in gui-mode (returns world descriptor)"""
@@ -80,5 +88,5 @@ class Wesend:
 				print(" got keyboard interrupt, stopping now.");
 				break;
 			if((self.world.turns % 100) == 0):
-				print("turn",self.world.turns,"stats:");
+				print("turn", self.world.turns, "stats:");
 				pprint(self.world.stats, indent=3, depth=4, width=80);
