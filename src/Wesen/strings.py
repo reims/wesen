@@ -64,7 +64,7 @@ STRING_USAGE_CONFIGFILE = 'specify the configfile to use, defaults to '+DEFAULT_
 STRING_USAGE_EDITCONFIG = 'start the config editor';
 STRING_USAGE_DEFAULTCONFIG = 'write the default config';
 STRING_USAGE_PRINTCONFIG = 'print the config (without changes from command-line options)';
-STRING_USAGE_OVERWRITE = 'overwrite corresponding setting in the config file';
+STRING_USAGE_OVERWRITE = 'overwrite config [%s] %s';
 STRING_USAGE_EPILOG = 'all other arguments are passed to OpenGL';
 
 STRING_LOGGER = {
