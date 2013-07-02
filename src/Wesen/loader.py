@@ -4,12 +4,12 @@ It then runs a Wesend instance."""
 
 from .definition import NAMES, VERSIONS;
 from .defaults import DEFAULT_GENERAL_CONFIGFILE;
-from .strings import STRING_USAGE_PRINTCONFIG,\
-		     STRING_USAGE_DEFAULTCONFIG,\
-		     STRING_USAGE_EDITCONFIG,\
-		     STRING_USAGE_CONFIGFILE,\
-		     STRING_USAGE_EPILOG,\
-		     STRING_USAGE_DESCRIPTION,\
+from .strings import STRING_USAGE_PRINTCONFIG, \
+		     STRING_USAGE_DEFAULTCONFIG, \
+		     STRING_USAGE_EDITCONFIG, \
+		     STRING_USAGE_CONFIGFILE, \
+		     STRING_USAGE_EPILOG, \
+		     STRING_USAGE_DESCRIPTION, \
 		     STRING_USAGE_OVERWRITE;
 from .configed import ConfigEd;
 from .wesend import Wesend;
@@ -18,6 +18,8 @@ from os import mkdir;
 from os.path import exists, join, expanduser;
 import importlib;
 import sys;
+
+_CONFIG = b"_config";
 
 def Loader():
 	"""Calling a Loader object will start a Wesen simulation,
@@ -40,8 +42,8 @@ def Loader():
 	if(parsedArgs.invoke_printconfig):
 		configEd.printConfig();
 	config = configEd.getConfig();
-	if("_config" in parsedArgs):
-		for section, sectionDict in parsedArgs._config.items():
+	if(_CONFIG in parsedArgs):
+		for section, sectionDict in parsedArgs[_CONFIG].items():
 			config[section].update(sectionDict);
 	if(len(extraArgs)>0):
 		print("handing over the following command-line arguments to OpenGL: ",
@@ -92,6 +94,8 @@ def _parseArgs():
 	return parser.parse_known_args();
 
 def _addOverwriteBool(parser, argName, section, key):
+	"""for convenience, adds a mutually exclusive group
+	with --enable and --disable argName, to modify [section] key"""
 	group = parser.add_mutually_exclusive_group();
 	group.add_argument('--enable'+argName, section=section,
 			   dest=key,
@@ -118,15 +122,17 @@ def checkSourcesAvailability(sourcesList):
 			sys.exit();
 
 class _OverwriteConfigAction(Action):
-	"""An ArgumentParser Action that stores in a _config dict
+	"""An ArgumentParser Action that stores in a dict
+	called _CONFIG in the namespace
 	which config option should be overwritten by command-line."""
 	def __init__(self, option_strings, dest, section, nargs=1):
-		helpMessage = (STRING_USAGE_OVERWRITE % (section,dest));
-		super(_OverwriteConfigAction, self).__init__(option_strings=option_strings,
-							     dest=dest, nargs=nargs,
-							     const=False, default=None,
-							     required=False,
-							     help=helpMessage);
+		helpMessage = (STRING_USAGE_OVERWRITE % (section, dest));
+		super(_OverwriteConfigAction, self)\
+		    .__init__(option_strings=option_strings,
+			      dest=dest, nargs=nargs,
+			      const=False, default=None,
+			      required=False,
+			      help=helpMessage);
 		self.section = section;
 
 	def __call__(self, parser, namespace, values, option_string=None):
@@ -139,19 +145,20 @@ class _OverwriteConfigAction(Action):
 			      self.section, "]",
 			      self.dest, "=",
 			      values[0]);
-			if(not "_config" in namespace):
-				namespace._config = {};
-			if(not self.section in namespace._config.keys()):
-				namespace._config[self.section] = {};
-			namespace._config[self.section][self.dest] = values[0];
+			if(not _CONFIG in namespace):
+				namespace[_CONFIG] = {};
+			if(not self.section in namespace[_CONFIG].keys()):
+				namespace[_CONFIG][self.section] = {};
+			namespace[_CONFIG][self.section][self.dest] = values[0];
 		
 
 class _OverwriteConfigActionBool(_OverwriteConfigAction):
 	"""For convenience, storing True/False as specified"""
 	def __init__(self, option_strings, dest, section, storeValue=None):
-		super(_OverwriteConfigActionBool, self).__init__(option_strings=option_strings,
-								 dest=dest, section=section,
-								 nargs=0);
+		super(_OverwriteConfigActionBool, self)\
+		    .__init__(option_strings=option_strings,
+			      dest=dest, section=section,
+			      nargs=0);
 		self.storeValue = storeValue;
 
 	def __call__(self, parser, namespace, values, option_string=None):
