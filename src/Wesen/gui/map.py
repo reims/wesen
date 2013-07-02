@@ -9,8 +9,8 @@ class Map(GuiObject):
 		GuiObject.__init__(self, gui);
 		self.infoWorld = infoWorld;
 		colorDescriptor = {};
-		for (wesenSource,colorInfo) in zip(sourceList, colorList):
-			colorDescriptor[wesenSource] = colorInfo[1];
+		for (wesenSource,color) in zip(sourceList, colorList):
+			colorDescriptor[wesenSource] = color;
 		self.colorDescriptor = colorDescriptor;
 
 	def DrawMap(self):
@@ -22,7 +22,7 @@ class Map(GuiObject):
                 glScale(scaleFactor, scaleFactor, 1.0);
                 for desc in self.descriptor:
                         color = self.colorDescriptor[desc["source"]] if desc["type"] == "wesen" else [0.0, 1.0, 0.0];
-                        glColor4f(color[0], color[1], color[2], 1.0);
+                        glColor3f(*color);
                         glRectf(desc["position"][0], desc["position"][1], desc["position"][0]+1.0, desc["position"][1]-1.0);
 
 	def Draw(self):

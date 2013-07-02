@@ -1,132 +1,112 @@
+"""This module contains all methods related to displaying text in the gui"""
+
 from OpenGL.GL import *;
 from OpenGL.GLUT import glutBitmapCharacter, GLUT_BITMAP_8_BY_13;
 from .object import GuiObject;
 
-color3white = [1,1,1];
-color3grey = [0.9,0.9,0.9];
-color3hacker = [0.2,0.9,0.2];
-color3freak = [0.9,0.95,0.9];
-colorset = color3freak;
-
 class Text(GuiObject):
+	"""A Text object displays world.stats"""
 
 	def __init__(self, gui, world):
 		GuiObject.__init__(self, gui);
 		self.world = world;
 		self.printer = TextPrinter();
-		self.givenText = None;
+		self.givenText = None; #TODO replace this mechanism by something else
 
-	def Step(self):
-		self.printer.ResetRaster();
-
-	def Print(self, line):
+	def Print(self, line): #TODO replace this mechanism by something else
 		self.givenText = line;
 
 	def Reshape(self, x, y):
 		GuiObject.Reshape(self, x, y);
-		self.printer.Reshape(x,y);
+		self.printer.Reshape(x, y);
 
-	def DrawFieldStats(self, p):
+	def DrawFieldStats(self): #TODO unused? maybe remove.
+		p = self.printer;
 		fieldInformation = self.gui.fieldInformation;
 		if(not fieldInformation):
 			return;
-		p.PrintLn("Field %s information:" % (fieldInformation[0]["position"]));
+		p.Print("Field %s information:\n" % (fieldInformation[0]["position"]));
 		for element in fieldInformation:
 			if(element["type"] == "food"):
-				p.PrintLn("Food(%6d): %4d years old" % (element["energy"], element["age"]));
+				p.Print("Food(%6d): %4d years old\n" %
+					(element["energy"],
+					 element["age"]));
 			elif(element["type"] == "wesen"):
-				p.PrintLines("%s(%6d): %4d years old - %s" % (element["source"], element["energy"], element["age"], element["sourcedescriptor"]));
+				p.Print("%s(%6d): %4d years old - %s\n" %
+					(element["source"],
+					 element["energy"],
+					 element["age"],
+					 element["sourcedescriptor"]));
 
-	def DrawGameStats(self, p):
-		statString = "%-20s | %9s | %9s | %14s |";
-		p.PrintLn(statString % 
+	def DrawGameStats(self):
+		"""Print world.stats"""
+		p = self.printer;
+		statString = "%-20s | %9s | %9s | %14s |\n";
+		p.Print(statString % 
 			  ("","energy","count","energy/object"));
-		for source in self.world.stats.keys():
+		for source in sorted(self.world.stats.keys()):
 			energy = self.world.stats[source]["energy"];
 			count = self.world.stats[source]["count"];
 			if(count == 0):
 				perWesen = 0;
 			else:
 				perWesen = energy // count;
-			p.PrintLn(statString % 
-				  (source, energy, count, perWesen));
+			p.Print(statString % 
+				(source, energy, count, perWesen));
 
-	def DrawEngineStats(self, p):
-		if(self.gui.pause):
-			status = "paused";
-		else:
-			status = "running";
-		p.PrintLn("%10s\n" % (status));
-		p.PrintLn("\t%3.1f fps,  %8d turns" % (self.gui.fps, self.world.turns));
-		#p.PrintLn("\t%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));
-		#p.PrintLn("\t\t\t\t| manual slowdown: %3d percent" % (int(100.0/self.gui.speed)));
-		#p.PrintLn("\t%.1f tps | %5d turns | %10d sec | overall tps: %s" % (self.gui.tps, self.world.turns, int(glutGet(GLUT_ELAPSED_TIME)/1000), int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
-
-	def DrawGivenText(self, p):
-		if(self.givenText is not None):
-			p.PrintLn(self.givenText);
-
-	def DrawText(self):
-		glPushMatrix();
-		glTranslatef(0.02, 0.85, 0.0);
+	def DrawEngineStats(self):
+		"""Print some information about the game engine,
+		such as fps (frames per second), number of turns, etc."""
 		p = self.printer;
-		p.PrintLn();
-		self.DrawEngineStats(p);
-		p.PrintLn();
-		self.DrawGameStats(p);
-		p.PrintLn();
-		self.DrawFieldStats(p);
-		p.PrintLn();
-		self.DrawGivenText(p);
-		glPopMatrix();
+		status = "paused" if self.gui.pause else "running";
+		p.Print(status);
+		p.Print("\n\n\n%3.1f fps,  %8d turns\n\n" % (self.gui.fps, self.world.turns));
+		#p.PrintLn("%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));
+		#p.PrintLn("| manual slowdown: %3d percent" % (int(100.0/self.gui.speed)));
+		#p.PrintLn("%.1f tps | %5d turns | %10d sec | overall tps: %s" % (self.gui.tps, self.world.turns, int(glutGet(GLUT_ELAPSED_TIME)/1000), int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
+
+	def DrawGivenText(self): #TODO replace this mechanism by something else
+		if(self.givenText is not None):
+			self.printer.PrintLn(self.givenText);
 
 	def Draw(self):
 		GuiObject.Draw(self);
 		if(self.visible):
-			self.DrawText();
+			self.printer.ResetRaster();
+			self.DrawEngineStats();
+			self.DrawGameStats();
+			self.DrawFieldStats();
+			self.DrawGivenText();
 
 class TextPrinter(object):
+	"""A printer that uses OpenGL to draw strings.
+	Use ResetRaster() and then Print(text)."""
 
 	def __init__(self):
+		self.y = 0.03;
 		self.ResetRaster();
-		self.tabSize = 4; # in blanks
-		self.color = colorset;
-		self.SetColor();
-		self.SetColumn();
-		self.x = 1.0;
-		self.y = 0.03;
-
-	def Reshape(self, x, y):
-		self.x = int(x / 8.0);
-		self.y = 0.03;
 
 	def ResetRaster(self):
-		self.rasterPos = 0.1;
+		"""Call each frame before any Print()"""
+		self.rasterPos = self.y;
+		self.Print("\n");
 
-	def SetColumn(self):
-		glRasterPos(0,self.rasterPos);
-
-	def SetColor(self):
-		glColor3f(self.color[0], self.color[1], self.color[2]);
+	def Reshape(self, x, y):
+		self.y = 30 / y;
 
 	def PrintLn(self, text=""):
+		"""PrintLn() is equivalent to Print(" \n")"""
 		self.Print(" "+text+"\n");
 
-	def PrintLines(self, text=""):
-		while(len(text) >= self.x):
-			self.Print(text[:self.x]+"\n");
-			text = text[self.x:];
-		self.PrintLn(text);
-
-	def PrintBreak(self):
-		self.rasterPos -= self.y;
-		self.SetColumn();
-
 	def Print(self, text):
+		"""Print(String text) prints text to the screen"""
+		glPushMatrix();
+		glTranslatef(0.02, 0.96, 0.0);
 		for character in text:
 			if(character == "\n"):
-				self.PrintBreak();
-			elif(character == "\t"):
-				self.Print(" "*self.tabSize);
+				self.rasterPos -= self.y;
+				glRasterPos(0, self.rasterPos);
 			else:
-				glutBitmapCharacter(GLUT_BITMAP_8_BY_13, ord(character));
+				glutBitmapCharacter(GLUT_BITMAP_8_BY_13,
+						    ord(character));
+		glPopMatrix();

@@ -11,15 +11,16 @@ import traceback;
 #TODO this should be a config option.
 OpenGL.ERROR_CHECKING = False; # performance-relevant
 
-cl_default =   [("red",[1.0, 0.0, 0.0]), ("blue",[0.0, 0.0, 1.0]),
-		("violet",[1.0, 0.0, 1.0]), ("brown",[1.0, 1.0, 0.0]),
-		("cyan",[0.0, 1.0, 1.0]), ("light red",[0.5, 0.0, 0.0]),
-		("light blue",[0.0, 0.0, 0.5]), ("light violet",[0.5, 0.0, 0.5]),
-		("light brown",[0.5, 0.5, 0.0]), ("light cyan",[0.0, 0.5, 0.5])];
-cl_freak =     [("lilablue",[0.4, 0.2, 0.6]), ("redlila",[0.6, 0.2, 0.4]),
-		("red",[0.8, 0.2, 0.2]), ("blue",[0.2, 0.2, 0.8])];
+cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0],
+		[1.0, 0.0, 1.0], [1.0, 1.0, 0.0],
+		[0.0, 1.0, 1.0], [0.5, 0.0, 0.0],
+		[0.0, 0.0, 0.5], [0.5, 0.0, 0.5],
+		[0.5, 0.5, 0.0], [0.0, 0.5, 0.5]];
+cl_freak =     [[0.4, 0.2, 0.6], [0.6, 0.2, 0.4],
+		[0.8, 0.2, 0.2], [0.2, 0.2, 0.8],
+		[0.7, 0.3, 0.1], [0.1, 0.3, 0.7]];
 
-colorList = cl_default;
+colorList = cl_freak;
 
 #glutArgvDebugging = "--indirect --sync --gldebug";
 
@@ -85,13 +86,7 @@ class GUI:
 		glutKeyboardFunc(self.HandleKeys);
 		glutSpecialFunc(self.HandleKeys);
 		glutMouseFunc(self.HandleMouse);
-		#NOTE: the following lines would make sense for fancier graphics:
-		#glEnable(GL_ALPHA_TEST);
-		#glAlphaFunc(GL_GREATER, 0);
-		#glEnable(GL_DEPTH_TEST);
-		#glEnable(GL_BLEND);
-		#glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glClearColor(self.bgcolor[0], self.bgcolor[1], self.bgcolor[2], 0.0);
+		glClearColor(*(self.bgcolor+[0.0]));
 
 	def Exit(self):
 		glFinish();
@@ -105,7 +100,7 @@ class GUI:
 		self.wait = 1;
 		self.speed += amount;
 		if(self.speed <= 0):
-			self.speed = 0.0;
+			self.speed = 0.01;
 		if(self.speed > 1):
 			self.speed = 1.0;
 
