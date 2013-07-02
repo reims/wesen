@@ -47,7 +47,6 @@ def Loader():
 		print("handing over the following command-line arguments to OpenGL: ",
 		      " ".join(extraArgs));
 	checkSourcesAvailability(config['wesen']['sources']);
-	print(config);
 	Wesend(config);
 
 def _enableCustomSourcesFolder():
