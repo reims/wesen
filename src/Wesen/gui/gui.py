@@ -8,6 +8,9 @@ from OpenGL.GLUT import *;
 import sys;
 import traceback;
 
+#TODO this should be a config option.
+OpenGL.ERROR_CHECKING = False; # performance-relevant
+
 cl_default =   [("red",[1.0, 0.0, 0.0]), ("blue",[0.0, 0.0, 1.0]),
 		("violet",[1.0, 0.0, 1.0]), ("brown",[1.0, 1.0, 0.0]),
 		("cyan",[0.0, 1.0, 1.0]), ("light red",[0.5, 0.0, 0.0]),
@@ -151,11 +154,11 @@ class GUI:
 
 	def initMenu(self):
 		self.menu = glutCreateMenu(self.HandleAction);
-		glutAddMenuEntry(b"change map visibility",0);
-		glutAddMenuEntry(b"change graph visibility",25);
-		glutAddMenuEntry(b"change text visibility",50);
-		glutAddMenuEntry(b"display key bindings",55);
-		glutAddMenuEntry(b"pause   (space)",100);
+		glutAddMenuEntry(b"change map visibility", 0);
+		glutAddMenuEntry(b"change graph visibility", 25);
+		glutAddMenuEntry(b"change text visibility", 50);
+		glutAddMenuEntry(b"display key bindings", 55);
+		glutAddMenuEntry(b"pause   (space)", 100);
 		glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	def HandleAction(self, action):
@@ -209,12 +212,12 @@ class GUI:
 	def HandleMouse(self, button, state, x, y):
 		"""handles all mouse events as clicks, dragdrops, etc."""
 		if(state == 0):
-			self.mouseFirst = [x,y];
+			self.mouseFirst = [x, y];
 			posX, posY = self._win2wesenCoord(x, y);
 			if(posX != self.posX or posY != self.posY):
 				self.posX, self.posY = (posX, posY);
 		if(state == 1):
-			self.mouseLast = [x,y];
+			self.mouseLast = [x, y];
 			image = self.takeScreenshot();
 			image.save('screenshot.png');
 
@@ -222,15 +225,15 @@ class GUI:
 		"""takes a screenshot of the map region"""
 		(width,height) = self.windowSize;
 		buffer = ( GLubyte * (3*width*height) )(0);
-		glReadPixels(0,0,width,height,
-			     GL_RGB,GL_UNSIGNED_BYTE, buffer);
+		glReadPixels(0, 0, width, height,
+			     GL_RGB, GL_UNSIGNED_BYTE, buffer);
 		from PIL import Image;
 		image = Image.fromstring(mode="RGB",
 					size=(width, height),
 					data=buffer);
 		image = image.transpose(Image.FLIP_TOP_BOTTOM);
-		image = image.crop((0,0,width//2,height//2));
-		image = image.resize((800,800),Image.ANTIALIAS);
+		image = image.crop((0, 0, width//2, height//2));
+		image = image.resize((800, 800), Image.ANTIALIAS);
 		return image;
 
 	def Reshape(self, x, y):
@@ -238,7 +241,7 @@ class GUI:
 		glViewport(0, 0, x, y);
 		self.windowSize = [x, y];
 		for object in self.objects:
-			object.Reshape(x,y);
+			object.Reshape(x, y);
 
 	def DrawMap(self):
 		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
@@ -315,9 +318,10 @@ class GUI:
 		if(self.init):
 			self.Pause();
 			self.init = False;
+		#TODO do the try/catch only in debugging-mode
 		try:
 			self.RenderScene();
-		except Exception as e:
+		except GLError as e:
 			print("exception:", e);
 			print(traceback.format_exc());
 			sys.exit(1);

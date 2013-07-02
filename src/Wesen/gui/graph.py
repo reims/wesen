@@ -142,7 +142,7 @@ class SensorData(object):
 				glDrawArrays(GL_LINE_STRIP,
 					     0,
 					     (self.previous_index +1));
-		except Exception as e:
+		except GLError as e:
 			print("exception:", e);
 			print(traceback.format_exc());
 		finally:
