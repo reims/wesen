@@ -1,3 +1,8 @@
+"""Contains 2 classes:
+Graph and _SensorData.
+Graph plots several curves,
+_SensorData plots a single curve."""
+
 from numpy import array as narray;
 from OpenGL.GL import GL_VERTEX_ARRAY, GL_LINE_STRIP, \
     GL_STREAM_DRAW, GL_ARRAY_BUFFER, GL_FLOAT, \
@@ -12,22 +17,25 @@ from .text import TextPrinter;
 SENSORFCT_FROMSTATS_ENERGY = lambda world : lambda x : world.stats[x]["energy"];
 
 class Graph(GuiObject):
+	"""A Graph object plots curves for sensors.
+	See AddSensor().
+	Currently, there are some default sensors."""
 
-	def __init__(self, gui, world, sourceList, colorList, resolution=1000):
+	def __init__(self, gui, world, sourceList, colorList):
 		GuiObject.__init__(self, gui);
 		self.world = world;
-		self.sourceList = sourceList;
-		self.colorList = colorList;
 		self.shadow = True;
-		self.maxValue = 1000; # used to compute y axis scaling
-		self.SetResolution(resolution);
+		self.maxValue = 20000; # used to compute y axis scaling
 		self.sensors = [];
+		self.history = [];
+		# both sensors and history are set in AddSensor.
 		self.printer = TextPrinter();
+		self.resolution = 400;
 		self._AddDefaultSensors();
-		self._AddObjectEnergySensors();
+		self._AddObjectEnergySensors(sourceList, colorList);
 
 	def _AddDefaultSensors(self):
-		"""currently: (global energy, food energy)"""
+		"""adds sensors: (global energy, food energy)"""
 		self.AddSensor({"f":SENSORFCT_FROMSTATS_ENERGY,
 				 "statskey":"global",
 				 "color":[0.5,0.5,0.5],
@@ -37,8 +45,9 @@ class Graph(GuiObject):
 				 "color":[0.0,1.0,0.0],
 				 "name":"food energy"});
 
-	def _AddObjectEnergySensors(self):
-		for (wesenSource, color) in zip(self.sourceList, self.colorList):
+	def _AddObjectEnergySensors(self, sourceList, colorList):
+		"""adds a sensor for each source's energy."""
+		for (wesenSource, color) in zip(sourceList, colorList):
 			self.AddSensor({"f":SENSORFCT_FROMSTATS_ENERGY,
 					"color":color,
 					"statskey":wesenSource,
@@ -47,25 +56,19 @@ class Graph(GuiObject):
 	def Reshape(self, x, y):
 		GuiObject.Reshape(self, x, y);
 		self.printer.Reshape(x, y);
-		self.SetResolution(self.width / 2.0);
-
-	def SetResolution(self, resolution):
-		self.resolution = float(resolution);
-		self.histlength = int(self.resolution);
-
-	def SetSensors(self, sensors):
-		self.sensors = sensors;
-		self.history = [SensorData(self.histlength) for _ in self.sensors];
 
 	def AddSensor(self, newSensor):
-		"""newSensor = {f=lambda world : lambda statskey : int,
+		"""AddSensor(newSensor) should be called only
+		during initialization, as it erases history.
+		newSensor = {f=lambda world : lambda statskey : int,
 				statskey=None,
 				color=[0.0,1.0,0.0],
-				name="food energy"}"""
+				name="some value"}"""
 		self.sensors.append(newSensor);
-		self.history = [SensorData(self.histlength) for _ in self.sensors];
+		self.history = [_SensorData(self.resolution) for _ in self.sensors];
 
 	def Step(self):
+		"""adds current world.stats as data point to all sensors."""
 		for sensorInfo, data in zip(self.sensors, self.history):
 			data.AddValue(sensorInfo["f"]\
 					      (self.world)\
@@ -74,14 +77,21 @@ class Graph(GuiObject):
 				    + [self.maxValue]);
 
 	def DrawPlot(self):
+		"""Plots the curves for all sensors in self.sensors"""
 		glPushMatrix();
-		glScalef(1.0/self.resolution, 0.8/self.maxValue, 1.0);
+		#TODO the following is "moving away from frame",
+		# and should use the framedata (plastic, etc.)
+		# from the GuiObject base class.
+		# Probably this stuff should be done in GuiObject!
+		glTranslatef(0.005, 0.01, 0.0);
+		glScalef(0.99/self.resolution, 0.7/self.maxValue, 1.0);
 		for sensorInfo, data in zip(self.sensors, self.history):
 			glColor3f(*(sensorInfo["color"]));
 			data.Draw();
 		glPopMatrix();
 
 	def DrawHint(self):
+		"""Prints a caption for the plot"""
 		p = self.printer;
 		p.ResetRaster();
 		for sensorInfo in self.sensors:
@@ -97,7 +107,12 @@ class Graph(GuiObject):
 			self.DrawHint();
 			self.DrawPlot();
 
-class SensorData(object):
+class _SensorData(object):
+	"""A _SensorData object holds the data
+	for a single sensor, including previous data.
+	It can draw itself via Draw()
+	and you can update it via AddValue()"""
+
 	def __init__(self, size):
 		self.size = size;
 		initialBuffer = [];
@@ -114,15 +129,19 @@ class SensorData(object):
 		self.maxValue = 0;
 
 	def AddValue(self, value):
+		"""supply one more numerical value"""
 		if(self.previous_index == self.size - 1
 		   and not(self.buffer_full)):
 			self.buffer_full = True;
 		self.previous_index = (self.previous_index +1) % self.size;
 		self.buf[self.previous_index*2+1] = value;
-		self.vbo[self.previous_index*2+1:self.previous_index*2+2] = narray([value],'f');
+		self.vbo[self.previous_index*2+1
+			 :self.previous_index*2+2] = narray([value],'f');
 		self.maxValue = max(self.maxValue, value);
 
 	def Draw(self):
+		"""draw a curve of all previous data,
+		up to a certain point (self.resolution)"""
 		self.vbo.bind();
 		self.vbo.copy_data();
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -137,13 +156,11 @@ class SensorData(object):
 				glPopMatrix();
 			glPushMatrix();
 			glTranslatef(self.size - self.previous_index - 1, 0.0, 0.0);
-			glDrawArrays(GL_LINE_STRIP,
-				     0,
+			glDrawArrays(GL_LINE_STRIP, 0,
 				     (self.previous_index +1));
 			glPopMatrix();
 		else:
-			glDrawArrays(GL_LINE_STRIP,
-				     0,
+			glDrawArrays(GL_LINE_STRIP, 0,
 				     (self.previous_index +1));
 		glDisableClientState(GL_VERTEX_ARRAY);
 		self.vbo.unbind();

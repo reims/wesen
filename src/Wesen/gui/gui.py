@@ -2,13 +2,26 @@ from ..definition import NAMES, VERSIONS;
 from .map import Map;
 from .text import Text;
 from .graph import Graph;
-from OpenGL.GL import *;
+from OpenGL.GL import glClearColor, glLineWidth, \
+    glEnable, glViewport, glReadPixels, glTranslatef, \
+    glScale, glLoadIdentity, glClear, glMatrixMode, \
+    glPushMatrix, glPopMatrix, glFinish, GLError, \
+    GL_RGB, GL_UNSIGNED_BYTE, GL_LINE_SMOOTH, \
+    GL_COLOR_BUFFER_BIT, GL_MODELVIEW;
 from OpenGL.GLU import GLubyte;
-from OpenGL.GLUT import *;
+from OpenGL.GLUT import glutMainLoop, glutInitDisplayMode, \
+    glutInitWindowSize, glutInitWindowPosition, glutInit, \
+    glutCreateWindow, glutDisplayFunc, glutIdleFunc, \
+    glutPostRedisplay, glutReshapeFunc, glutKeyboardFunc, \
+    glutSpecialFunc, glutMouseFunc, glutCreateMenu, \
+    glutAddMenuEntry, glutAttachMenu, glutSwapBuffers, glutGet, \
+    GLUT_ELAPSED_TIME, GLUT_DOUBLE, GLUT_RGB, GLUT_RIGHT_BUTTON;
+from PIL import Image;
 import sys;
 import traceback;
 
-#TODO this should be a config option.
+#TODO Error checking should be a config option.
+import OpenGL;
 OpenGL.ERROR_CHECKING = False; # performance-relevant
 
 cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0],
@@ -27,7 +40,10 @@ colorList = cl_freak;
 class GUI:
 
 	def __init__(self, infoGUI, GameLoop, world, extraArgs):
-		"""infoGUI should be a dict, GameLoop a method, world a World object and extraArgs is a string which is passed to OpenGL"""
+		"""infoGUI should be a dict,
+		GameLoop a method,
+		world a World object and
+		extraArgs is a string which is passed to OpenGL"""
 		self.GameLoop = GameLoop;
 		self.config = infoGUI["config"];
 		self.wesend = infoGUI["wesend"];
@@ -57,20 +73,27 @@ class GUI:
 		self.inity = int(initxy[initxy.index(",")+1:]);
 		self.fieldInformation = [];
 		self.step = False;
-		self.descriptor = [{},[]];
+		self.descriptor = [{}, []];
 		self.bgcolor = [0.0, 0.0, 0.05];
 		self.fgcolor = [0.0, 0.1, 0.2];
-		self.colorList = colorList * int(1+len(self.infoWesen["sources"])/len(colorList));
-		self.graph = Graph(self, self.world, self.infoWesen["sources"], self.colorList);
-		self.map = Map(self, self.infoWorld, self.infoWesen["sources"], self.colorList);
+		self.colorList = colorList *\
+		    int(1+len(self.infoWesen["sources"])/len(colorList));
+		self.graph = Graph(self, self.world,
+				   self.infoWesen["sources"],
+				   self.colorList);
+		self.map = Map(self, self.infoWorld,
+			       self.infoWesen["sources"],
+			       self.colorList);
 		self.text = Text(self, self.world);
-		self.text.SetAspect(2,1); # aspect ratio x:y is 2:1
+		self.text.SetAspect(2, 1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];
+		#TODO remove the capability to change visibility in GuiObject!
 		if(not self.infoGui["map"]): self.map.ChangeVisibility();
 		if(not self.infoGui["text"]): self.text.ChangeVisibility();
 		if(not self.infoGui["graph"]): self.graph.ChangeVisibility();
 		self.initGL(extraArgs);
 		self.initMenu();
+		self.initKeyBindings();
 		glutMainLoop();
 
 	def initGL(self, extraArgs):
@@ -87,12 +110,16 @@ class GUI:
 		glutSpecialFunc(self.HandleKeys);
 		glutMouseFunc(self.HandleMouse);
 		glClearColor(*(self.bgcolor+[0.0]));
+		glEnable(GL_LINE_SMOOTH);
+		glLineWidth(1.3);
 
 	def Exit(self):
+		"""Stop the simulation and quit"""
 		glFinish();
 		sys.exit();
 
 	def Pause(self):
+		"""Pause/Unpause the simulation"""
 		self.pause = not self.pause;
 
 	def SetSpeed(self, amount):
@@ -164,33 +191,54 @@ class GUI:
 		elif(action == 50):
 			self.text.ChangeVisibility();
 		elif(action == 55):
-			self.text.Print("key bindings:\nx|q|esc: exit\n p|space: pause\n+-:speed\nik:frame drop rate\nm:movie mode\nd:debug info\narrows: modify food, left/right: del/add, up/down: inc/dec."); #TODO put that string somewhere else
+			line = "".join(["'%s' %s\n" % (key, self.keyExplanation[key])
+					for key in sorted(self.keyExplanation.keys())]);
+			self.text.Print(line);
 		elif(action == 100):
 			self.Pause();
 		else:
 			raise "unknown action from popup-menu (%s)" % (action);
 		return 0;
 
+	def initKeyBindings(self):
+		specialKeyRepresentation = \
+		    lambda key : ("<ESC>"    if key == 27 else
+				  "<RETURN>" if key == 13 else
+				  "<LEFT>"   if key == 100 else
+				  "<UP>"     if key == 101 else
+				  "<RIGHT>"  if key == 102 else
+				  "<DOWN>"   if key == 103 else
+				  str(key));
+		keyRepresentation = \
+		    lambda key : (key.decode('ascii')
+				  if type(key) is bytes
+				  else specialKeyRepresentation(key));
+		keybindings = {b"x": self.Exit, b"q":self.Exit, 27:self.Exit,
+			       b"p": self.Pause, b" ":self.Pause,
+			       b"-": self.SpeedDown,
+			       b"+": self.SpeedUp,
+			       b"i": self.DropDown,
+			       b"k": self.DropUp,
+			       b"m": self.ToggleMovie,
+			       #b"d": lambda : print(self.infoWorld),
+			       13  : self.Step, #TODO seems to be broken
+			       100 : lambda : self.ModifyFood("delete"),
+			       101 : lambda : self.ModifyFood("increase"),
+			       102 : lambda : self.ModifyFood("add"),
+			       103 : lambda : self.ModifyFood("decrease"),
+			       };
+		self.keyExplanation = {keyRepresentation(key):str(keybindings[key].__doc__)
+				       for key in keybindings};
+		self.keybindings = keybindings;
+
 	def HandleKeys(self, key, x, y):
 		"""handle both usual (character) and special (ordinal) keys"""
 		#print("key detection: key="+str(key)+" at (x,y)="+str(x)+","+str(y));
-		#TODO document this functionality somewhere (e.g. in the menu)
-		if(key == b"x" or key == b"q"): self.Exit();
-		elif(key == b"p" or key == b" "): self.Pause();
-		elif(key == b"-"): self.SpeedDown();
-		elif(key == b"+"): self.SpeedUp();
-		elif(key == b"i"): self.DropDown();
-		elif(key == b"k"): self.DropUp();
-		elif(key == b"m"): self.ToggleMovie();
-		elif(key == b"d"): print(self.infoWorld);
-		elif(key == 13): self.Step(); # <enter> #TODO seems to be broken
-		elif(key == 27): self.Exit(); # <esc>
-		elif(key == 100): self.ModifyFood("delete");   # <leftarrow>
-		elif(key == 101): self.ModifyFood("increase"); # <uparrow>
-		elif(key == 102): self.ModifyFood("add");      # <rightarrow>
-		elif(key == 103): self.ModifyFood("decrease"); # <downarrow>
+		if(key in self.keybindings):
+			self.keybindings[key]();
 
 	def ToggleMovie(self):
+		"""Toggle movie mode on/off. In movie mode, each frame is saved to disk."""
 		self.movieMode = not self.movieMode;
 
 	def _win2glCoord(self, x, y):
@@ -218,16 +266,18 @@ class GUI:
 
 	def takeScreenshot(self):
 		"""takes a screenshot of the map region"""
-		(width,height) = self.windowSize;
+		(width, height) = self.windowSize;
 		buffer = ( GLubyte * (3*width*height) )(0);
 		glReadPixels(0, 0, width, height,
 			     GL_RGB, GL_UNSIGNED_BYTE, buffer);
-		from PIL import Image;
 		image = Image.fromstring(mode="RGB",
 					size=(width, height),
 					data=buffer);
+		# use image coordinates, not OpenGL coordinates:
 		image = image.transpose(Image.FLIP_TOP_BOTTOM);
+		# take only the Map part of the screenshot:
 		image = image.crop((0, 0, width//2, height//2));
+		# resize to a uniform format (important for movie mode):
 		image = image.resize((800, 800), Image.ANTIALIAS);
 		return image;
 
@@ -235,8 +285,8 @@ class GUI:
 		"""warning: symmetrical x/y reshape not implemented yet"""
 		glViewport(0, 0, x, y);
 		self.windowSize = [x, y];
-		for object in self.objects:
-			object.Reshape(x, y);
+		for o in self.objects:
+			o.Reshape(x, y);
 
 	def DrawMap(self):
 		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
@@ -255,14 +305,11 @@ class GUI:
 		self.text.Step();
 		self.text.Draw();
 
-	def ResetView(self):
-		glLoadIdentity();
-
 	def RenderScene(self):
 		"""draws the actual descriptor"""
 		glClear(GL_COLOR_BUFFER_BIT);
 		glMatrixMode(GL_MODELVIEW);
-		self.ResetView();
+		glLoadIdentity();
 		glPushMatrix();
 		self.DrawMap();
 		glPopMatrix();
@@ -291,6 +338,9 @@ class GUI:
 
 	def Draw(self):
 		"""actualizes the descriptor by calling his GameLoop and renders it"""
+		#TODO figure out how self.step is supposed to work
+		#TODO kill the framedropping mechanism
+		#     (OpenGL code is very fast now, we don't need that)
 		if((not self.pause) or self.step):
 			if(self.step):
 				self.descriptor = self.GameLoop();

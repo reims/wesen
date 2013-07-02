@@ -1,6 +1,7 @@
 """This module contains all methods related to displaying text in the gui"""
 
-from OpenGL.GL import *;
+from OpenGL.GL import glPushMatrix, glPopMatrix, \
+    glTranslatef, glRasterPos;
 from OpenGL.GLUT import glutBitmapCharacter, GLUT_BITMAP_8_BY_13;
 from .object import GuiObject;
 
@@ -60,14 +61,24 @@ class Text(GuiObject):
 		p = self.printer;
 		status = "paused" if self.gui.pause else "running";
 		p.Print(status);
-		p.Print("\n\n\n%3.1f fps,  %8d turns\n\n" % (self.gui.fps, self.world.turns));
-		#p.PrintLn("%3d fps | drawing every %s frames" % (self.gui.fps, self.gui.dropFrames+1));
-		#p.PrintLn("| manual slowdown: %3d percent" % (int(100.0/self.gui.speed)));
-		#p.PrintLn("%.1f tps | %5d turns | %10d sec | overall tps: %s" % (self.gui.tps, self.world.turns, int(glutGet(GLUT_ELAPSED_TIME)/1000), int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
+		p.Print("\n\n\n%3.1f fps,  %8d turns\n\n" %
+			(self.gui.fps, self.world.turns));
+		#TODO clean up the following mess:
+		#TODO find out whether/how framedrop,speed and tps work.
+		#     (as it seems that tps and fps is only working at full speed)
+		#p.PrintLn("%3d fps | drawing every %s frames" %
+		#	  (self.gui.fps, self.gui.dropFrames+1));
+		#p.PrintLn("| manual slowdown: %3d percent" %
+		#	  (int(100.0/self.gui.speed)));
+		#p.PrintLn("%.1f tps | %5d turns | %10d sec | overall tps: %s" %
+		#	  (self.gui.tps, self.world.turns,
+		#	   int(glutGet(GLUT_ELAPSED_TIME)/1000),
+		#	   int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
 
 	def DrawGivenText(self): #TODO replace this mechanism by something else
 		if(self.givenText is not None):
-			self.printer.PrintLn(self.givenText);
+			self.printer.Print("\n");
+			self.printer.Print(self.givenText);
 
 	def Draw(self):
 		GuiObject.Draw(self);
