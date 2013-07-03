@@ -87,6 +87,6 @@ class Wesend(object):
 			except KeyboardInterrupt:
 				print(" got keyboard interrupt, stopping now.");
 				break;
-			if((self.world.turns % 100) == 0):
+			if((self.world.turns % 1000) == 0):
 				print("turn", self.world.turns, "stats:");
 				pprint(self.world.stats, indent=3, depth=4, width=80);
