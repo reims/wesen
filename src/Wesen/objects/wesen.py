@@ -316,6 +316,7 @@ class Wesen(WorldObject):
 		WorldObject.main(self);
 		self.energy -= 1;
 		self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
+		#TODO decide whether we want to use generators more extensively.
 		self.maxRange = self.getRange(self.worldObjects,
 					      (self.infoRange["look"]
 					       + 1 + (self.time // self.infoTime["move"])));

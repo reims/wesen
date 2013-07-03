@@ -30,21 +30,27 @@ class WorldObject(object):
 		return ("<worldobject id=%s pos=%s energy=%s>" %
 			(self.id, self.position, self.energy));
 
-	def getRange(self, objects, radius, condition=lambda x : True):
-		"""returns a list with all objects in objectlist in radius,
-		   which match the condition"""
+	def getRangeIterator(self, objectIterator, radius, condition=None):
+		"""returns an iterator of pairs (id, object)
+		with all objects from objectIterator in radius
+		that match the condition"""
 		(x, y) = self.position;
-		return {i:o for (i, o) in objects.items()
+		return ((i, o) for (i, o) in objectIterator
 		# the following is more efficient but equivalent to:
 		#	if ((abs(o.position[0] - x) <= radius) and
 		#	    (abs(o.position[1] - y) <= radius) and condition(o));
-			if(condition(o)
+			if((condition is None or condition(o))
 			   and (    (((o.position[0] < x) and (x-o.position[0] <= radius))
 				     or ((o.position[0] > x) and (o.position[0]-x <= radius))
 				     or ((o.position[0] == x)))
 				and (((o.position[1] < y) and (y-o.position[1] <= radius))
 				     or ((o.position[1] > y) and (o.position[1]-y <= radius))
-				     or ((o.position[1] == y)))))};
+				     or ((o.position[1] == y))))));
+
+	def getRange(self, objects, radius, condition=None):
+		"""returns a dict of id:object with all objects in objectlist
+		in radius, which match the condition"""
+		return dict(self.getRangeIterator(objects.items(), radius, condition));
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""

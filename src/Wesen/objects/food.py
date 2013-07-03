@@ -61,10 +61,16 @@ class Food(WorldObject):
 			#TODO the GUI should be more careful and this raise an Error.
 			print("warning: food energy lower than zero detected");
 
-	def getNearbyFoodCount(self):
-		return len(self.getRange(self.worldObjects,
-					 self.rangeseed,
-					 condition = lambda o : o.source == "food"));
+	def hasTooMuchFoodNearby(self):
+		"""return True as soon as there is a lot of food nearby."""
+		count = 0;
+		for (i, o) in self.getRangeIterator(self.worldObjects.items(),
+						    self.rangeseed,
+						    condition = lambda o : o.source == "food"):
+			count += 1;
+			if(count == 10): #TODO make this number configurable!
+				return True;
+		return False;
 
 	def main(self):
 		"""randomly grow or seed, based on growrate and seedrate.
@@ -72,6 +78,6 @@ class Food(WorldObject):
 		WorldObject.main(self); # handles age and low-energy death
 		if(self.age > 10): #TODO numbers should be a config option
 			if(uniform(0,1) < self.seedrate):
-				if(self.getNearbyFoodCount() <= 10):
+				if(not self.hasTooMuchFoodNearby()):
 					self.Seed();
 		self.Grow();
