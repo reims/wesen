@@ -28,6 +28,11 @@ class World(object):
 
 	def __init__(self, infoAllWorld):
 		"""infoAllWorld is a dictionary of dictionaries"""
+		#TODO the infoSomething mechanism is very intransparent.
+		#     either document it very well or change it
+		#     to something more evident...
+		#     maybe at least hand over the config as one dictproxy,
+		#     without any changes...
 		self.infoAllWorld = infoAllWorld;
 		self.Debug = self.infoAllWorld["world"]["Debug"];
 		#self.logger = self.infoAllWorld["world"]["logger"];
@@ -101,7 +106,7 @@ class World(object):
 				stats["food"]["energy"] += o.energy;
 			o.main();
 		stats["global"] = {"count":len(self.objects),
-				   "energy":sum([objectType["energy"]
-						 for objectType
-						 in stats.values()])};
+				   "energy":sum(objectType["energy"]
+						for objectType
+						in stats.values())};
 		self.stats = stats;

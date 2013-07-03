@@ -73,8 +73,9 @@ class Graph(GuiObject):
 			data.AddValue(sensorInfo["f"]\
 					      (self.world)\
 					      (sensorInfo["statskey"]));
-		self.maxValue = max([data.maxValue for data in self.history]
-				    + [self.maxValue]);
+		self.maxValue = max(self.maxValue,
+				    max(data.maxValue
+					for data in self.history));
 
 	def DrawPlot(self):
 		"""Plots the curves for all sensors in self.sensors"""
