@@ -14,6 +14,7 @@ from .strings import STRING_ERROR_FILEEXISTS, \
 from configparser import SafeConfigParser;
 import os.path;
 
+#TODO consider moving the CONFIG_OPTIONS to another file (defaults?):
 CONFIG_OPTIONS = [["general", [("enablelog", bool), ("logfile", str)]],
 		  ["gui", [("enable", bool), ("source", str),
 			   ("size", int), ("pos", str),
