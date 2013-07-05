@@ -19,7 +19,7 @@ from os.path import exists, join, expanduser;
 import importlib;
 import sys;
 
-def Loader():
+def Loader(run_immediately=True):
 	"""Calling a Loader object will start a Wesen simulation,
 	if the found configuration allows it.
 
@@ -29,7 +29,12 @@ def Loader():
 	(using fallback config from defaults.py)
 	and modifying it according to command-line parameters.
 	Then it checks whether the provided sources exist,
-	and runs a Wesen simulation with the given config."""
+	and runs a Wesen simulation with the given config.
+
+	If you want to manipulate the Wesen simulation
+	before the start, pass run_immediately=False,
+	then Loader returns a Wesend instance,
+	which you can start by start()"""
 	_enableCustomSourcesFolder();
 	(parsedArgs, extraArgs) = _parseArgs();
 	configEd = ConfigEd(parsedArgs.configfile);
@@ -47,7 +52,10 @@ def Loader():
 		print("handing over the following command-line arguments to OpenGL: ",
 		      " ".join(extraArgs));
 	checkSourcesAvailability(config['wesen']['sources']);
-	Wesend(config);
+	wesend = Wesend(config);
+	if(run_immediately):
+		wesend.start()
+	return wesend;
 
 def _enableCustomSourcesFolder():
 	"""Appends to the path a folder where the user can store custom AI code."""
@@ -61,6 +69,8 @@ def _enableCustomSourcesFolder():
 
 def _parseArgs():
 	"""returns the result of an ArgumentParser.parse_known_args call"""
+	#HINT: If you consider adding an option,
+	#      please consider adding a config file option first.
 	parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
 				epilog=STRING_USAGE_EPILOG);
 	parser.add_argument('--version', action='version',
@@ -139,10 +149,10 @@ class _OverwriteConfigAction(Action):
 					 self.section, "]",
 					 self.dest, "=", ",".join(values));
 		else:
-			print("Overwritten config option: [",
-			      self.section, "]",
-			      self.dest, "=",
-			      values[0]);
+			#print("Overwritten config option: [",
+			#      self.section, "]",
+			#      self.dest, "=",
+			#      values[0]);
 			if(not "_config" in namespace):
 				namespace._config = {};
 			if(not self.section in namespace._config.keys()):
