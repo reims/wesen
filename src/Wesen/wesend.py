@@ -11,7 +11,7 @@ import importlib;
 
 class Wesend(object):
 	"""Wesend(config, extraArgs="")
-		Runs one Wesen game directly on initialization, with given config data.
+		Runs one Wesen game by start(), with given config data.
 		This module intruments a World object
 		and, if enabled in the config, a Gui object.
 	"""
@@ -20,7 +20,6 @@ class Wesend(object):
 		"""config should be a dictionary (see loader.py),
 		extraArgs are all passed to OpenGL"""
 		#TODO change the NAMES,VERSIONS mechanism to something simpler.
-		print("%s %s" % (NAMES["PROJECT"], VERSIONS["PROJECT"]));
 		self.infoGeneral = config["general"];
 		self.infoGui = config["gui"];
 		self.infoWorld = config["world"];
@@ -39,6 +38,8 @@ class Wesend(object):
 				"range" : self.infoRange,
 				"time"  : self.infoTime};
 		self.world = World(infoAllWorld);
+
+	def start(self, extraArgs=""):
 		if(self.infoGui["enable"]):
 			self.initGUI(extraArgs);
 		else:
