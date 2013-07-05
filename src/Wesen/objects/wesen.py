@@ -79,10 +79,11 @@ class Wesen(WorldObject):
 		objecttype and python id.
 		"""
 		if(self.UseTime("look")):
-			return [{"position":o.position, "type":o.objectType, "id":o.id}
-				for o in self.getRange(self.maxRange,
-						       self.infoRange["look"],
-						       condition = lambda x : self != x).values()];
+			return [{"position":o.position, "type":o.objectType, "id":oid}
+				for oid, o in self.getRangeIterator(\
+					self.maxRange.items(),
+					self.infoRange["look"],
+					condition = lambda x : self != x)];
 		else:
 			return [];
 
@@ -92,12 +93,13 @@ class Wesen(WorldObject):
 		"""
 		if(self.UseTime("closerlook")):
 			return [{"position":o.position, "type":o.objectType,
-				 "id":o.id, "energy":o.energy,
+				 "id":oid, "energy":o.energy,
 				 "age":o.age, "time":o.time,
 				 "source":o.source}
-				for o in self.getRange(self.maxRange,
-						       self.infoRange["closer_look"],
-						       condition = lambda x : self != x).values()];
+				for oid, o in self.getRangeIterator(\
+					self.maxRange.items(),
+					self.infoRange["closer_look"],
+					condition = lambda x : self != x)];
 		else:
 			return [];
 
@@ -156,10 +158,11 @@ class Wesen(WorldObject):
 	def Talk(self, wesenid, message):
 		"""calls Receive(message) in the wesen specified by wesenid when in range."""
 		if(self.UseTime("talk")):
-			for o in self.getRange(self.maxRange, 
-					       self.infoRange["look"],
-					       condition = lambda x : ((o.id == wesenid) and
-								       (o.objectType == "wesen"))):
+			for oid, o in self.getRangeIterator(\
+				self.maxRange.items(), 
+				self.infoRange["look"],
+				condition = lambda x : ((oid == wesenid) and
+							(o.objectType == "wesen"))):
 				o.wesenSource.Receive(message);
 				return True;
 		return False;
@@ -263,10 +266,11 @@ class Wesen(WorldObject):
 	def Broadcast(self, message):
 		"""calls Talk(message) with all wesen in range"""
 		if(self.UseTime("broadcast")):
-			for o in self.getRange(self.maxRange,
-					       self.infoRange["talk"],
-					       condition = lambda x : (self != x and
-								       x.objectType == "wesen")):
+			for oid, o in self.getRangeIterator(\
+				self.maxRange.items(),
+				self.infoRange["talk"],
+				condition = lambda x : (self != x and
+							x.objectType == "wesen")):
 				o.Receive(message);
 			return True;
 		return False;
@@ -316,8 +320,9 @@ class Wesen(WorldObject):
 		WorldObject.main(self);
 		self.energy -= 1;
 		self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
-		#TODO decide whether we want to use generators more extensively.
-		self.maxRange = self.getRange(self.worldObjects,
-					      (self.infoRange["look"]
-					       + 1 + (self.time // self.infoTime["move"])));
+		self.maxRange = dict(self.getRangeIterator(\
+				self.worldObjects.items(),
+				(self.infoRange["look"]
+				 + 1 + (self.time // self.infoTime["move"])),
+				condition = lambda x : True));
 		self.wesenSource.main();
