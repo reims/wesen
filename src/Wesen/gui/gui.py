@@ -59,13 +59,10 @@ class GUI:
 		self.init = True;
 		self.frame = 0;
 		self.lasttime = 0;
-		self.lastturns = 0;
 		self.turns = 0;
 		self.fps = 0;
-		self.tps = 0;
 		self.speed = 1.0;
 		self.wait = 1;
-		self.dropFrames = 0;
 		self.movieMode = False;
 		self.posX, self.posY = (0, 0);
 		initxy = self.infoGui["pos"];
@@ -130,16 +127,6 @@ class GUI:
 			self.speed = 0.01;
 		if(self.speed > 1):
 			self.speed = 1.0;
-
-	def DropDown(self):
-		"""decrease framedrops by 1"""
-		self.dropFrames -= 1;
-		if(self.dropFrames < 0):
-			self.dropFrames = 0;
-
-	def DropUp(self):
-		"""increase framedrops by 1"""
-		self.dropFrames += 1;
 
 	def SpeedDown(self):
 		"""decrease Speed by 0.05"""
@@ -217,8 +204,6 @@ class GUI:
 			       b"p": self.Pause, b" ":self.Pause,
 			       b"-": self.SpeedDown,
 			       b"+": self.SpeedUp,
-			       b"i": self.DropDown,
-			       b"k": self.DropUp,
 			       b"m": self.ToggleMovie,
 			       #b"d": lambda : print(self.infoWorld),
 			       13  : self.Step, #TODO seems to be broken
@@ -324,23 +309,18 @@ class GUI:
 			self.takeScreenshot().save(("m%08d.png" % (self.turns)));
 
 	def CalcFps(self):
-		"""calculates GUI.fps and GUI.tps (call every frame)"""
+		"""calculates GUI.fps (call every frame)"""
 		self.frame += 1;
 		self.actualtime = glutGet(GLUT_ELAPSED_TIME);
 		timenow = self.actualtime - self.lasttime;
-		turnsnow = self.turns - self.lastturns;
 		if(timenow > 1000):
 			self.fps = self.frame*1000.0/timenow;
 			self.lasttime = self.actualtime;
-			self.lastturns = self.turns;
-			self.tps = turnsnow*1000.0/timenow;
 			self.frame = 0;
 
 	def Draw(self):
 		"""actualizes the descriptor by calling his GameLoop and renders it"""
 		#TODO figure out how self.step is supposed to work
-		#TODO kill the framedropping mechanism
-		#     (OpenGL code is very fast now, we don't need that)
 		if((not self.pause) or self.step):
 			if(self.step):
 				self.descriptor = self.GameLoop();
@@ -351,13 +331,10 @@ class GUI:
 			else:
 				if(self.wait == int(1.0/self.speed)):
 					self.wait = 1;
-					dropped = 0;
-					while(dropped <= self.dropFrames):
-						self.descriptor = self.GameLoop();
-						self.turns += 1;
-						self.CalcFps();
-						self.graph.Step();
-						dropped += 1;
+					self.descriptor = self.GameLoop();
+					self.turns += 1;
+					self.CalcFps();
+					self.graph.Step();
 				else:
 					self.wait += 1;
 		if(self.init):

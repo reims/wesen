@@ -21,24 +21,6 @@ class Text(GuiObject):
 		GuiObject.Reshape(self, x, y);
 		self.printer.Reshape(x, y);
 
-	def DrawFieldStats(self): #TODO unused? maybe remove.
-		p = self.printer;
-		fieldInformation = self.gui.fieldInformation;
-		if(not fieldInformation):
-			return;
-		p.Print("Field %s information:\n" % (fieldInformation[0]["position"]));
-		for element in fieldInformation:
-			if(element["type"] == "food"):
-				p.Print("Food(%6d): %4d years old\n" %
-					(element["energy"],
-					 element["age"]));
-			elif(element["type"] == "wesen"):
-				p.Print("%s(%6d): %4d years old - %s\n" %
-					(element["source"],
-					 element["energy"],
-					 element["age"],
-					 element["sourcedescriptor"]));
-
 	def DrawGameStats(self):
 		"""Print world.stats"""
 		p = self.printer;
@@ -59,21 +41,11 @@ class Text(GuiObject):
 		"""Print some information about the game engine,
 		such as fps (frames per second), number of turns, etc."""
 		p = self.printer;
-		status = "paused" if self.gui.pause else "running";
-		p.Print(status);
+		p.Print("paused" if self.gui.pause else "running");
 		p.Print("\n\n\n%3.1f fps,  %8d turns\n\n" %
 			(self.gui.fps, self.world.turns));
-		#TODO clean up the following mess:
-		#TODO find out whether/how framedrop,speed and tps work.
-		#     (as it seems that tps and fps is only working at full speed)
-		#p.PrintLn("%3d fps | drawing every %s frames" %
-		#	  (self.gui.fps, self.gui.dropFrames+1));
-		#p.PrintLn("| manual slowdown: %3d percent" %
+		#p.Print("manual slowdown: %3d percent" %
 		#	  (int(100.0/self.gui.speed)));
-		#p.PrintLn("%.1f tps | %5d turns | %10d sec | overall tps: %s" %
-		#	  (self.gui.tps, self.world.turns,
-		#	   int(glutGet(GLUT_ELAPSED_TIME)/1000),
-		#	   int(self.world.turns/(glutGet(GLUT_ELAPSED_TIME)/1000)));
 
 	def DrawGivenText(self): #TODO replace this mechanism by something else
 		if(self.givenText is not None):
@@ -86,7 +58,6 @@ class Text(GuiObject):
 			self.printer.ResetRaster();
 			self.DrawEngineStats();
 			self.DrawGameStats();
-			self.DrawFieldStats();
 			self.DrawGivenText();
 
 class TextPrinter(object):
