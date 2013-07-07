@@ -6,7 +6,7 @@ See also:
  defaults.py for defaults used here."""
 
  # The wildcards are actually useful here.
-from .defaults import *;
+from .defaults import CONFIG_OPTIONS, CONFIG_DEFAULTS;
 from .strings import STRING_ERROR_FILEEXISTS, \
     STRING_MESSAGE_WROTE, \
     STRING_ERROR_NOTWROTE, \
@@ -15,25 +15,7 @@ from configparser import SafeConfigParser;
 import os.path;
 
 #TODO consider moving the CONFIG_OPTIONS to another file (defaults?):
-CONFIG_OPTIONS = [["general", [("enablelog", bool), ("logfile", str)]],
-		  ["gui", [("enable", bool), ("source", str),
-			   ("size", int), ("pos", str),
-			   ("map", bool), ("graph", bool),
-			   ("text", bool)]],
-		  ["world", [("length", int)]],
-		  ["wesen", [("sources", str), ("count", int),
-			     ("energy", int), ("maxage", int)]],
-		  ["food", [("count", int), ("energy", int),
-			    ("maxamount", int), ("seedrate", float),
-			    ("growrate", float), ("maxage", int)]],
-		  ["range", [("look", int), ("closer_look", int),
-			     ("talk", int), ("seed", int)]],
-		  ["time", [("init", int), ("max", int),
-			    ("look", int), ("closerlook", int),
-			    ("move", int), ("eat", int),
-			    ("talk", int), ("vomit", int),
-			    ("broadcast", int), ("attack", int),
-			    ("donate", int), ("reproduce", int)]]];
+
 
 class ConfigEd(object):
 	"""ConfigEd(filename) creates a full powered config editor for wesen"""
@@ -131,8 +113,9 @@ class ConfigEd(object):
 							 explanationString)));
 
 	def getDefaultValue(self, section, key):
-		#TODO this should be done with a dict, not eval (see STRING_CONFIGED)
-		return eval("DEFAULT_%s_%s" % (section.upper(), key.upper()));
+		#TODO/done this should be done with a dict, not eval (see STRING_CONFIGED)
+		return CONFIG_DEFAULTS[section][key];
+		#return eval("DEFAULT_%s_%s" % (section.upper(), key.upper()));
 
 	def def_input(self, default, msg):
 		"""derived from raw_input,

@@ -104,9 +104,8 @@ class Graph(GuiObject):
 
 	def Draw(self):
 		GuiObject.Draw(self);
-		if(self.visible):
-			self.DrawHint();
-			self.DrawPlot();
+		self.DrawHint();
+		self.DrawPlot();
 
 class _SensorData(object):
 	"""A _SensorData object holds the data

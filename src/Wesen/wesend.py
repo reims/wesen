@@ -1,9 +1,4 @@
-"""Copyright 2003-2013 by Konrad Voelkel and Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit https://github.com/reims/wesen for versions > 2013
-or http://wesen.sourceforge.net for old versions of 2003,2004."""
-
-from .definition import NAMES, VERSIONS, FORMAT_LOGSTRING;
+from .strings import FORMAT_LOGSTRING;
 from .world import World;
 from pprint import pprint;
 import logging;
@@ -62,7 +57,7 @@ class Wesend(object):
 
 	def initLogger(self):
 		"""initializes the logging system."""
-		self.logger = logging.getLogger(NAMES["PROJECT"]);
+		self.logger = logging.getLogger("wesen");
 		if(self.uselog):
 			logfileh = logging.FileHandler(self.infoGeneral["logfile"]);
 			logfileh.setFormatter(logging.Formatter(FORMAT_LOGSTRING));

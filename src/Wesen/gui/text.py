@@ -54,11 +54,10 @@ class Text(GuiObject):
 
 	def Draw(self):
 		GuiObject.Draw(self);
-		if(self.visible):
-			self.printer.ResetRaster();
-			self.DrawEngineStats();
-			self.DrawGameStats();
-			self.DrawGivenText();
+		self.printer.ResetRaster();
+		self.DrawEngineStats();
+		self.DrawGameStats();
+		self.DrawGivenText();
 
 class TextPrinter(object):
 	"""A printer that uses OpenGL to draw strings.
@@ -75,10 +74,6 @@ class TextPrinter(object):
 
 	def Reshape(self, x, y):
 		self.y = 30 / y;
-
-	def PrintLn(self, text=""):
-		"""PrintLn() is equivalent to Print(" \n")"""
-		self.Print(" "+text+"\n");
 
 	def Print(self, text):
 		"""Print(String text) prints text to the screen"""

@@ -2,15 +2,15 @@
 and interprets command-line arguments.
 It then runs a Wesend instance."""
 
-from .definition import NAMES, VERSIONS;
-from .defaults import DEFAULT_GENERAL_CONFIGFILE;
+from .defaults import DEFAULT_CONFIGFILE;
 from .strings import STRING_USAGE_PRINTCONFIG, \
 		     STRING_USAGE_DEFAULTCONFIG, \
 		     STRING_USAGE_EDITCONFIG, \
 		     STRING_USAGE_CONFIGFILE, \
 		     STRING_USAGE_EPILOG, \
 		     STRING_USAGE_DESCRIPTION, \
-		     STRING_USAGE_OVERWRITE;
+		     STRING_USAGE_OVERWRITE, \
+		     VERSIONSTRING;
 from .configed import ConfigEd;
 from .wesend import Wesend;
 from argparse import ArgumentParser, Action;
@@ -74,10 +74,10 @@ def _parseArgs():
 	parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
 				epilog=STRING_USAGE_EPILOG);
 	parser.add_argument('--version', action='version',
-			    version='%(prog)s ('+NAMES["PROJECT"]+') '+VERSIONS['PROJECT']);
+			    version='%(prog)s ('+VERSIONSTRING+')');
 	parser.add_argument('-c', '--configfile', action='store',
 			    dest='configfile',
-			    default=DEFAULT_GENERAL_CONFIGFILE,
+			    default=DEFAULT_CONFIGFILE,
 			    help=STRING_USAGE_CONFIGFILE);
 	parser.add_argument('-e', '--editconfig', action='store_true',
 			    dest='invoke_editconfig',
