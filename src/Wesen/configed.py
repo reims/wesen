@@ -5,7 +5,6 @@ See also:
  strings.py for explanations used here,
  defaults.py for defaults used here."""
 
- # The wildcards are actually useful here.
 from .defaults import CONFIG_OPTIONS, CONFIG_DEFAULTS;
 from .strings import STRING_ERROR_FILEEXISTS, \
     STRING_MESSAGE_WROTE, \
@@ -13,9 +12,6 @@ from .strings import STRING_ERROR_FILEEXISTS, \
     STRING_CONFIGED;
 from configparser import SafeConfigParser;
 import os.path;
-
-#TODO consider moving the CONFIG_OPTIONS to another file (defaults?):
-
 
 class ConfigEd(object):
 	"""ConfigEd(filename) creates a full powered config editor for wesen"""
@@ -67,7 +63,7 @@ class ConfigEd(object):
 		elif(entryType == float):
 			value = self.configParser.getfloat(section, key);
 		if(value is None):
-			value = self.getDefaultValue(section, key);
+			value = CONFIG_DEFAULTS[section][key];
 		return value;
 
 	def writeDefaults(self):
@@ -107,15 +103,11 @@ class ConfigEd(object):
 	def setDefInputStandard(self, section, key):
 		"""fetches explanation from .strings
 		and default value from .defaults"""
+		#TODO why upper? we should have lower-case here.
 		explanationString = STRING_CONFIGED[section.upper()][key.upper()];
 		self.configParser.set(section, key,
-				      str(self.def_input(self.getDefaultValue(section, key),
+				      str(self.def_input(CONFIG_DEFAULTS[section][key],
 							 explanationString)));
-
-	def getDefaultValue(self, section, key):
-		#TODO/done this should be done with a dict, not eval (see STRING_CONFIGED)
-		return CONFIG_DEFAULTS[section][key];
-		#return eval("DEFAULT_%s_%s" % (section.upper(), key.upper()));
 
 	def def_input(self, default, msg):
 		"""derived from raw_input,
