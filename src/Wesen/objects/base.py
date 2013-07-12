@@ -13,8 +13,6 @@ class WorldObject(object):
 		self.infoObject = infoAllObject["object"];
 		self.infoRange = infoAllObject["range"];
 		self.objectType = self.infoObject["type"];
-		self.logger = self.infoWorld["logger"];
-		self.Debug = self.infoWorld["Debug"];
 		self.energy = self.infoObject["energy"];
 		self.DeleteObject = self.infoWorld["DeleteObject"];
 		self.AddObject = self.infoWorld["AddObject"];

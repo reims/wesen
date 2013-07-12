@@ -12,8 +12,6 @@ class DefaultWesenSource(object):
 		self.infoTime = infoAllSource["time"];
 		self.infoRange = infoAllSource["range"];
 		self.worldlength = self.infoWorld["length"];
-		self.Debug = self.infoWorld["Debug"];
-		self.logger = self.infoWorld["logger"];
 		self.source = self.infoSource["source"];
 
 	def getDescriptor(self):

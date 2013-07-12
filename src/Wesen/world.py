@@ -28,31 +28,46 @@ class World(object):
 	Via AddObject(info) and DeleteObject(id)
 	one can manipulate the simulation."""
 
-	def __init__(self, infoAllWorld):
+	def __init__(self, infoAllWorld = None, createObjects = True):
 		"""infoAllWorld is a dictionary of dictionaries"""
 		#TODO the infoSomething mechanism is very intransparent.
 		#     either document it very well or change it
 		#     to something more evident...
 		#     maybe at least hand over the config as one dictproxy,
 		#     without any changes...
-		self.infoAllWorld = infoAllWorld;
-		self.Debug = self.infoAllWorld["world"]["Debug"];
-		#self.logger = self.infoAllWorld["world"]["logger"];
+		if not infoAllWorld is None:
+			self.setInfoAllWord(infoAllWorld);
+			if createObjects:
+				self.createDefaultObjects();
+			self.initStats();
+
+	def setInfoAllWord(self, infoAllWorld):
+		"""sets the infoAllWorld and initializes member variables"""
+		# copy everything that will be modified
+		self.infoAllWorld = infoAllWorld.copy();
+		self.infoAllWorld.update({"wesen" : infoAllWorld["wesen"].copy(),
+					  "world" : infoAllWorld["world"].copy(),
+					  "food" : infoAllWorld["food"].copy()});
 		self.objects = {};
 		self.turns = 0;
 		self.stats = {}; # is initialized depending on sources in initStats()
 		self.infoAllWorld["world"].update({"DeleteObject":self.DeleteObject,
-				       "AddObject":self.AddObject,
-				       "objects":self.objects});
+						   "AddObject":self.AddObject,
+						   "objects":self.objects});
 		self.infoAllWorld["food"]["type"] = "food";
 		self.infoAllWorld["wesen"]["type"] = "wesen";
 		self.infoAllWorld["wesen"]["sources"].sort();
+
+	def createDefaultObjects(self):
+		"""creates all objects (wesen and food) as specified by self.infoAllWorld"""
+		self.objects = {};
 		for entry in self.infoAllWorld["wesen"]["sources"]:
 			for _ in range(self.infoAllWorld["wesen"]["count"]):
-				self.infoAllWorld["wesen"]["source"] = entry;
+				#maybe this is preferable to make_dictproxy, since the dict is modified
+				#if any wesen looks at this value again after creation, it could see a different source
 				temp = self.infoAllWorld["wesen"].copy();#make_dictproxy(self.infoAllWorld["wesen"]);
+				temp["source"] = entry;
 				self.AddObject(temp);
-		self.initStats();
 		for _ in range(self.infoAllWorld["food"]["count"]):
 			self.AddObject(self.infoAllWorld["food"]);
 
@@ -97,12 +112,18 @@ class World(object):
 
 		This object contains all information needed to restore the exact same
 		state of the world."""
-		return {"world" : self.infoAllWorld["world"],
-			"wesen" : self.infoAllWorld["wesen"],
-			"range" : self.infoAllWorld["range"],
-			"time" : self.infoAllWorld["time"],
-			"food" : self.infoAllWorld["food"],
-			"objects" : [o.persist() for o in self.objects.values()]};
+		d = {"world" : self.infoAllWorld["world"].copy(), #need to copy, since we are modifying it
+		     "wesen" : self.infoAllWorld["wesen"],
+		     "range" : self.infoAllWorld["range"],
+		     "time" : self.infoAllWorld["time"],
+		     "food" : self.infoAllWorld["food"],
+		     "objects" : [o.persist() for o in self.objects.values()]};
+		d["world"].pop("logger",None);
+		d["world"].pop("Debug",None);
+		d["world"].pop("DeleteObject",None);
+		d["world"].pop("AddObject",None);
+		d["world"].pop("objects",None);
+		return d;
 
 	def restore(self, obj):
 		"""restores the state of the world represented by obj"""
@@ -110,6 +131,18 @@ class World(object):
 		for infoObj in obj["objects"]:
 			newObj = self.AddObject(infoObj);
 			newObj.restore(infoObj);
+
+	def persistToJSON(self):
+		"""returns the persistency info as a JSON string"""
+		d = self.persist();
+		return json.dumps(d);
+
+
+	def restoreFromJson(self, string):
+		"""restores the state of the world from a JSON string"""
+		obj = json.loads(string);
+		self.setInfoAllWord(obj);
+		self.restore(obj);
 
 	def main(self):
 		"""runs one turn of Game code (and all objects code, including the AI)"""
