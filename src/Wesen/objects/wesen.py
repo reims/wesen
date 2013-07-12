@@ -290,6 +290,18 @@ class Wesen(WorldObject):
 		descriptor.update(WorldObject.getDescriptor(self));
 		return descriptor;
 
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		d = WorldObject.persist(self);
+		d.update({"wesensource":self.wesenSource.persist()});
+		return d;
+
+	def restore(self, obj):
+		"""restores the state of the wesen object"""
+		WorldObject.restore(self, obj);
+		self.wesenSource.restore(obj);
+
 	def UseTime(self, function):
 		"""if the wesen has enough time,
 		return true and subtract the time needed for function;

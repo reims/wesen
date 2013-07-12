@@ -26,6 +26,24 @@ class Food(WorldObject):
 		"""currently doing nothing than returning the WorldObjects getDescriptor."""
 		return WorldObject.getDescriptor(self);
 
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		d = WorldObject.persist(self);
+		d.update({"seedrate":self.seedrate,
+			  "growrate":self.growrate,
+			  "rangeseed":self.rangeseed,
+			  "maxamount":self.maxamount});
+		return d;
+
+	def restore(self, obj):
+		"""restores the state of the food object"""
+		WorldObject.restore(self, obj);
+		self.seedrate = obj["seedrate"];
+		self.growrate = obj["growrate"];
+		self.rangeseed = obj["rangeseed"];
+		self.maxamount = obj["maxamount"];
+
 	def getEaten(self):
 		"""dies and returns previous energy amount.
 		"""

@@ -61,6 +61,23 @@ class WorldObject(object):
 			"age":self.age,
 			"type":self.objectType};
 
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		return {"type":self.objectType,
+			"energy":self.energy,
+			"age":self.age,
+			"position":self.position,
+			"source":self.source,
+			"time":self.time};
+
+	def restore(self, obj):
+		"""restores state of this objects from obj"""
+		self.age = obj["age"];
+		self.energy = obj["energy"];
+		self.position = obj["position"];
+		self.time = obj["time"];
+
 	def AgeCheck(self):
 		"""virtual function, look in wesen or food"""
 		pass;

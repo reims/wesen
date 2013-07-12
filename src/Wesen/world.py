@@ -6,6 +6,7 @@ from .objects.food import Food;
 #BEGIN code for dictproxys:
 from ctypes import pythonapi, py_object;
 from _ctypes import PyObj_FromPtr;
+import json;
 
 DICT_PROXY = pythonapi.PyDictProxy_New;
 DICT_PROXY.argtypes = (py_object,);
@@ -15,16 +16,17 @@ def make_dictproxy(obj):
 	"""takes a dictionary and returns an immutable proxy of it,
 	which is more performant than creating a copy."""
 	assert isinstance(obj, dict);
+	print ("in make_dictproxy");
 	return PyObj_FromPtr(DICT_PROXY(obj));
 #END code for dictproxys.
 
 class World(object):
 	"""A World object contains a single Wesen simulation,
-	   In the MVC paradigm it is M+C.
-	   The main() method runs a single simulation turn.
-	   The getDescriptor() method returns descriptive data for viewers.
-	   Via AddObject(info) and DeleteObject(id)
-               one can manipulate the simulation."""
+	In the MVC paradigm it is M+C.
+	The main() method runs a single simulation turn.
+	The getDescriptor() method returns descriptive data for viewers.
+	Via AddObject(info) and DeleteObject(id)
+	one can manipulate the simulation."""
 
 	def __init__(self, infoAllWorld):
 		"""infoAllWorld is a dictionary of dictionaries"""
@@ -48,7 +50,8 @@ class World(object):
 		for entry in self.infoAllWorld["wesen"]["sources"]:
 			for _ in range(self.infoAllWorld["wesen"]["count"]):
 				self.infoAllWorld["wesen"]["source"] = entry;
-				self.AddObject(make_dictproxy(self.infoAllWorld["wesen"]));
+				temp = self.infoAllWorld["wesen"].copy();#make_dictproxy(self.infoAllWorld["wesen"]);
+				self.AddObject(temp);
 		self.initStats();
 		for _ in range(self.infoAllWorld["food"]["count"]):
 			self.AddObject(self.infoAllWorld["food"]);
@@ -88,6 +91,25 @@ class World(object):
 	def getDescriptor(self):
 		"""returns a list of descriptive information for the GUI"""
 		return [o.getDescriptor() for o in self.objects.values()];
+
+	def persist(self):
+		"""returns a JSON serializable object.
+
+		This object contains all information needed to restore the exact same
+		state of the world."""
+		return {"world" : self.infoAllWorld["world"],
+			"wesen" : self.infoAllWorld["wesen"],
+			"range" : self.infoAllWorld["range"],
+			"time" : self.infoAllWorld["time"],
+			"food" : self.infoAllWorld["food"],
+			"objects" : [o.persist() for o in self.objects.values()]};
+
+	def restore(self, obj):
+		"""restores the state of the world represented by obj"""
+		self.objects = {};
+		for infoObj in obj["objects"]:
+			newObj = self.AddObject(infoObj);
+			newObj.restore(infoObj);
 
 	def main(self):
 		"""runs one turn of Game code (and all objects code, including the AI)"""

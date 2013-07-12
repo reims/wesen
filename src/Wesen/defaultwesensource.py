@@ -20,6 +20,16 @@ class DefaultWesenSource(object):
 		"""currently unused, designed for debugging"""
 		return {};
 
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object
+
+		subclasses need to add all information they need to restore their state"""
+		return {};
+
+	def restore(self, obj):
+		pass;
+
 	def Receive(self, message):
 		"""message should be a dict"""
 		pass;
