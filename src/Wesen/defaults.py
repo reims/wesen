@@ -3,15 +3,14 @@
 from os.path import expanduser, join;
 from math import sqrt;
 
-DEFAULT_GENERAL_CONFIGFILE = join(expanduser("~"),".wesen","conf");
+DEFAULT_GENERAL_CONFIGFOLDER = join(expanduser("~"),".wesen");
+DEFAULT_GENERAL_CONFIGFILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "conf");
 # this configfile is _always_ used before any other specified!
 # these default values are used in configed for the defaults in the editor and when no values are specified in the configfile.
 # I recommend to use the calculated values as they are.
 # For an explanation of these values,
 # run the config editor (with wesen --editconfig)
-
-DEFAULT_GENERAL_ENABLELOG = False;
-DEFAULT_GENERAL_LOGFILE = join(expanduser("~"),".wesen","log");
+DEFAULT_GAME_STATE_FILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "gamestate");
 
 DEFAULT_WORLD_LENGTH = 500;
 

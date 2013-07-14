@@ -21,8 +21,7 @@ else: # python2
 import os.path;
 
 #TODO consider moving the CONFIG_OPTIONS to another file (defaults?):
-CONFIG_OPTIONS = [["general", [("enablelog", bool), ("logfile", str)]],
-		  ["gui", [("enable", bool), ("source", str),
+CONFIG_OPTIONS = [["gui", [("enable", bool), ("source", str),
 			   ("size", int), ("pos", str),
 			   ("map", bool), ("graph", bool),
 			   ("text", bool)]],

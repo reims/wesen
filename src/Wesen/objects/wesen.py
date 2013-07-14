@@ -1,6 +1,5 @@
 """The class for all data and operations a single Wesen has"""
 
-from ..strings import STRING_LOGGER;
 from .base import WorldObject;
 import importlib;
 
@@ -218,8 +217,6 @@ class Wesen(WorldObject):
 
 	def getAttacked(self, energy):
 		"""called when this Wesen is attacked"""
-		self.logger.info(STRING_LOGGER["DEATHWESEN"]["ATTACK"]
-				 % (repr(self), energy));
 		previousEnergy = self.energy;
 		self.energy -= int(energy*0.75);
 		self.EnergyCheck();
@@ -294,7 +291,8 @@ class Wesen(WorldObject):
 		"""returns JSON serializable object with all information
 		needed to restore the state of the object"""
 		d = WorldObject.persist(self);
-		d.update({"wesensource":self.wesenSource.persist()});
+		d.update({"wesensource":self.wesenSource.persist(),
+			  "maxage":self.infoObject["maxage"]});
 		return d;
 
 	def restore(self, obj):
@@ -316,13 +314,11 @@ class Wesen(WorldObject):
 	def AgeCheck(self):
 		"""kills the wesen if it's too old"""
 		if(self.age > self.infoObject["maxage"]):
-			self.logger.info(STRING_LOGGER["DEATHWESEN"]["AGE"] % (repr(self)));
 			self.Die();
 
 	def EnergyCheck(self):
 		"""kills the Wesen when energy <= 0"""
 		if(self.energy <= 0):
-			self.logger.info(STRING_LOGGER["DEATHWESEN"]["ENERGY"] % (repr(self)));
 			self.Die();
 			return True;
 		return False;

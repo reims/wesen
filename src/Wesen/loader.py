@@ -10,6 +10,7 @@ from .strings import STRING_USAGE_PRINTCONFIG, \
 		     STRING_USAGE_CONFIGFILE, \
 		     STRING_USAGE_EPILOG, \
 		     STRING_USAGE_DESCRIPTION, \
+		     STRING_USAGE_RESUME, \
 		     STRING_USAGE_OVERWRITE;
 from .configed import ConfigEd;
 from .wesend import Wesend;
@@ -48,6 +49,7 @@ def Loader(run_immediately=True):
 	if("_config" in parsedArgs):
 		for section, sectionDict in parsedArgs._config.items():
 			config[section].update(sectionDict);
+	config["resume"] = parsedArgs.resume;
 	if(len(extraArgs)>0):
 		print("handing over the following command-line arguments to OpenGL: ",
 		      " ".join(extraArgs));
@@ -92,13 +94,12 @@ def _parseArgs():
 			    default=False,
 			    help=STRING_USAGE_PRINTCONFIG);
 	_addOverwriteBool(parser, 'gui', 'gui', 'enable');
-	_addOverwriteBool(parser, 'logger', 'general', 'enablelog');
-	parser.add_argument('-l', '--logfile', section='general',
-			    dest='logfile',
-			    action=_OverwriteConfigAction);
 	parser.add_argument('-s', '--sources', section='wesen',
 			    dest='sources',
 			    action=_OverwriteConfigAction);
+	parser.add_argument('-r', '--resume',
+			    dest='resume', action='store_true',
+			    default=False, help=STRING_USAGE_RESUME);
 	return parser.parse_known_args();
 
 def _addOverwriteBool(parser, argName, section, key):

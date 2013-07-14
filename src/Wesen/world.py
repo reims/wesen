@@ -118,7 +118,6 @@ class World(object):
 		     "time" : self.infoAllWorld["time"],
 		     "food" : self.infoAllWorld["food"],
 		     "objects" : [o.persist() for o in self.objects.values()]};
-		d["world"].pop("logger",None);
 		d["world"].pop("Debug",None);
 		d["world"].pop("DeleteObject",None);
 		d["world"].pop("AddObject",None);

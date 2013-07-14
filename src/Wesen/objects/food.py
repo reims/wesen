@@ -2,7 +2,6 @@
 
 from .base import WorldObject;
 from ..point import getRandomPositionInRadius;
-from ..strings import STRING_LOGGER;
 from numpy.random import uniform;
 
 class Food(WorldObject):
@@ -17,6 +16,7 @@ class Food(WorldObject):
 		self.growrate = self.infoObject["growrate"];
 		self.rangeseed = self.infoRange["seed"];
 		self.maxamount = self.infoObject["maxamount"];
+		self.maxage = self.infoObject["maxage"];
 
 	def __repr__(self):
 		return ("<food id=%s growrate=%s pos=%s energy=%s>" %
@@ -33,7 +33,8 @@ class Food(WorldObject):
 		d.update({"seedrate":self.seedrate,
 			  "growrate":self.growrate,
 			  "rangeseed":self.rangeseed,
-			  "maxamount":self.maxamount});
+			  "maxamount":self.maxamount,
+			  "maxage":self.maxage});
 		return d;
 
 	def restore(self, obj):
@@ -43,6 +44,7 @@ class Food(WorldObject):
 		self.growrate = obj["growrate"];
 		self.rangeseed = obj["rangeseed"];
 		self.maxamount = obj["maxamount"];
+		self.maxage = obj["maxage"];
 
 	def getEaten(self):
 		"""dies and returns previous energy amount.
@@ -67,7 +69,6 @@ class Food(WorldObject):
 
 	def AgeCheck(self):
 		if(self.age >= self.infoObject["maxage"]):
-			self.logger.info(STRING_LOGGER["DEATHFOOD"]["AGE"] % self.id);
 			self.Die();
 
 	def EnergyCheck(self):
