@@ -94,6 +94,7 @@ class World(object):
 				 "time":self.infoAllWorld["time"],
 				 "food":self.infoAllWorld["food"],
 				 "object":infoObject};
+		infoAllObject["world"].update({"objects":self.objects});
 		if(infoObject["type"] == "wesen"):
 			newObject = Wesen(infoAllObject);
 		elif(infoObject["type"] == "food"):
