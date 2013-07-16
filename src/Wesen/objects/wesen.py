@@ -141,6 +141,7 @@ class Wesen(WorldObject):
 			self.time -= usedTime;
 			self.position =  [(pc+dc) % self.infoWorld["length"]
 					  for (pc,dc) in zip(self.position,direction)];
+			self.UpdatePos(self.id, self.getDescriptor());
 			return True;
 		else:
 			return False;

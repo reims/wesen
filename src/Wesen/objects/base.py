@@ -17,6 +17,7 @@ class WorldObject(object):
 		self.DeleteObject = self.infoWorld["DeleteObject"];
 		self.AddObject = self.infoWorld["AddObject"];
 		self.worldObjects = self.infoWorld["objects"];
+		self.UpdatePos = self.infoWorld["UpdatePos"];
 		self.age = 0;
 		self.time = 0;
 		self.source = "";
@@ -55,6 +56,7 @@ class WorldObject(object):
 		included by the world in World.getDescriptor.
 		"""
 		return {"position":self.position,
+			"id":self.id,
 			"energy":self.energy,
 			"age":self.age,
 			"type":self.objectType};

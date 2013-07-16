@@ -84,6 +84,7 @@ class GUI:
 		self.map = Map(self, self.infoWorld,
 			       self.infoWesen["sources"],
 			       self.colorList);
+		self.world.setCallbacks(self.map.GetCallbacks());
 		self.text = Text(self, self.world);
 		self.text.SetAspect(2, 1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];

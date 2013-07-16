@@ -28,13 +28,14 @@ class World(object):
 	Via AddObject(info) and DeleteObject(id)
 	one can manipulate the simulation."""
 
-	def __init__(self, infoAllWorld = None, createObjects = True):
+	def __init__(self, infoAllWorld = None, createObjects = True, callbacks = {}):
 		"""infoAllWorld is a dictionary of dictionaries"""
 		#TODO the infoSomething mechanism is very intransparent.
 		#     either document it very well or change it
 		#     to something more evident...
 		#     maybe at least hand over the config as one dictproxy,
 		#     without any changes...
+		self.callbacks = callbacks;
 		if not infoAllWorld is None:
 			self.setInfoAllWord(infoAllWorld);
 			if createObjects:
@@ -53,10 +54,14 @@ class World(object):
 		self.stats = {}; # is initialized depending on sources in initStats()
 		self.infoAllWorld["world"].update({"DeleteObject":self.DeleteObject,
 						   "AddObject":self.AddObject,
+						   "UpdatePos":self.UpdatePos,
 						   "objects":self.objects});
 		self.infoAllWorld["food"]["type"] = "food";
 		self.infoAllWorld["wesen"]["type"] = "wesen";
 		self.infoAllWorld["wesen"]["sources"].sort();
+
+	def setCallbacks(self, callbacks):
+		self.callbacks = callbacks;
 
 	def createDefaultObjects(self):
 		"""creates all objects (wesen and food) as specified by self.infoAllWorld"""
@@ -83,6 +88,7 @@ class World(object):
 		"""removes an object from the world."""
 		if(objectid in self.objects.keys()):
 			del self.objects[objectid];
+			self.callbacks.get("DeleteObject", lambda _id: None)(objectid);
 			return True;
 		else:
 			return False;
@@ -102,7 +108,11 @@ class World(object):
 		else:
 			raise Exception("invalid objectType: "+infoObject["type"]);
 		self.objects[newObject.id] = newObject;
+		self.callbacks.get("AddObject", lambda _id,obj: None)(newObject.id, newObject.getDescriptor());
 		return newObject;
+
+	def UpdatePos(self, _id, obj):
+		self.callbacks.get("UpdatePos", lambda _id,obj: None)(_id,obj);
 
 	def getDescriptor(self):
 		"""returns a list of descriptive information for the GUI"""
@@ -119,10 +129,11 @@ class World(object):
 		     "time" : self.infoAllWorld["time"],
 		     "food" : self.infoAllWorld["food"],
 		     "objects" : [o.persist() for o in self.objects.values()]};
-		d["world"].pop("Debug",None);
-		d["world"].pop("DeleteObject",None);
-		d["world"].pop("AddObject",None);
-		d["world"].pop("objects",None);
+		d["world"].pop("Debug", None);
+		d["world"].pop("DeleteObject", None);
+		d["world"].pop("AddObject", None);
+		d["world"].pop("objects", None);
+		d["world"].pop("UpdatePos", None);
 		return d;
 
 	def restore(self, obj):
