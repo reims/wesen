@@ -2,6 +2,9 @@
 
 from ..point import getRandomPosition;
 
+class TurnOverException(Exception):
+	pass
+
 class WorldObject(object):
 	"""this class is an abstraction to all world objects,
 	as Wesen, Food and maybe some day something else.
@@ -56,6 +59,7 @@ class WorldObject(object):
 	def Die(self):
 		"""deletes WorldObject instance from world."""
 		self.DeleteObject(self.id);
+		raise TurnOverException(); #raise exception to immediatly end turn
 
 	def getDescriptor(self):
 		"""return descriptive data for the gui,

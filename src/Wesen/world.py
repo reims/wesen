@@ -1,7 +1,8 @@
 """The world in which Wesen takes place"""
 
-from .objects.wesen import Wesen;
+from .objects.wesen import Wesen, RuleException;
 from .objects.food import Food;
+from .objects.base import TurnOverException;
 
 #BEGIN code for dictproxys:
 from ctypes import pythonapi, py_object;
@@ -89,14 +90,12 @@ class World(object):
 
 	def DeleteObject(self, objectid):
 		"""removes an object from the world."""
-		if(objectid in self.objects.keys()):
-			pos = self.objects[objectid].position;
-			del self.map[pos[0]][pos[1]][objectid];
-			del self.objects[objectid];
-			self.callbacks.get("DeleteObject", lambda _id: None)(objectid);
-			return True;
-		else:
-			return False;
+		pos = self.objects[objectid].position;
+		del self.map[pos[0]][pos[1]][objectid];
+		del self.objects[objectid];
+		#print("Deleted object with id", objectid);
+		self.callbacks.get("DeleteObject", lambda _id: None)(objectid);
+		return True;
 
 	def AddObject(self, infoObject):
 		"""adds an object to the world."""
@@ -114,13 +113,15 @@ class World(object):
 			raise Exception("invalid objectType: "+infoObject["type"]);
 		self.objects[newObject.id] = newObject;
 		self.map[newObject.position[0]][newObject.position[1]][newObject.id] = newObject;
+		#print("Added new", infoObject["type"], "with id", newObject.id, "at", newObject.position);
 		self.callbacks.get("AddObject", lambda _id,obj: None)(newObject.id, newObject.getDescriptor());
 		return newObject;
 
 	def UpdatePos(self, _id, oldPos, obj):
 		del self.map[oldPos[0]][oldPos[1]][_id];
 		newPos = obj["position"];
-		self.map[newPos[0]][newPos[1]][_id] = self.objects[_id]; 
+		self.map[newPos[0]][newPos[1]][_id] = self.objects[_id];
+		#print("Moved object with id", _id, "from", oldPos, "to", newPos);
 		self.callbacks.get("UpdatePos", lambda _id,obj: None)(_id,obj);
 
 	def getDescriptor(self):
@@ -179,7 +180,10 @@ class World(object):
 			else:
 				stats["food"]["count"] += 1;
 				stats["food"]["energy"] += o.energy;
-			o.main();
+			try:
+				o.main();
+			except TurnOverException: pass
+			except RuleException: pass #TODO: make offending source loose
 		stats["global"] = {"count":len(self.objects),
 				   "energy":sum(objectType["energy"]
 						for objectType

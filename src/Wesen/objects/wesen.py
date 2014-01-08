@@ -168,7 +168,7 @@ class Wesen(WorldObject):
 	def Eat(self, foodid):
 		"""if it's at the same position, eat the food with python object id foodid."""
 		if not foodid in self.worldObjects:
-			return False;
+			raise RuleException("Tried to eat non-existing food");
 		o = self.worldObjects[foodid];
 		if((o.position == self.position) and
 		   (o.objectType == "food")):
