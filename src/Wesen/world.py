@@ -37,6 +37,8 @@ class World(object):
 		#     without any changes...
 		self.callbacks = callbacks;
 		if not infoAllWorld is None:
+			self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
+				      for _ in range(infoAllWorld["world"]["length"])];
 			self.setInfoAllWord(infoAllWorld);
 			if createObjects:
 				self.createDefaultObjects();
@@ -55,7 +57,8 @@ class World(object):
 		self.infoAllWorld["world"].update({"DeleteObject":self.DeleteObject,
 						   "AddObject":self.AddObject,
 						   "UpdatePos":self.UpdatePos,
-						   "objects":self.objects});
+						   "objects":self.objects,
+						   "map":self.map});
 		self.infoAllWorld["food"]["type"] = "food";
 		self.infoAllWorld["wesen"]["type"] = "wesen";
 		self.infoAllWorld["wesen"]["sources"].sort();
@@ -87,6 +90,8 @@ class World(object):
 	def DeleteObject(self, objectid):
 		"""removes an object from the world."""
 		if(objectid in self.objects.keys()):
+			pos = self.objects[objectid].position;
+			del self.map[pos[0]][pos[1]][objectid];
 			del self.objects[objectid];
 			self.callbacks.get("DeleteObject", lambda _id: None)(objectid);
 			return True;
@@ -108,10 +113,14 @@ class World(object):
 		else:
 			raise Exception("invalid objectType: "+infoObject["type"]);
 		self.objects[newObject.id] = newObject;
+		self.map[newObject.position[0]][newObject.position[1]][newObject.id] = newObject;
 		self.callbacks.get("AddObject", lambda _id,obj: None)(newObject.id, newObject.getDescriptor());
 		return newObject;
 
-	def UpdatePos(self, _id, obj):
+	def UpdatePos(self, _id, oldPos, obj):
+		del self.map[oldPos[0]][oldPos[1]][_id];
+		newPos = obj["position"];
+		self.map[newPos[0]][newPos[1]][_id] = self.objects[_id]; 
 		self.callbacks.get("UpdatePos", lambda _id,obj: None)(_id,obj);
 
 	def getDescriptor(self):

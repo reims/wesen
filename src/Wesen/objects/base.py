@@ -17,6 +17,7 @@ class WorldObject(object):
 		self.DeleteObject = self.infoWorld["DeleteObject"];
 		self.AddObject = self.infoWorld["AddObject"];
 		self.worldObjects = self.infoWorld["objects"];
+		self.map = self.infoWorld["map"];
 		self.UpdatePos = self.infoWorld["UpdatePos"];
 		self.age = 0;
 		self.time = 0;
@@ -29,7 +30,7 @@ class WorldObject(object):
 		return ("<worldobject id=%s pos=%s energy=%s>" %
 			(self.id, self.position, self.energy));
 
-	def getRangeIterator(self, objectIterator, radius, condition):
+	def getRangeIterator(self, radius, condition):
 		"""returns an iterator of pairs (id, object)
 		with all objects from objectIterator in radius
 		that match the condition.
@@ -41,11 +42,16 @@ class WorldObject(object):
 		#      There is still room for improvement.
 		#SEE testradius.py and testrange.py
 		(x, y) = self.position;
+		minX = max(0, x-radius);
+		maxX = min(self.infoWorld["length"], x+radius+1); #+1 since upper bound of range is exclusive
+		minY = max(0, y-radius)
+		maxY = min(self.infoWorld["length"], y+radius+1);
+		#print(minX, maxX, maxY, maxY, self.infoWorld["length"]);
 		return ((i, o)
-			for (i, o) in objectIterator
-			if(abs(x - o.position[0]) <= radius and
-			   abs(y - o.position[1]) <= radius and
-			   (condition is None or condition(o))));
+			for x1 in range(minX, maxX)
+			for y1 in range(minY, maxY)
+			for (i, o) in self.map[x1][y1].items()
+			if (condition is None or condition(o)));
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""

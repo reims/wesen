@@ -82,9 +82,8 @@ class Food(WorldObject):
 
 	def hasTooMuchFoodNearby(self):
 		"""return True as soon as there is a lot of food nearby."""
-		for i, _ in enumerate(self.getRangeIterator(self.worldObjects.items(),
-							 self.rangeseed,
-							 condition = lambda o : o.objectType == b"food")):
+		for i, _ in enumerate(self.getRangeIterator(self.rangeseed,
+							    condition = lambda o : o.objectType == b"food")):
 			if(i == 10): #TODO make this number configurable!
 				return True;
 		return False;
