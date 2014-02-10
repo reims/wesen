@@ -2,9 +2,9 @@
 and interprets command-line arguments.
 It then runs a Wesend instance."""
 
-from .definition import NAMES, VERSIONS;
-from .defaults import DEFAULT_GENERAL_CONFIGFILE;
-from .strings import STRING_USAGE_PRINTCONFIG, \
+from .defaults import DEFAULT_CONFIGFILE;
+from .strings import VERSIONSTRING, \
+                     STRING_USAGE_PRINTCONFIG, \
 		     STRING_USAGE_DEFAULTCONFIG, \
 		     STRING_USAGE_EDITCONFIG, \
 		     STRING_USAGE_CONFIGFILE, \
@@ -76,10 +76,10 @@ def _parseArgs():
 	parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
 				epilog=STRING_USAGE_EPILOG);
 	parser.add_argument('--version', action='version',
-			    version='%(prog)s ('+NAMES["PROJECT"]+') '+VERSIONS['PROJECT']);
+			    version='%(prog)s ('+VERSIONSTRING);
 	parser.add_argument('-c', '--configfile', action='store',
 			    dest='configfile',
-			    default=DEFAULT_GENERAL_CONFIGFILE,
+			    default=DEFAULT_CONFIGFILE,
 			    help=STRING_USAGE_CONFIGFILE);
 	parser.add_argument('-e', '--editconfig', action='store_true',
 			    dest='invoke_editconfig',
@@ -94,10 +94,6 @@ def _parseArgs():
 			    default=False,
 			    help=STRING_USAGE_PRINTCONFIG);
 	_addOverwriteBool(parser, 'gui', 'gui', 'enable');
-	_addOverwriteBool(parser, 'logger', 'general', 'enablelog');
-	parser.add_argument('-l', '--logfile', section='general',
-			    dest='logfile',
-			    action=_OverwriteConfigAction);
 	parser.add_argument('-s', '--sources', section='wesen',
 			    dest='sources',
 			    action=_OverwriteConfigAction);
