@@ -103,6 +103,8 @@ class Wesen(WorldObject):
 	def Move(self, direction):
 		"""moves the wesen into a specified direction,
 		returns true if any position change happened."""
+		if(self.dead):
+			return False;
 		direction = [int(dc) for dc in direction];
 		# the following code is a more time-efficient way to do
 		#usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
@@ -167,6 +169,8 @@ class Wesen(WorldObject):
 
 	def Eat(self, foodid):
 		"""if it's at the same position, eat the food with python object id foodid."""
+		if(self.dead):
+			return False;
 		if not foodid in self.worldObjects:
 			raise RuleException("Tried to eat non-existing food");
 		o = self.worldObjects[foodid];
@@ -186,6 +190,8 @@ class Wesen(WorldObject):
 		"""Create a new Wesen instance with the same source and the specified energy
 		which is then subtracted from the reproducing wesen.
 		"""
+		if(self.dead):
+			return False;
 		if(self.UseTime("reproduce")):
 			childEnergy = self.energy // 2;
 			infoWesen = self.infoObject.copy();
@@ -205,7 +211,12 @@ class Wesen(WorldObject):
 		so the one who had more energy than his enemy can survive.
 		The other Wesen dies.
 		"""
-		o = self.worldObjects[wesenid];
+		if(self.dead):
+			return False;
+		try:
+			o = self.worldObjects[wesenid];
+		except KeyError:
+			raise RuleException("May not attack non-existent enemy with id '%s'" % (wesenid));
 		if((o.objectType == "wesen") and
 		   (o.position == self.position)):
 			if(self.UseTime("attack")):
@@ -226,6 +237,8 @@ class Wesen(WorldObject):
 		"""turns the given energy into strange food
 		(other growing and seeding behaviour).
 		the energy is subtracted from the wesen"""
+		if(self.dead):
+			return False;
 		if(self.UseTime("vomit")):
 			if(energy > self.energy):
 				energy = self.energy;
@@ -244,6 +257,8 @@ class Wesen(WorldObject):
 
 	def Donate(self, energy, wesenid):
 		"""transfer energy from this wesen to another specified by wesenid"""
+		if(self.dead):
+			return False;
 		o = self.worldObjects[wesenid];
 		if((o.objectType == "wesen") and
 		   (o.position == self.position)):
@@ -259,6 +274,8 @@ class Wesen(WorldObject):
 
 	def Broadcast(self, message):
 		"""calls Talk(message) with all wesen in range"""
+		if(self.dead):
+			return False;
 		if(self.UseTime("broadcast")):
 			for oid, o in self.getRangeIterator(\
 				self.infoRange["talk"],
@@ -314,6 +331,9 @@ class Wesen(WorldObject):
 
 	def EnergyCheck(self):
 		"""kills the Wesen when energy <= 0"""
+		#XXX this code should not be executed if it is already dead!
+		if(self.dead):
+			print("aha!")
 		if(self.energy <= 0):
 			self.Die();
 			return True;
@@ -322,6 +342,7 @@ class Wesen(WorldObject):
 	def main(self):
 		"""runs one turn of wesen code and it's AI code"""
 		WorldObject.main(self);
-		self.energy -= 1;
-		self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
-		self.wesenSource.main();
+		if(not self.dead):
+			self.energy -= 1;
+			self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
+			self.wesenSource.main();

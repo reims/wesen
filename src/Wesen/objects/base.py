@@ -2,9 +2,6 @@
 
 from ..point import getRandomPosition;
 
-class TurnOverException(Exception):
-	pass
-
 class WorldObject(object):
 	"""this class is an abstraction to all world objects,
 	as Wesen, Food and maybe some day something else.
@@ -25,6 +22,7 @@ class WorldObject(object):
 		self.age = 0;
 		self.time = 0;
 		self.source = "";
+		self.dead = False;
 		self.id = id(self);
 		self.position = self.infoObject.get("position",
 						    getRandomPosition(self.infoWorld["length"]));
@@ -44,6 +42,7 @@ class WorldObject(object):
 		#      most efficient implementation here.
 		#      There is still room for improvement.
 		#SEE testradius.py and testrange.py
+		#TODO: apparently this comment is outdated already?
 		(x, y) = self.position;
 		minX = max(0, x-radius);
 		maxX = min(self.infoWorld["length"], x+radius+1); #+1 since upper bound of range is exclusive
@@ -58,8 +57,8 @@ class WorldObject(object):
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""
+		self.dead = True
 		self.DeleteObject(self.id);
-		raise TurnOverException(); #raise exception to immediatly end turn
 
 	def getDescriptor(self):
 		"""return descriptive data for the gui,
@@ -98,6 +97,7 @@ class WorldObject(object):
 
 	def main(self):
 		"""run one turn of object code"""
-		self.EnergyCheck();
-		self.age += 1;
-		self.AgeCheck();
+		if(not self.dead):
+			self.EnergyCheck();
+			self.age += 1;
+			self.AgeCheck();

@@ -92,8 +92,9 @@ class Food(WorldObject):
 		"""randomly grow or seed, based on growrate and seedrate.
 		When too old, die."""
 		WorldObject.main(self); # handles age and low-energy death
-		if(self.age > 10): #TODO numbers should be a config option
-			if(uniform(0,1) < self.seedrate):
-				if(not self.hasTooMuchFoodNearby()):
-					self.Seed();
-		self.Grow();
+		if(not self.dead):
+			if(self.age > 10): #TODO numbers should be a config option
+				if(uniform(0,1) < self.seedrate):
+					if(not self.hasTooMuchFoodNearby()):
+						self.Seed();
+			self.Grow();
