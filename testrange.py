@@ -59,7 +59,7 @@ which makes it our choice.
 from numpy.random import randint
 
 from src.Wesen.loader import Loader
-from src.Wesen.defaults import DEFAULT_GENERAL_CONFIGFILE
+from src.Wesen.defaults import DEFAULT_CONFIGFILE
 
 from sys import argv
 from timeit import repeat as timeit_repeat
@@ -140,7 +140,7 @@ TEST_THESE = (#getRangeIterator_3,
               getRangeIterator_1_c_force)
 
 TEST_RADIUS = 40;
-TEST_NUMBER = 3000;
+TEST_NUMBER = 300;
 TEST_REPEAT = 40;
 
 SETUP = ('import testrange;'
@@ -210,7 +210,6 @@ def test_times():
 
 if __name__ == '__main__':
     argv.append("--disablegui")
-    argv.append("--disablelog")
     for _ in range(10):
         test_sophisticated()
     test_times()
