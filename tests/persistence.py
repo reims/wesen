@@ -6,14 +6,14 @@ if __name__ == "__main__":
 
 import unittest
 from Wesen.world import World;
-from Wesen.defaults import DEFAULT_GENERAL_CONFIGFILE;
+from Wesen.defaults import DEFAULT_CONFIGFILE;
 from Wesen.configed import ConfigEd;
 from Wesen.wesend import Wesend;
 
 class TestPersistence(unittest.TestCase):
     
     def setUp(self):
-        configEd = ConfigEd(DEFAULT_GENERAL_CONFIGFILE);
+        configEd = ConfigEd(DEFAULT_CONFIGFILE);
         config = configEd.getConfig();
         wesend = Wesend(config);
         self.world = wesend.world;
