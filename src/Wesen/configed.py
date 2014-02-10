@@ -10,6 +10,8 @@ from .strings import STRING_ERROR_FILEEXISTS, \
     STRING_MESSAGE_WROTE, \
     STRING_ERROR_NOTWROTE, \
     STRING_CONFIGED;
+
+# import the correct version of ConfigParser:
 from sys import version_info;
 if version_info.major == 3 and version_info.minor < 2: # pre version 3.2 
 	from configparser import SafeConfigParser;

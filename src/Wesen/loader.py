@@ -1,5 +1,6 @@
 """The Loader function determines which configfile to use
 and interprets command-line arguments.
+It makes sure that the configured wesen sources exist.
 It then runs a Wesend instance."""
 
 from .defaults import DEFAULT_CONFIGFILE;
@@ -76,7 +77,7 @@ def _parseArgs():
 	parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
 				epilog=STRING_USAGE_EPILOG);
 	parser.add_argument('--version', action='version',
-			    version='%(prog)s ('+VERSIONSTRING);
+			    version='%(prog)s ('+VERSIONSTRING+')');
 	parser.add_argument('-c', '--configfile', action='store',
 			    dest='configfile',
 			    default=DEFAULT_CONFIGFILE,
