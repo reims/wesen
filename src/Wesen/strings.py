@@ -28,13 +28,7 @@ STRING_CONFIGED = {
 	"ENABLE":"\nenable=",
 	"SOURCE":"\nsource=",
 	"SIZE":"\nsize=",
-	"POS":"\npos=",
-	"MAP":"\nmap=",
-	"GRAPH":"\ngraph=",
-	"TEXT":"\ntext="},
-"GENERAL":{
-	"ENABLELOG":"\nenablelog=",
-	"LOGFILE":"(destination of your logfile)\nlogfile="},
+	"POS":"\npos="},
 "WORLD":{
 	"LENGTH":"(length of the worlds x-axis and y-axis)\nlength="},
 "FOOD":{
@@ -71,12 +65,3 @@ STRING_USAGE_PRINTCONFIG = 'print the config (without changes from command-line 
 STRING_USAGE_OVERWRITE = 'overwrite config [%s] %s';
 STRING_USAGE_RESUME = 'resumes game stored in %s if exists' % DEFAULT_GAME_STATE_FILE;
 STRING_USAGE_EPILOG = 'all other arguments are passed to OpenGL';
-
-STRING_LOGGER = {
-"DEATHWESEN":{
-	"AGE":"%s died because of too high age",
-	"ATTACK":"%s was attacked with %s energy",
-	"ENERGY":"%s died because of too low energy level"},
-"DEATHFOOD":{
-	"AGE":"food %s was removed because of too high age",
-	"ENERGY":"food %s was removed because of too high energy level"}};
