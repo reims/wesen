@@ -1,13 +1,14 @@
 """The world in which Wesen takes place"""
 
+from .defaults import DEFAULT_GAME_STATE_FILE;
 from .objects.wesen import Wesen, RuleException;
 from .objects.food import Food;
-from .objects.base import TurnOverException;
+
+import json;
 
 #BEGIN code for dictproxys:
 from ctypes import pythonapi, py_object;
 from _ctypes import PyObj_FromPtr;
-import json;
 
 DICT_PROXY = pythonapi.PyDictProxy_New;
 DICT_PROXY.argtypes = (py_object,);
@@ -40,12 +41,13 @@ class World(object):
 		if not infoAllWorld is None:
 			self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
 				      for _ in range(infoAllWorld["world"]["length"])];
-			self.setInfoAllWord(infoAllWorld);
+			#TODO empty map init should be somewhere else; see failing persitency tests
+			self.setInfoAllWorld(infoAllWorld);
 			if createObjects:
 				self.createDefaultObjects();
 			self.initStats();
 
-	def setInfoAllWord(self, infoAllWorld):
+	def setInfoAllWorld(self, infoAllWorld):
 		"""sets the infoAllWorld and initializes member variables"""
 		# copy everything that will be modified
 		self.infoAllWorld = infoAllWorld.copy();
@@ -93,7 +95,6 @@ class World(object):
 		pos = self.objects[objectid].position;
 		del self.map[pos[0]][pos[1]][objectid];
 		del self.objects[objectid];
-		#print("Deleted object with id", objectid);
 		self.callbacks.get("DeleteObject", lambda _id: None)(objectid);
 		return True;
 
@@ -128,6 +129,12 @@ class World(object):
 		"""returns a list of descriptive information for the GUI"""
 		return [o.getDescriptor() for o in self.objects.values()];
 
+	def DumpGameState(self, filename = DEFAULT_GAME_STATE_FILE):
+		#TODO move this to wesend, where it belongs?
+		with open(filename, 'w') as f:
+			json = self.persistToJSON();
+			f.write(json);
+
 	def persist(self):
 		"""returns a JSON serializable object.
 
@@ -140,6 +147,7 @@ class World(object):
 		     "food" : self.infoAllWorld["food"],
 		     "objects" : [o.persist() for o in self.objects.values()]};
 		d["world"].pop("Debug", None);
+		d["world"].pop("map", None);
 		d["world"].pop("DeleteObject", None);
 		d["world"].pop("AddObject", None);
 		d["world"].pop("objects", None);
@@ -158,11 +166,10 @@ class World(object):
 		d = self.persist();
 		return json.dumps(d);
 
-
 	def restoreFromJson(self, string):
 		"""restores the state of the world from a JSON string"""
 		obj = json.loads(string);
-		self.setInfoAllWord(obj);
+		self.setInfoAllWorld(obj);
 		self.restore(obj);
 
 	def main(self):
@@ -182,7 +189,6 @@ class World(object):
 				stats["food"]["energy"] += o.energy;
 			try:
 				o.main();
-			except TurnOverException: pass
 			except RuleException: pass #TODO: make offending source loose
 		stats["global"] = {"count":len(self.objects),
 				   "energy":sum(objectType["energy"]
