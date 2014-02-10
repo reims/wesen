@@ -1,4 +1,4 @@
-from ..defaults import DEFAULT_GAME_STATE_FILE;
+from ..strings import VERSIONSTRING;
 from .map import Map;
 from .text import Text;
 from .graph import Graph;
@@ -87,10 +87,6 @@ class GUI:
 		self.text = Text(self, self.world);
 		self.text.SetAspect(2, 1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];
-		#TODO remove the capability to change visibility in GuiObject!
-		if(not self.infoGui["map"]): self.map.ChangeVisibility();
-		if(not self.infoGui["text"]): self.text.ChangeVisibility();
-		if(not self.infoGui["graph"]): self.graph.ChangeVisibility();
 		self.initGL(extraArgs);
 		self.initMenu();
 		self.initKeyBindings();
@@ -102,7 +98,7 @@ class GUI:
 		glutInitWindowSize(self.size, self.size);
 		glutInitWindowPosition(self.initx, self.inity);
 		glutInit(extraArgs.split(" "));
-		glutCreateWindow((NAMES["PROJECT"]+" "+VERSIONS["PROJECT"]).encode("ascii"));
+		glutCreateWindow(VERSIONSTRING.encode("ascii"));
 		glutDisplayFunc(self.Draw);
 		glutIdleFunc(glutPostRedisplay);
 		glutReshapeFunc(self.Reshape);
@@ -116,17 +112,12 @@ class GUI:
 	def Exit(self):
 		"""Stop the simulation and quit"""
 		glFinish();
-		self.DumpGameState();
+		self.world.DumpGameState();
 		sys.exit();
 
 	def Pause(self):
 		"""Pause/Unpause the simulation"""
 		self.pause = not self.pause;
-
-	def DumpGameState(self, filename = DEFAULT_GAME_STATE_FILE):
-		with open(filename, 'w') as f:
-			json = self.world.persistToJSON();
-			f.write(json);
 
 	def SetSpeed(self, amount):
 		"""SetSpeed(amount) -> amount is added to the speed, checks if too low  or high"""
@@ -168,6 +159,7 @@ class GUI:
 						break;
 		if(action == "add"):
 			infoFood = self.infoFood;
+			infoFood["type"] = "food";
 			if("position" in infoFood):
 				del infoFood["position"];
 			self.world.AddObject(infoFood);
@@ -182,21 +174,12 @@ class GUI:
 
 	def initMenu(self):
 		self.menu = glutCreateMenu(self.HandleAction);
-		glutAddMenuEntry(b"change map visibility", 0);
-		glutAddMenuEntry(b"change graph visibility", 25);
-		glutAddMenuEntry(b"change text visibility", 50);
 		glutAddMenuEntry(b"display key bindings", 55);
 		glutAddMenuEntry(b"pause   (space)", 100);
 		glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	def HandleAction(self, action):
-		if(action == 0):
-			self.map.ChangeVisibility();
-		elif(action == 25):
-			self.graph.ChangeVisibility();
-		elif(action == 50):
-			self.text.ChangeVisibility();
-		elif(action == 55):
+		if(action == 55):
 			line = "".join(["'%s' %s\n" % (key, self.keyExplanation[key])
 					for key in sorted(self.keyExplanation.keys())]);
 			self.text.Print(line);
@@ -235,6 +218,10 @@ class GUI:
 			       };
 		self.keyExplanation = {keyRepresentation(key):str(keybindings[key].__doc__)
 				       for key in keybindings};
+		self.keyExplanation[keyRepresentation(100)] = "delete food"
+		self.keyExplanation[keyRepresentation(101)] = "increase food"
+		self.keyExplanation[keyRepresentation(102)] = "add food"
+		self.keyExplanation[keyRepresentation(103)] = "decrease food"
 		self.keybindings = keybindings;
 
 	def HandleKeys(self, key, x, y):
@@ -296,9 +283,7 @@ class GUI:
 
 	def DrawMap(self):
 		glTranslatef(-1.0, 0.0, 0.0); # draw at -1.0/0.0 - 0.0/1.0
-		if(self.map.visible):
-			self.map.SetDescriptor(self.descriptor);
-		self.map.Draw();
+		self.map.Draw(self.descriptor);
 
 	def DrawGraph(self):
 		# draw at 0.0/0.0 - 1.0/1.0 (standard)
@@ -307,8 +292,6 @@ class GUI:
 	def DrawText(self):
 		glTranslatef(-1.0, -1.0, 0.0); # draw at -1.0/-1.0 - 0.0/1.0
 		glScale(2.0, 1.0, 1.0);
-		self.text.SetDescriptor(self.descriptor);
-		self.text.Step();
 		self.text.Draw();
 
 	def RenderScene(self):
