@@ -7,20 +7,19 @@ from os.path import expanduser, join;
 from math import sqrt;
 
 DEFAULT_GENERAL_CONFIGFOLDER = join(expanduser("~"),".wesen");
-DEFAULT_GENERAL_CONFIGFILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "conf");
+#DEFAULT_GENERAL_CONFIGFILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "conf");
+DEFAULT_CONFIGFILE = join(DEFAULT_GENERAL_CONFIGFOLDER,"conf");
 # this configfile is _always_ used before any other specified!
 # these default values are used in configed for the defaults in the editor and when no values are specified in the configfile.
 # I recommend to use the calculated values as they are.
 # For an explanation of these values,
 # run the config editor (with wesen --editconfig)
+
 DEFAULT_GAME_STATE_FILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "gamestate");
 
 #HINT: While the following could be inferred from the defaults below,
 #      It adds a lot of clarity to have it explicitly.
-CONFIG_OPTIONS = [["general",
-                   [("enablelog", bool),
-                    ("logfile", str)]],
-		  ["gui",
+CONFIG_OPTIONS = [["gui",
                    [("enable", bool),
                     ("source", str),
                     ("size", int),
@@ -58,10 +57,7 @@ CONFIG_OPTIONS = [["general",
                     ("donate", int),
                     ("reproduce", int)]]];
 
-CONFIG_DEFAULTS = {"general":
-                       {"enablelog":False,
-                        "logfile":join(expanduser("~"),".wesen","log")},
-                   "gui":
+CONFIG_DEFAULTS = {"gui":
                        {"enable":True,
                         "source":"gui",
                         "size":500,
@@ -99,5 +95,3 @@ CONFIG_DEFAULTS = {"general":
                         "attack":14,
                         "reproduce":20}
                    };
-
-DEFAULT_CONFIGFILE = join(expanduser("~"),".wesen","conf");
