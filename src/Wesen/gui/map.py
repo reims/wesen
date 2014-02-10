@@ -160,5 +160,4 @@ class Map(GuiObject):
 	def Draw(self, descriptor):
 		"""draws the map"""
 		GuiObject.Draw(self);
-		if(self.visible):
-			self.DrawMap(descriptor);
+		self.DrawMap(descriptor);
