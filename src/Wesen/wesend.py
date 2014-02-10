@@ -1,8 +1,14 @@
-from .strings import FORMAT_LOGSTRING;
+"""Copyright 2003-2013 by Konrad Voelkel and Reimer Backhaus.
+This program is distributed under the terms of the GNU General Public License.
+visit https://github.com/reims/wesen for versions > 2013
+or http://wesen.sourceforge.net for old versions of 2003,2004."""
+
+from .defaults import DEFAULT_GAME_STATE_FILE;
 from .world import World;
 from pprint import pprint;
-import logging;
+from os.path import exists;
 import importlib;
+import json;
 
 class Wesend(object):
 	"""Wesend(config, extraArgs="")
@@ -15,16 +21,12 @@ class Wesend(object):
 		"""config should be a dictionary (see loader.py),
 		extraArgs are all passed to OpenGL"""
 		#TODO change the NAMES,VERSIONS mechanism to something simpler.
-		self.infoGeneral = config["general"];
 		self.infoGui = config["gui"];
 		self.infoWorld = config["world"];
 		self.infoWesen = config["wesen"];
 		self.infoFood = config["food"];
 		self.infoRange = config["range"];
 		self.infoTime = config["time"];
-		self.uselog = self.infoGeneral["enablelog"];
-		self.initLogger(); # sets self.logger
-		self.infoWorld["logger"] = self.logger;
 		self.infoWesen["sources"] = self.infoWesen["sources"].split(",");
 		self.infoWorld["Debug"] = self.Debug;
 		infoAllWorld = {"world" : self.infoWorld,
@@ -32,7 +34,16 @@ class Wesend(object):
 				"food"  : self.infoFood,
 				"range" : self.infoRange,
 				"time"  : self.infoTime};
-		self.world = World(infoAllWorld);
+		if (config.pop("resume", False) and 
+		    exists(DEFAULT_GAME_STATE_FILE)):
+			with open(DEFAULT_GAME_STATE_FILE, "r") as f:
+				string = f.read();
+				d = json.loads(string);
+				infoAllWorld.update(d);
+				self.world = World(infoAllWorld, False);
+				self.world.restore(infoAllWorld);
+		else:
+			self.world = World(infoAllWorld);
 
 	def start(self, extraArgs=""):
 		if(self.infoGui["enable"]):
@@ -45,24 +56,10 @@ class Wesend(object):
 		GUI = importlib.import_module(".gui."
 					      + self.infoGui["source"],
 					      __package__).GUI;
-		infoGui = {"config":self.infoGeneral, "wesend":self,
-			   "world":self.infoWorld, "wesen":self.infoWesen,
-			   "food":self.infoFood, "gui":self.infoGui};
+		infoGui = {"wesend":self, "world":self.infoWorld,
+			   "wesen":self.infoWesen, "food":self.infoFood,
+			   "gui":self.infoGui};
 		GUI(infoGui, self.mainLoop, self.world, extraArgs);
-
-	def __del__(self):
-		"""stops logging."""
-		logging.shutdown();
-		super(Wesend, self).__del__();
-
-	def initLogger(self):
-		"""initializes the logging system."""
-		self.logger = logging.getLogger("wesen");
-		if(self.uselog):
-			logfileh = logging.FileHandler(self.infoGeneral["logfile"]);
-			logfileh.setFormatter(logging.Formatter(FORMAT_LOGSTRING));
-			self.logger.addHandler(logfileh);
-		self.logger.setLevel(logging.INFO);
 
 	def Debug(self, message):
 		"""currently just prints the message."""

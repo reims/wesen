@@ -2,7 +2,6 @@
 
 from .base import WorldObject;
 from ..point import getRandomPositionInRadius;
-from ..strings import STRING_LOGGER;
 from numpy.random import uniform;
 
 class Food(WorldObject):
@@ -17,6 +16,7 @@ class Food(WorldObject):
 		self.growrate = self.infoObject["growrate"];
 		self.rangeseed = self.infoRange["seed"];
 		self.maxamount = self.infoObject["maxamount"];
+		self.maxage = self.infoObject["maxage"];
 
 	def __repr__(self):
 		return ("<food id=%s growrate=%s pos=%s energy=%s>" %
@@ -25,6 +25,26 @@ class Food(WorldObject):
 	def getDescriptor(self):
 		"""currently doing nothing than returning the WorldObjects getDescriptor."""
 		return WorldObject.getDescriptor(self);
+
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		d = WorldObject.persist(self);
+		d.update({"seedrate":self.seedrate,
+			  "growrate":self.growrate,
+			  "rangeseed":self.rangeseed,
+			  "maxamount":self.maxamount,
+			  "maxage":self.maxage});
+		return d;
+
+	def restore(self, obj):
+		"""restores the state of the food object"""
+		WorldObject.restore(self, obj);
+		self.seedrate = obj["seedrate"];
+		self.growrate = obj["growrate"];
+		self.rangeseed = obj["rangeseed"];
+		self.maxamount = obj["maxamount"];
+		self.maxage = obj["maxage"];
 
 	def getEaten(self):
 		"""dies and returns previous energy amount.
@@ -49,7 +69,6 @@ class Food(WorldObject):
 
 	def AgeCheck(self):
 		if(self.age >= self.infoObject["maxage"]):
-			self.logger.info(STRING_LOGGER["DEATHFOOD"]["AGE"] % self.id);
 			self.Die();
 
 	def EnergyCheck(self):
@@ -63,9 +82,8 @@ class Food(WorldObject):
 
 	def hasTooMuchFoodNearby(self):
 		"""return True as soon as there is a lot of food nearby."""
-		for i, _ in enumerate(self.getRangeIterator(self.worldObjects.items(),
-							 self.rangeseed,
-							 condition = lambda o : o.objectType == b"food")):
+		for i, _ in enumerate(self.getRangeIterator(self.rangeseed,
+							    condition = lambda o : o.objectType == b"food")):
 			if(i == 10): #TODO make this number configurable!
 				return True;
 		return False;

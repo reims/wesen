@@ -2,15 +2,16 @@
 and interprets command-line arguments.
 It then runs a Wesend instance."""
 
-from .defaults import DEFAULT_CONFIGFILE;
+from .definition import NAMES, VERSIONS;
+from .defaults import DEFAULT_GENERAL_CONFIGFILE;
 from .strings import STRING_USAGE_PRINTCONFIG, \
 		     STRING_USAGE_DEFAULTCONFIG, \
 		     STRING_USAGE_EDITCONFIG, \
 		     STRING_USAGE_CONFIGFILE, \
 		     STRING_USAGE_EPILOG, \
 		     STRING_USAGE_DESCRIPTION, \
-		     STRING_USAGE_OVERWRITE, \
-		     VERSIONSTRING;
+		     STRING_USAGE_RESUME, \
+		     STRING_USAGE_OVERWRITE;
 from .configed import ConfigEd;
 from .wesend import Wesend;
 from argparse import ArgumentParser, Action;
@@ -48,6 +49,7 @@ def Loader(run_immediately=True):
 	if("_config" in parsedArgs):
 		for section, sectionDict in parsedArgs._config.items():
 			config[section].update(sectionDict);
+	config["resume"] = parsedArgs.resume;
 	if(len(extraArgs)>0):
 		print("handing over the following command-line arguments to OpenGL: ",
 		      " ".join(extraArgs));
@@ -74,10 +76,10 @@ def _parseArgs():
 	parser = ArgumentParser(description=STRING_USAGE_DESCRIPTION,
 				epilog=STRING_USAGE_EPILOG);
 	parser.add_argument('--version', action='version',
-			    version='%(prog)s ('+VERSIONSTRING+')');
+			    version='%(prog)s ('+NAMES["PROJECT"]+') '+VERSIONS['PROJECT']);
 	parser.add_argument('-c', '--configfile', action='store',
 			    dest='configfile',
-			    default=DEFAULT_CONFIGFILE,
+			    default=DEFAULT_GENERAL_CONFIGFILE,
 			    help=STRING_USAGE_CONFIGFILE);
 	parser.add_argument('-e', '--editconfig', action='store_true',
 			    dest='invoke_editconfig',
@@ -99,6 +101,9 @@ def _parseArgs():
 	parser.add_argument('-s', '--sources', section='wesen',
 			    dest='sources',
 			    action=_OverwriteConfigAction);
+	parser.add_argument('-r', '--resume',
+			    dest='resume', action='store_true',
+			    default=False, help=STRING_USAGE_RESUME);
 	return parser.parse_known_args();
 
 def _addOverwriteBool(parser, argName, section, key):

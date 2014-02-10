@@ -2,6 +2,9 @@
 
 from ..point import getRandomPosition;
 
+class TurnOverException(Exception):
+	pass
+
 class WorldObject(object):
 	"""this class is an abstraction to all world objects,
 	as Wesen, Food and maybe some day something else.
@@ -13,12 +16,12 @@ class WorldObject(object):
 		self.infoObject = infoAllObject["object"];
 		self.infoRange = infoAllObject["range"];
 		self.objectType = self.infoObject["type"];
-		self.logger = self.infoWorld["logger"];
-		self.Debug = self.infoWorld["Debug"];
 		self.energy = self.infoObject["energy"];
 		self.DeleteObject = self.infoWorld["DeleteObject"];
 		self.AddObject = self.infoWorld["AddObject"];
 		self.worldObjects = self.infoWorld["objects"];
+		self.map = self.infoWorld["map"];
+		self.UpdatePos = self.infoWorld["UpdatePos"];
 		self.age = 0;
 		self.time = 0;
 		self.source = "";
@@ -30,7 +33,7 @@ class WorldObject(object):
 		return ("<worldobject id=%s pos=%s energy=%s>" %
 			(self.id, self.position, self.energy));
 
-	def getRangeIterator(self, objectIterator, radius, condition):
+	def getRangeIterator(self, radius, condition):
 		"""returns an iterator of pairs (id, object)
 		with all objects from objectIterator in radius
 		that match the condition.
@@ -42,24 +45,48 @@ class WorldObject(object):
 		#      There is still room for improvement.
 		#SEE testradius.py and testrange.py
 		(x, y) = self.position;
+		minX = max(0, x-radius);
+		maxX = min(self.infoWorld["length"], x+radius+1); #+1 since upper bound of range is exclusive
+		minY = max(0, y-radius)
+		maxY = min(self.infoWorld["length"], y+radius+1);
+		#print(minX, maxX, maxY, maxY, self.infoWorld["length"]);
 		return ((i, o)
-			for (i, o) in objectIterator
-			if(abs(x - o.position[0]) <= radius and
-			   abs(y - o.position[1]) <= radius and
-			   (condition is None or condition(o))));
+			for x1 in range(minX, maxX)
+			for y1 in range(minY, maxY)
+			for (i, o) in self.map[x1][y1].items()
+			if (condition is None or condition(o)));
 
 	def Die(self):
 		"""deletes WorldObject instance from world."""
 		self.DeleteObject(self.id);
+		raise TurnOverException(); #raise exception to immediatly end turn
 
 	def getDescriptor(self):
 		"""return descriptive data for the gui,
 		included by the world in World.getDescriptor.
 		"""
 		return {"position":self.position,
+			"id":self.id,
 			"energy":self.energy,
 			"age":self.age,
 			"type":self.objectType};
+
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		return {"type":self.objectType,
+			"energy":self.energy,
+			"age":self.age,
+			"position":self.position,
+			"source":self.source,
+			"time":self.time};
+
+	def restore(self, obj):
+		"""restores state of this objects from obj"""
+		self.age = obj["age"];
+		self.energy = obj["energy"];
+		self.position = obj["position"];
+		self.time = obj["time"];
 
 	def AgeCheck(self):
 		"""virtual function, look in wesen or food"""

@@ -1,6 +1,5 @@
 """The class for all data and operations a single Wesen has"""
 
-from ..strings import STRING_LOGGER;
 from .base import WorldObject;
 import importlib;
 
@@ -81,9 +80,8 @@ class Wesen(WorldObject):
 		if(self.UseTime("look")):
 			return [{"position":o.position, "type":o.objectType, "id":oid}
 				for oid, o in self.getRangeIterator(\
-					self.maxRange.items(),
-					self.infoRange["look"],
-					condition = lambda x : self != x)];
+								    self.infoRange["look"],
+								    condition = lambda x : self != x)];
 		else:
 			return [];
 
@@ -97,7 +95,6 @@ class Wesen(WorldObject):
 				 "age":o.age, "time":o.time,
 				 "source":o.source}
 				for oid, o in self.getRangeIterator(\
-					self.maxRange.items(),
 					self.infoRange["closer_look"],
 					condition = lambda x : self != x)];
 		else:
@@ -140,8 +137,10 @@ class Wesen(WorldObject):
 				return False;
 		if(self.time >= usedTime):
 			self.time -= usedTime;
+			oldPos = self.position;
 			self.position =  [(pc+dc) % self.infoWorld["length"]
 					  for (pc,dc) in zip(self.position,direction)];
+			self.UpdatePos(self.id, oldPos, self.getDescriptor());
 			return True;
 		else:
 			return False;
@@ -159,7 +158,6 @@ class Wesen(WorldObject):
 		"""calls Receive(message) in the wesen specified by wesenid when in range."""
 		if(self.UseTime("talk")):
 			for oid, o in self.getRangeIterator(\
-				self.maxRange.items(), 
 				self.infoRange["look"],
 				condition = lambda x : ((oid == wesenid) and
 							(o.objectType == "wesen"))):
@@ -169,17 +167,18 @@ class Wesen(WorldObject):
 
 	def Eat(self, foodid):
 		"""if it's at the same position, eat the food with python object id foodid."""
-		if(foodid in self.maxRange.keys()):
-			o = self.maxRange[foodid];
-			if((o.position == self.position) and
-			   (o.objectType == "food")):
-				if(self.UseTime("eat")):
-					self.energy += o.getEaten();
-					return True;
-			else:
-				if(o.position != self.position):
-					raise RuleException("In order to eat something, one has to be at the same position. Keep in mind that wesen move and you have to look where they are each turn, as the information from looking around becomes stale quickly!");
-				if(o.objectType != "food"):
+		if not foodid in self.worldObjects:
+			raise RuleException("Tried to eat non-existing food");
+		o = self.worldObjects[foodid];
+		if((o.position == self.position) and
+		   (o.objectType == "food")):
+			if(self.UseTime("eat")):
+				self.energy += o.getEaten();
+				return True;
+		else:
+			if(o.position != self.position):
+				raise RuleException("In order to eat something, one has to be at the same position. Keep in mind that wesen move and you have to look where they are each turn, as the information from looking around becomes stale quickly!");
+			if(o.objectType != "food"):
 					raise RuleException("In order to eat something, it has to be food.");
 		return False;
 
@@ -194,7 +193,6 @@ class Wesen(WorldObject):
 			infoWesen["source"] = self.source;
 			infoWesen["position"] = self.position;
 			child = self.AddObject(infoWesen);
-			self.maxRange[child.id] = child;
 			self.energy -= childEnergy;
 			self.age = 0;
 			self.EnergyCheck();
@@ -207,19 +205,16 @@ class Wesen(WorldObject):
 		so the one who had more energy than his enemy can survive.
 		The other Wesen dies.
 		"""
-		if(wesenid in self.maxRange.keys()):
-			o = self.maxRange[wesenid];
-			if((o.objectType == "wesen") and
-			   (o.position == self.position)):
-				if(self.UseTime("attack")):
-					self.energy -= int(o.getAttacked(self.energy)*0.5);
-					return (not self.EnergyCheck());
+		o = self.worldObjects[wesenid];
+		if((o.objectType == "wesen") and
+		   (o.position == self.position)):
+			if(self.UseTime("attack")):
+				self.energy -= int(o.getAttacked(self.energy)*0.5);
+				return (not self.EnergyCheck());
 		return False;
 
 	def getAttacked(self, energy):
 		"""called when this Wesen is attacked"""
-		self.logger.info(STRING_LOGGER["DEATHWESEN"]["ATTACK"]
-				 % (repr(self), energy));
 		previousEnergy = self.energy;
 		self.energy -= int(energy*0.75);
 		self.EnergyCheck();
@@ -249,25 +244,23 @@ class Wesen(WorldObject):
 
 	def Donate(self, energy, wesenid):
 		"""transfer energy from this wesen to another specified by wesenid"""
-		if(wesenid in self.maxRange.keys()):
-			o = self.maxRange[wesenid];
-			if((o.objectType == "wesen") and
-                           (o.position == self.position)):
-				if(self.UseTime("donate")):
-					if(energy > self.energy):
-						energy = self.energy;
-					if(not energy <= 0):
-						o.energy += energy;
-						self.energy -= energy;
-						self.EnergyCheck();
-						return True;
+		o = self.worldObjects[wesenid];
+		if((o.objectType == "wesen") and
+		   (o.position == self.position)):
+			if(self.UseTime("donate")):
+				if(energy > self.energy):
+					energy = self.energy;
+				if(not energy <= 0):
+					o.energy += energy;
+					self.energy -= energy;
+					self.EnergyCheck();
+					return True;
 		return False;
 
 	def Broadcast(self, message):
 		"""calls Talk(message) with all wesen in range"""
 		if(self.UseTime("broadcast")):
 			for oid, o in self.getRangeIterator(\
-				self.maxRange.items(),
 				self.infoRange["talk"],
 				condition = lambda x : (self != x and
 							x.objectType == "wesen")):
@@ -290,6 +283,19 @@ class Wesen(WorldObject):
 		descriptor.update(WorldObject.getDescriptor(self));
 		return descriptor;
 
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object"""
+		d = WorldObject.persist(self);
+		d.update({"wesensource":self.wesenSource.persist(),
+			  "maxage":self.infoObject["maxage"]});
+		return d;
+
+	def restore(self, obj):
+		"""restores the state of the wesen object"""
+		WorldObject.restore(self, obj);
+		self.wesenSource.restore(obj);
+
 	def UseTime(self, function):
 		"""if the wesen has enough time,
 		return true and subtract the time needed for function;
@@ -304,13 +310,11 @@ class Wesen(WorldObject):
 	def AgeCheck(self):
 		"""kills the wesen if it's too old"""
 		if(self.age > self.infoObject["maxage"]):
-			self.logger.info(STRING_LOGGER["DEATHWESEN"]["AGE"] % (repr(self)));
 			self.Die();
 
 	def EnergyCheck(self):
 		"""kills the Wesen when energy <= 0"""
 		if(self.energy <= 0):
-			self.logger.info(STRING_LOGGER["DEATHWESEN"]["ENERGY"] % (repr(self)));
 			self.Die();
 			return True;
 		return False;
@@ -320,9 +324,4 @@ class Wesen(WorldObject):
 		WorldObject.main(self);
 		self.energy -= 1;
 		self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
-		self.maxRange = dict(self.getRangeIterator(\
-				self.worldObjects.items(),
-				(self.infoRange["look"]
-				 + 1 + (self.time // self.infoTime["move"])),
-				condition = lambda x : True));
 		self.wesenSource.main();

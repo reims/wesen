@@ -12,13 +12,21 @@ class DefaultWesenSource(object):
 		self.infoTime = infoAllSource["time"];
 		self.infoRange = infoAllSource["range"];
 		self.worldlength = self.infoWorld["length"];
-		self.Debug = self.infoWorld["Debug"];
-		self.logger = self.infoWorld["logger"];
 		self.source = self.infoSource["source"];
 
 	def getDescriptor(self):
 		"""currently unused, designed for debugging"""
 		return {};
+
+	def persist(self):
+		"""returns JSON serializable object with all information
+		needed to restore the state of the object
+
+		subclasses need to add all information they need to restore their state"""
+		return {};
+
+	def restore(self, obj):
+		pass;
 
 	def Receive(self, message):
 		"""message should be a dict"""

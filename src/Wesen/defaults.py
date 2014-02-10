@@ -6,6 +6,15 @@ run the config editor (with wesen --editconfig)"""
 from os.path import expanduser, join;
 from math import sqrt;
 
+DEFAULT_GENERAL_CONFIGFOLDER = join(expanduser("~"),".wesen");
+DEFAULT_GENERAL_CONFIGFILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "conf");
+# this configfile is _always_ used before any other specified!
+# these default values are used in configed for the defaults in the editor and when no values are specified in the configfile.
+# I recommend to use the calculated values as they are.
+# For an explanation of these values,
+# run the config editor (with wesen --editconfig)
+DEFAULT_GAME_STATE_FILE = join(DEFAULT_GENERAL_CONFIGFOLDER, "gamestate");
+
 #HINT: While the following could be inferred from the defaults below,
 #      It adds a lot of clarity to have it explicitly.
 CONFIG_OPTIONS = [["general",
