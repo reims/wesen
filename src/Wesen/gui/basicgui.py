@@ -1,4 +1,5 @@
 from ..strings import VERSIONSTRING;
+from ..defaults import DEFAULT_GAME_STATE_FILE;
 from .map import Map;
 from .text import Text;
 from .graph import Graph;
@@ -101,11 +102,17 @@ class BasicGUI(object):
 	def Exit(self):
 		"""Stop the simulation and quit"""
 		glFinish();
+		self.DumpGameState();
 		sys.exit();
 
 	def Pause(self):
 		"""Pause/Unpause the simulation"""
 		self.pause = not self.pause;
+
+	def DumpGameState(self, filename = DEFAULT_GAME_STATE_FILE):
+		with open(filename, 'w') as f:
+			json = self.world.persistToJSON();
+			f.write(json);
 
 	def SetSpeed(self, amount):
 		"""SetSpeed(amount) -> amount is added to the speed, checks if too low  or high"""
