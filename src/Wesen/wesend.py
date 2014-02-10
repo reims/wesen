@@ -79,6 +79,7 @@ class Wesend(object):
 				self.world.main();
 			except KeyboardInterrupt:
 				print(" got keyboard interrupt, stopping now.");
+				self.world.DumpGameState()
 				break;
 			if((self.world.turns % 1000) == 0):
 				print("turn", self.world.turns, "stats:");
