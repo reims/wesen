@@ -1,29 +1,26 @@
 from ..strings import VERSIONSTRING;
-from ..defaults import DEFAULT_GAME_STATE_FILE;
 from .map import Map;
 from .text import Text;
 from .graph import Graph;
 from OpenGL.GL import glClearColor, glLineWidth, \
-    glEnable, glViewport, glReadPixels, glTranslatef, \
+    glEnable, glViewport, glTranslatef, \
     glScale, glLoadIdentity, glClear, glMatrixMode, \
     glPushMatrix, glPopMatrix, glFinish, GLError, \
-    GL_RGB, GL_UNSIGNED_BYTE, GL_LINE_SMOOTH, \
-    GL_COLOR_BUFFER_BIT, GL_MODELVIEW;
-from OpenGL.GLU import GLubyte;
+    GL_LINE_SMOOTH, GL_COLOR_BUFFER_BIT, GL_MODELVIEW;
 from OpenGL.GLUT import glutMainLoop, glutInitDisplayMode, \
     glutInitWindowSize, glutInitWindowPosition, glutInit, \
     glutCreateWindow, glutDisplayFunc, glutIdleFunc, \
     glutPostRedisplay, glutReshapeFunc, glutKeyboardFunc, \
-    glutSpecialFunc, glutMouseFunc, glutCreateMenu, \
-    glutAddMenuEntry, glutAttachMenu, glutSwapBuffers, glutGet, \
-    GLUT_ELAPSED_TIME, GLUT_DOUBLE, GLUT_RGB, GLUT_RIGHT_BUTTON;
-from PIL import Image;
+    glutSpecialFunc, glutMouseFunc, glutSwapBuffers, glutGet, \
+    GLUT_ELAPSED_TIME, GLUT_DOUBLE, GLUT_RGB;
 import sys;
 import traceback;
 
 #TODO Error checking should be a config option.
 import OpenGL;
 OpenGL.ERROR_CHECKING = False; # performance-relevant
+
+#glutArgvDebugging = "--indirect --sync --gldebug";
 
 cl_default =   [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0],
 		[1.0, 0.0, 1.0], [1.0, 1.0, 0.0],
@@ -39,7 +36,6 @@ class BasicGUI(object):
 		world a World object and
 		extraArgs is a string which is passed to OpenGL"""
 		self.GameLoop = GameLoop;
-		self.config = infoGUI["config"];
 		self.wesend = infoGUI["wesend"];
 		self.infoWorld = infoGUI["world"];
 		self.infoWesen = infoGUI["wesen"];
@@ -53,16 +49,17 @@ class BasicGUI(object):
 		self.init = True;
 		self.frame = 0;
 		self.lasttime = 0;
-		self.turns = 0;
+		self.lastturns = 0;
+		self.turns = 0; #TODO restore after resume?
 		self.fps = 0;
+		self.tps = 0; #TODO maybe kill turns per second stats
 		self.speed = 1.0;
 		self.wait = 1;
-		self.movieMode = False;
 		self.posX, self.posY = (0, 0);
 		initxy = self.infoGui["pos"];
 		self.initx = int(initxy[:initxy.index(",")]);
 		self.inity = int(initxy[initxy.index(",")+1:]);
-		self.step = False;
+		self.step = False; #TODO maybe repair step feature
 		self.descriptor = [{}, []];
 		self.bgcolor = [0.0, 0.0, 0.05];
 		self.fgcolor = [0.0, 0.1, 0.2];
@@ -74,6 +71,7 @@ class BasicGUI(object):
 		self.map = Map(self, self.infoWorld,
 			       self.infoWesen["sources"],
 			       self.colorList);
+		self.world.setCallbacks(self.map.GetCallbacks());
 		self.text = Text(self, self.world);
 		self.text.SetAspect(2, 1); # aspect ratio x:y is 2:1
 		self.objects = [self.map, self.text];
@@ -102,17 +100,12 @@ class BasicGUI(object):
 	def Exit(self):
 		"""Stop the simulation and quit"""
 		glFinish();
-		self.DumpGameState();
+		self.world.DumpGameState();
 		sys.exit();
 
 	def Pause(self):
 		"""Pause/Unpause the simulation"""
 		self.pause = not self.pause;
-
-	def DumpGameState(self, filename = DEFAULT_GAME_STATE_FILE):
-		with open(filename, 'w') as f:
-			json = self.world.persistToJSON();
-			f.write(json);
 
 	def SetSpeed(self, amount):
 		"""SetSpeed(amount) -> amount is added to the speed, checks if too low  or high"""
@@ -157,16 +150,19 @@ class BasicGUI(object):
 			if type(key) is bytes
 			else specialKeyRepresentation(key));
 
+	def _generateKeyExplanations(self):
+		self.keyExplanation = {self._getKeyRepresentation(key):
+					       str(self.keybindings[key].__doc__)
+				       for key in self.keybindings};
+
 	def initKeyBindings(self):
-		keybindings = {b"q":self.Exit, 27:self.Exit,
-			       b" ":self.Pause,
-			       b"-": self.SpeedDown,
-			       b"+": self.SpeedUp,
-			       13  : self.Step, #TODO seems to be broken
-			       };
-		self.keyExplanation = {self._getKeyRepresentation(key):str(keybindings[key].__doc__)
-				       for key in keybindings};
-		self.keybindings = keybindings;
+		self.keybindings = {b"q":self.Exit, 27:self.Exit, b"x": self.Exit,
+				    b" ":self.Pause,
+				    b"-": self.SpeedDown,
+				    b"+": self.SpeedUp,
+				    13  : self.Step, #TODO seems to be broken
+				    };
+		self._generateKeyExplanations();
 
 	def HandleKeys(self, key, x, y):
 		"""handle both usual (character) and special (ordinal) keys"""
@@ -223,18 +219,22 @@ class BasicGUI(object):
 		glutSwapBuffers();
 
 	def CalcFps(self):
-		"""calculates GUI.fps (call every frame)"""
+		"""calculates GUI.fps and GUI.tps (call every frame)"""
 		self.frame += 1;
 		self.actualtime = glutGet(GLUT_ELAPSED_TIME);
 		timenow = self.actualtime - self.lasttime;
+		turnsnow = self.turns - self.lastturns;
 		if(timenow > 1000):
 			self.fps = self.frame*1000.0/timenow;
 			self.lasttime = self.actualtime;
+			self.lastturns = self.turns;
+			self.tps = turnsnow*1000.0/timenow;
 			self.frame = 0;
 
 	def Draw(self):
 		"""actualizes the descriptor by calling his GameLoop and renders it"""
-		#TODO figure out how self.step is supposed to work
+		#TODO figure out how self.step is supposed to work (broken!)
+		#TODO find out if the framedropping mechanism is already killed everywhere
 		if((not self.pause) or self.step):
 			if(self.step):
 				self.descriptor = self.GameLoop();
