@@ -20,7 +20,6 @@ print("You can supply an alternative config file on the command-line");
 print("You should stop Wesen by Ctrl+C to finish profiling");
 
 sys.argv.append('--disablegui');
-sys.argv.append('--disablelog');
 pr = Profile(perf_counter);
 pr.run('Loader()');
 pr.dump_stats('profile.stats');
@@ -29,4 +28,5 @@ pr.dump_stats('profile.stats');
 stats = Stats(pr)
 
 stats.sort_stats('tottime')
-stats.print_stats('Wesen/sources',10)
+#stats.print_stats('Wesen/sources',10)
+stats.print_stats('Wesen/',10)
