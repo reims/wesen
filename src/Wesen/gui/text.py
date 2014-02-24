@@ -1,4 +1,5 @@
-"""This module contains all methods related to displaying text in the gui"""
+"""This module contains all methods related to displaying text in the gui,
+such as the Text GuiObject subclass and the TextPrinter class"""
 
 from OpenGL.GL import glPushMatrix, glPopMatrix, \
     glTranslatef, glRasterPos
@@ -18,9 +19,12 @@ class Text(GuiObject):
         # TODO replace this mechanism by something else
 
     def Print(self, line):  # TODO replace this mechanism by something else
+        """there's a single place where this line is shown.
+        Call Print(line) again and the previous line is removed."""
         self.givenText = line
 
     def Reshape(self, x, y):
+        """Corrects content sizes after changing GuiObject size"""
         GuiObject.Reshape(self, x, y)
         self.printer.Reshape(x, y)
 
@@ -51,6 +55,7 @@ class Text(GuiObject):
         #	  (int(100.0/self.gui.speed)));
 
     def DrawGivenText(self):  # TODO replace this mechanism by something else
+        """Draws the last text given previously by Print(line)"""
         if(self.givenText is not None):
             self.printer.Print("\n")
             self.printer.Print(self.givenText)
@@ -80,13 +85,14 @@ class TextPrinter(object):
         self.Print("\n")
 
     def Reshape(self, x, y):
+        """Gets into good shape again"""
         self.x = x
-        self.y = 30 / y
+        self.y = 30 / y  # TODO where does the magic number come from?
 
     def Print(self, text):
         """Print(String text) prints text to the screen"""
         glPushMatrix()
-        glTranslatef(0.02, 0.96, 0.0)
+        glTranslatef(0.02, 0.96, 0.0) # TODO where does the magic number come from?
         for character in text:
             if(character == "\n"):
                 self.rasterPos -= self.y

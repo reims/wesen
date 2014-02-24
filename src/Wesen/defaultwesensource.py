@@ -17,7 +17,7 @@ class DefaultWesenSource(object):
         self.source = self.infoSource["source"]
 
     def getDescriptor(self):
-        """currently unused, designed for debugging"""
+        """currently unused, designed for debugging and UI"""
         return {}
 
     def persist(self):
@@ -28,6 +28,8 @@ class DefaultWesenSource(object):
         return {}
 
     def restore(self, obj):
+        """given a dict obj as returned by persist,
+        to restore internal state of AI"""
         pass
 
     def Receive(self, message):

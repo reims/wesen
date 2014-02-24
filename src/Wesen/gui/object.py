@@ -5,7 +5,7 @@ from OpenGL.GL import glColor3f, glRectf
 
 class GuiObject(object):
 
-    """A GuiObject maintains a frame."""
+    """A GuiObject maintains a visual frame around it."""
 
     def __init__(self, gui):
         self.gui = gui
@@ -13,9 +13,9 @@ class GuiObject(object):
                       "color": [0.75, 0.75, 0.75],  # base color
                       "plastic": 0.5,  # thickness of the frame
                       "aspect": 1, "x": 0, "y": 0}
-        # ???
 
     def _getFrameData(self):
+        """returns a dict with info about the visual frame"""
         # TODO the whole frame mechanism should be beautified.
         frame = self.frame["frame"]
         aspect = self.frame["aspect"]
@@ -30,7 +30,9 @@ class GuiObject(object):
         return self.frame
 
     def SetAspect(self, x, y):
-        # TODO understand the "aspect" mechanism...
+        """takes width and height and sets the visual frame aspect.
+        This is necessary to let the frame be of same thickness horizontally
+        and vertically, even after rescaling."""
         self.frame["aspect"] = x / y
 
     def _drawframe(self):

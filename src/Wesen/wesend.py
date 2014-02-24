@@ -1,7 +1,7 @@
-"""Copyright 2003-2013 by Konrad Voelkel and Reimer Backhaus.
-This program is distributed under the terms of the GNU General Public License.
-visit https://github.com/reims/wesen for versions > 2013
-or http://wesen.sourceforge.net for old versions of 2003,2004."""
+"""This class contains the code to run a Wesen game,
+with or without GUI,
+with or without savegame,
+provided a configuration is given."""
 
 from .defaults import DEFAULT_GAME_STATE_FILE
 from .world import World
@@ -49,6 +49,7 @@ class Wesend(object):
             self.world = World(infoAllWorld)
 
     def start(self, extraArgs=""):
+        """starts the simulation (with GUI, if configured)"""
         if(self.infoGui["enable"]):
             self.initGUI(extraArgs)
         else:
@@ -76,7 +77,8 @@ class Wesend(object):
 
     def main(self):
         """calls world.main() in gui-less mode,
-        until KeyboardInterrupt"""
+        until KeyboardInterrupt
+        and prints stats every 1000 turns to show some action"""
         while(True):
             try:
                 self.world.main()

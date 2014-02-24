@@ -1,3 +1,5 @@
+"""The basic OpenGL GUI code"""
+
 from ..strings import VERSIONSTRING
 from .map import Map
 from .text import Text
@@ -31,6 +33,10 @@ cl_default = [[1.0, 0.0, 0.0], [0.0, 0.0, 1.0],
 
 
 class BasicGUI(object):
+    """This GUI can be subclassed to enable more sophisticated display methods.
+    This class handles all dirty OpenGL work.
+    There are three components: Map, Graph and Text.
+    """
 
     def __init__(self, infoGUI, GameLoop, world, extraArgs, colorList=cl_default):
         """infoGUI should be a dict,
@@ -141,17 +147,18 @@ class BasicGUI(object):
         self.step = True
 
     def initMenu(self):
+        """Abstract method, gets called upon init.
+        Subclasses could do:
+          self.menu = glutCreateMenu(self.HandleAction)
+          glutAttachMenu(GLUT_RIGHT_BUTTON)
+        """
         pass
-        # subclasses can do:
-        #self.menu = glutCreateMenu(self.HandleAction);
-        # glutAttachMenu(GLUT_RIGHT_BUTTON);
-
-    def HandleAction(self, action):
-        raise NotImplementedError(
-            "unknown action from popup-menu (%s)" % (action))
 
     def _getKeyRepresentation(self, key):
-        # TODO rewrite this function for readability.
+        """takes a character and returns a nice string representation, like
+        >>> self._getKeyRepresentation(27)
+        <ESC>
+        """
         specialKeyRepresentation = \
             lambda key: ("<ESC>" if key == 27 else
                          "<RETURN>" if key == 13 else
@@ -165,11 +172,17 @@ class BasicGUI(object):
                 else specialKeyRepresentation(key))
 
     def _generateKeyExplanations(self):
+        """takes current key bindings and generates hints
+        using nice string representations and docstrings"""
         self.keyExplanation = {self._getKeyRepresentation(key):
                                str(self.keybindings[key].__doc__)
                                for key in self.keybindings}
 
     def initKeyBindings(self):
+        """sets up the key bindings for the GUI
+        and generates some help texts for the keys
+        (self.keyExplanation).
+        Could be overridden and called by subclasses."""
         self.keybindings = {b"q": self.Exit, 27: self.Exit, b"x": self.Exit,
                             b" ": self.Pause,
                             b"-": self.SpeedDown,
@@ -185,15 +198,18 @@ class BasicGUI(object):
             self.keybindings[key]()
 
     def _win2glCoord(self, x, y):
+        """converts window coordinates to OpenGL coordinates"""
         posX = (2.0 * x / self.windowSize[0])
         posY = (2.0 * y / self.windowSize[1])
         return (posX, posY)
 
     def _win2wesenCoord(self, x, y):
+        """converts window coordinates (as given by mouse events)
+        to Wesen World map coordinates (possibly out of range)"""
         x, y = self._win2glCoord(x, y)
         posX = int(x * self.infoWorld["length"])
         posY = int((1.0 - y) * self.infoWorld["length"]) + 1
-        # why +1 ?
+        # TODO why +1 ?
         return (posX, posY)
 
     def HandleMouse(self, button, state, x, y):
@@ -203,6 +219,7 @@ class BasicGUI(object):
             posX, posY = self._win2wesenCoord(x, y)
             if(posX != self.posX or posY != self.posY):
                 self.posX, self.posY = (posX, posY)
+            # HINT posX and posY are currently unused but that will change
         if(state == 1):
             self.mouseLast = [x, y]
 

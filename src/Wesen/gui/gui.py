@@ -22,6 +22,9 @@ colorList = cl_freak
 
 
 class GUI(BasicGUI):
+    """The GUI class is the usual class to use as GUI in Wesen.
+    If you want to use Wesen to do something else than AI tournaments,
+    you may be better off subclassing BasicGUI."""
 
     def __init__(self, infoGUI, GameLoop, world, extraArgs):
         """infoGUI should be a dict,
@@ -56,12 +59,14 @@ class GUI(BasicGUI):
                     o.energy -= 10
 
     def initMenu(self):
+        """sets up the popup-menu for right mouse button"""
         self.menu = glutCreateMenu(self.HandleAction)
         glutAddMenuEntry(b"display key bindings", 55)
         glutAddMenuEntry(b"pause   (space)", 100)
         glutAttachMenu(GLUT_RIGHT_BUTTON)
 
     def HandleAction(self, action):
+        """handles actions from the popup-menu"""
         if(action == 55):
             line = "".join(["'%s' %s\n" % (key, self.keyExplanation[key])
                             for key in sorted(self.keyExplanation.keys())])
@@ -74,6 +79,8 @@ class GUI(BasicGUI):
         return 0
 
     def initKeyBindings(self):
+        """sets up all key bindings,
+        inheriting some from BasicGUI"""
         BasicGUI.initKeyBindings(self)
         self.keybindings.update({b"m": self.ToggleMovie,
                                  # now following left,up,right,down keys:

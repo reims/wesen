@@ -6,6 +6,9 @@ import importlib
 
 class RuleException(Exception):
 
+    """This exception is thrown whenever a wesen source
+    violates the rules of the game."""
+
     def __init__(self, ruleDescription):
         super(RuleException, self).__init__(ruleDescription)
 
@@ -67,18 +70,23 @@ class Wesen(WorldObject):
     # small capabilites, no time cost
 
     def getTime(self):
+        """returns time left to do stuff (for free)"""
         return self.time
 
     def getEnergy(self):
+        """returns energy left (for free)"""
         return self.energy
 
     def getPosition(self):
+        """returns own position (for free)"""
         return self.position
 
     def getId(self):
+        """returns own object id (for free)"""
         return id(self)
 
     def getAge(self):
+        """returns own age (for free)"""
         return self.age
 
     # standard capabilities

@@ -105,6 +105,7 @@ class World(object):
         return newObject
 
     def UpdatePos(self, _id, oldPos, obj):
+        """updates the map about an objects position"""
         del self.map[oldPos[0]][oldPos[1]][_id]
         newPos = obj["position"]
         self.map[newPos[0]][newPos[1]][_id] = self.objects[_id]
@@ -115,7 +116,8 @@ class World(object):
         return [o.getDescriptor() for o in self.objects.values()]
 
     def DumpGameState(self, filename=DEFAULT_GAME_STATE_FILE):
-        # TODO move this to wesend, where it belongs?
+        """writes the whole game state to a given filename (as JSON)"""
+        # TODO move this to wesend, where it belongs!
         with open(filename, 'w') as f:
             jsonDump = self.persistToJSON()
             f.write(jsonDump)
