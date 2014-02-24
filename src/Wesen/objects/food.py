@@ -22,7 +22,7 @@ class Food(WorldObject):
 
     def __repr__(self):
         return ("<food id=%s growrate=%s pos=%s energy=%s>" %
-                (self.id, self.growrate, self.position, self.energy))
+                (id(self), self.growrate, self.position, self.energy))
 
     def getDescriptor(self):
         """currently doing nothing than returning the WorldObjects getDescriptor."""

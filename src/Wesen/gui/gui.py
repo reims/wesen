@@ -35,12 +35,12 @@ class GUI(BasicGUI):
 
     def ModifyFood(self, action):
         """action can be "delete" "add" "increase" "decrease" """
-        if(action == "delete"):
+        if(action == "delete"): # FIXME broken?
             for o in self.world.objects.values():
                 if(o.objectType == "food"):
-                    if(self.world.DeleteObject(o.id)):
+                    if(self.world.DeleteObject(id(o))):
                         break
-        if(action == "add"):
+        if(action == "add"): # FIXME broken?
             infoFood = self.infoFood
             infoFood["type"] = "food"
             if("position" in infoFood):

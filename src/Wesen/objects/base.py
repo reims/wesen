@@ -25,13 +25,12 @@ class WorldObject(object):
         self.time = 0
         self.source = ""
         self.dead = False
-        self.id = id(self)
         self.position = self.infoObject.get("position",
                                             getRandomPosition(self.infoWorld["length"]))
 
     def __repr__(self):
         return ("<worldobject id=%s pos=%s energy=%s>" %
-                (self.id, self.position, self.energy))
+                (id(self), self.position, self.energy))
 
     def getRangeIterator(self, radius, condition):
         """returns an iterator of pairs (id, object)
@@ -61,14 +60,14 @@ class WorldObject(object):
     def Die(self):
         """deletes WorldObject instance from world."""
         self.dead = True
-        self.DeleteObject(self.id)
+        self.DeleteObject(id(self))
 
     def getDescriptor(self):
         """return descriptive data for the gui,
         included by the world in World.getDescriptor.
         """
         return {"position": self.position,
-                "id": self.id,
+                "id": id(self),
                 "energy": self.energy,
                 "age": self.age,
                 "type": self.objectType}
@@ -102,5 +101,6 @@ class WorldObject(object):
         """run one turn of object code"""
         if(not self.dead):
             self._EnergyCheck()
+        if(not self.dead):
             self.age += 1
             self._AgeCheck()

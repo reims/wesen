@@ -97,11 +97,11 @@ class World(object):
             newObject = Food(infoAllObject)
         else:
             raise Exception("invalid objectType: " + infoObject["type"])
-        self.objects[newObject.id] = newObject
+        self.objects[id(newObject)] = newObject
         self.map[newObject.position[0]][
-            newObject.position[1]][newObject.id] = newObject
+            newObject.position[1]][id(newObject)] = newObject
         self.callbacks.get("AddObject", lambda _id, obj: None)(
-            newObject.id, newObject.getDescriptor())
+            id(newObject), newObject.getDescriptor())
         return newObject
 
     def UpdatePos(self, _id, oldPos, obj):

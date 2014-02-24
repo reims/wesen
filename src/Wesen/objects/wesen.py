@@ -42,7 +42,7 @@ class Wesen(WorldObject):
 
     def __repr__(self):
         return ("<wesen id=%s pos=%s energy=%s source=%s>" %
-                (self.id, self.position, self.energy, str(self.wesenSource)))
+                (id(self), self.position, self.energy, str(self.wesenSource)))
 
     def PutInterface(self, source):
         """maps the source functions to the corresponding wesen functions."""
@@ -76,7 +76,7 @@ class Wesen(WorldObject):
         return self.position
 
     def getId(self):
-        return self.id
+        return id(self)
 
     def getAge(self):
         return self.age
@@ -152,7 +152,7 @@ class Wesen(WorldObject):
             oldPos = self.position
             self.position = [(pc + dc) % self.infoWorld["length"]
                              for (pc, dc) in zip(self.position, direction)]
-            self.UpdatePos(self.id, oldPos, self.getDescriptor())
+            self.UpdatePos(id(self), oldPos, self.getDescriptor())
             return True
         else:
             return False
@@ -214,7 +214,7 @@ class Wesen(WorldObject):
             self.energy -= childEnergy
             self.age = 0
             self._EnergyCheck()
-            return child.id
+            return id(child)
         return False
 
     def Attack(self, wesenid):
