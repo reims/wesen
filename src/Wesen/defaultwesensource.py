@@ -36,4 +36,4 @@ class DefaultWesenSource(object):
 
     def main(self):
         """called every turn"""
-        pass
+        raise NotImplementedError("Every Wesen Source (AI code) needs a main method")

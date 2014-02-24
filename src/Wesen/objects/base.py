@@ -90,17 +90,17 @@ class WorldObject(object):
         self.position = obj["position"]
         self.time = obj["time"]
 
-    def AgeCheck(self):
+    def _AgeCheck(self):
         """virtual function, look in wesen or food"""
-        pass
+        assert not self.dead
 
-    def EnergyCheck(self):
+    def _EnergyCheck(self):
         """virtual function, look in wesen or food"""
-        pass
+        assert not self.dead
 
     def main(self):
         """run one turn of object code"""
         if(not self.dead):
-            self.EnergyCheck()
+            self._EnergyCheck()
             self.age += 1
-            self.AgeCheck()
+            self._AgeCheck()

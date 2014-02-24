@@ -6,23 +6,6 @@ from .objects.food import Food
 
 import json
 
-# BEGIN code for dictproxys:
-from ctypes import pythonapi, py_object
-from _ctypes import PyObj_FromPtr
-
-DICT_PROXY = pythonapi.PyDictProxy_New
-DICT_PROXY.argtypes = (py_object,)
-DICT_PROXY.rettype = py_object
-
-
-def make_dictproxy(obj):
-    """takes a dictionary and returns an immutable proxy of it,
-    which is more performant than creating a copy."""
-    assert isinstance(obj, dict)
-    print("in make_dictproxy")
-    return PyObj_FromPtr(DICT_PROXY(obj))
-# END code for dictproxys.
-
 
 class World(object):
 
@@ -35,11 +18,6 @@ class World(object):
 
     def __init__(self, infoAllWorld=None, createObjects=True, callbacks={}):
         """infoAllWorld is a dictionary of dictionaries"""
-        # TODO the infoSomething mechanism is very intransparent.
-        #     either document it very well or change it
-        #     to something more evident...
-        #     maybe at least hand over the config as one dictproxy,
-        #     without any changes...
         self.callbacks = callbacks
         if not infoAllWorld is None:
             self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
@@ -72,6 +50,10 @@ class World(object):
         self.infoAllWorld["wesen"]["sources"].sort()
 
     def setCallbacks(self, callbacks):
+        """used by UI to manipulate the world
+        >>> set(callbacks.keys()) == set(["DeleteObject", "AddObject", "UpdatePos"])
+        True
+        """
         self.callbacks = callbacks
 
     def createDefaultObjects(self):
@@ -79,11 +61,7 @@ class World(object):
         self.objects = {}
         for entry in self.infoAllWorld["wesen"]["sources"]:
             for _ in range(self.infoAllWorld["wesen"]["count"]):
-                # maybe this is preferable to make_dictproxy, since the dict is modified
-                # if any wesen looks at this value again after creation, it
-                # could see a different source
                 temp = self.infoAllWorld["wesen"].copy()
-                # make_dictproxy(self.infoAllWorld["wesen"])
                 temp["source"] = entry
                 self.AddObject(temp)
         for _ in range(self.infoAllWorld["food"]["count"]):
@@ -122,7 +100,6 @@ class World(object):
         self.objects[newObject.id] = newObject
         self.map[newObject.position[0]][
             newObject.position[1]][newObject.id] = newObject
-        #print("Added new", infoObject["type"], "with id", newObject.id, "at", newObject.position);
         self.callbacks.get("AddObject", lambda _id, obj: None)(
             newObject.id, newObject.getDescriptor())
         return newObject
@@ -131,7 +108,6 @@ class World(object):
         del self.map[oldPos[0]][oldPos[1]][_id]
         newPos = obj["position"]
         self.map[newPos[0]][newPos[1]][_id] = self.objects[_id]
-        #print("Moved object with id", _id, "from", oldPos, "to", newPos);
         self.callbacks.get("UpdatePos", lambda _id, obj: None)(_id, obj)
 
     def getDescriptor(self):
@@ -176,6 +152,7 @@ class World(object):
         return json.dumps(d)
 
     def restoreFromJson(self, string):
+        # TODO figure out if restore and restoreFromJson are both needed
         """restores the state of the world from a JSON string"""
         obj = json.loads(string)
         self.setInfoAllWorld(obj)

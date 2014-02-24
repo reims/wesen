@@ -15,7 +15,7 @@ import json
 
 class Wesend(object):
 
-    """Wesend(config, extraArgs="")
+    """Wesend(config)
             Runs one Wesen game by start(), with given config data.
             This module intruments a World object
             and, if enabled in the config, a Gui object.

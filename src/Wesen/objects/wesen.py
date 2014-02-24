@@ -87,7 +87,7 @@ class Wesen(WorldObject):
         """returns a list of dictionaries with all visible WorldObjects position,
         objecttype and python id.
         """
-        if(self.UseTime("look")):
+        if(self._UseTime("look")):
             return [{"position": o.position, "type": o.objectType, "id": oid}
                     for oid, o in self.getRangeIterator(
                         self.infoRange["look"],
@@ -99,7 +99,7 @@ class Wesen(WorldObject):
         """returns look() and a few more information, as
         energy, age, time, source (which equals to friend/foe).
         """
-        if(self.UseTime("closerlook")):
+        if(self._UseTime("closerlook")):
             return [{"position": o.position, "type": o.objectType,
                      "id": oid, "energy": o.energy,
                      "age": o.age, "time": o.time,
@@ -168,7 +168,7 @@ class Wesen(WorldObject):
 
     def Talk(self, wesenid, message):
         """calls Receive(message) in the wesen specified by wesenid when in range."""
-        if(self.UseTime("talk")):
+        if(self._UseTime("talk")):
             for oid, o in self.getRangeIterator(
                     self.infoRange["look"],
                     condition=lambda x: ((oid == wesenid) and
@@ -186,7 +186,7 @@ class Wesen(WorldObject):
         o = self.worldObjects[foodid]
         if((o.position == self.position) and
            (o.objectType == "food")):
-            if(self.UseTime("eat")):
+            if(self._UseTime("eat")):
                 self.energy += o.getEaten()
                 return True
         else:
@@ -204,7 +204,7 @@ class Wesen(WorldObject):
         """
         if(self.dead):
             return False
-        if(self.UseTime("reproduce")):
+        if(self._UseTime("reproduce")):
             childEnergy = self.energy // 2
             infoWesen = self.infoObject.copy()
             infoWesen["energy"] = childEnergy
@@ -213,7 +213,7 @@ class Wesen(WorldObject):
             child = self.AddObject(infoWesen)
             self.energy -= childEnergy
             self.age = 0
-            self.EnergyCheck()
+            self._EnergyCheck()
             return child.id
         return False
 
@@ -232,16 +232,16 @@ class Wesen(WorldObject):
                 "May not attack non-existent enemy with id '%s'" % (wesenid))
         if((o.objectType == "wesen") and
            (o.position == self.position)):
-            if(self.UseTime("attack")):
+            if(self._UseTime("attack")):
                 self.energy -= int(o.getAttacked(self.energy) * 0.5)
-                return (not self.EnergyCheck())
+                return (not self._EnergyCheck())
         return False
 
     def getAttacked(self, energy):
         """called when this Wesen is attacked"""
         previousEnergy = self.energy
         self.energy -= int(energy * 0.75)
-        self.EnergyCheck()
+        self._EnergyCheck()
         return previousEnergy
 
     # advanced capabilites
@@ -252,7 +252,7 @@ class Wesen(WorldObject):
         the energy is subtracted from the wesen"""
         if(self.dead):
             return False
-        if(self.UseTime("vomit")):
+        if(self._UseTime("vomit")):
             if(energy > self.energy):
                 energy = self.energy
                 if(deathOnLowEnergy):
@@ -275,13 +275,13 @@ class Wesen(WorldObject):
         o = self.worldObjects[wesenid]
         if((o.objectType == "wesen") and
            (o.position == self.position)):
-            if(self.UseTime("donate")):
+            if(self._UseTime("donate")):
                 if(energy > self.energy):
                     energy = self.energy
                 if(not energy <= 0):
                     o.energy += energy
                     self.energy -= energy
-                    self.EnergyCheck()
+                    self._EnergyCheck()
                     return True
         return False
 
@@ -289,7 +289,7 @@ class Wesen(WorldObject):
         """calls Talk(message) with all wesen in range"""
         if(self.dead):
             return False
-        if(self.UseTime("broadcast")):
+        if(self._UseTime("broadcast")):
             for _, o in self.getRangeIterator(
                     self.infoRange["talk"],
                     condition=lambda x: (self != x and
@@ -326,7 +326,7 @@ class Wesen(WorldObject):
         WorldObject.restore(self, obj)
         self.wesenSource.restore(obj)
 
-    def UseTime(self, function):
+    def _UseTime(self, function):
         """if the wesen has enough time,
         return true and subtract the time needed for function;
         else return false.
@@ -337,17 +337,15 @@ class Wesen(WorldObject):
             return True
         return False
 
-    # TODO: some methods needn't be public (AgeCheck, ...)
-    def AgeCheck(self):
+    def _AgeCheck(self):
         """kills the wesen if it's too old"""
+        WorldObject._AgeCheck(self)
         if(self.age > self.infoObject["maxage"]):
             self.Die()
 
-    def EnergyCheck(self):
+    def _EnergyCheck(self):
         """kills the Wesen when energy <= 0"""
-        # XXX this code should not be executed if it is already dead!
-        if(self.dead):
-            print("aha!")
+        WorldObject._EnergyCheck(self)
         if(self.energy <= 0):
             self.Die()
             return True

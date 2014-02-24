@@ -5,7 +5,7 @@ from .defaults import DEFAULT_CONFIGFILE, \
 
 # for I18N, insert here a stringtable-loader or replace this file.
 
-VERSIONSTRING = "wesen 0.6-dev (py3k version, early alpha)"
+VERSIONSTRING = "wesen 0.6.0-alpha"
 URL = "https://github.com/reims/wesen"
 
 STRING_ERROR_NOTSAMEPATH = "There is a path problem. The program could not find the desired files."

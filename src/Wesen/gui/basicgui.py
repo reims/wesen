@@ -82,7 +82,7 @@ class BasicGUI(object):
         self.text.SetAspect(2, 1)
         # aspect ratio x:y is 2:1
         self.objects = [self.map, self.text]
-        self.initGL(extraArgs)
+        self._initGL(extraArgs)
         self.menu = None
         self.initMenu()
         self.keybindings = dict()
@@ -92,7 +92,7 @@ class BasicGUI(object):
         self.mouseLast = [0, 0]
         glutMainLoop()
 
-    def initGL(self, extraArgs):
+    def _initGL(self, extraArgs):
         """initializes OpenGL and creates the Window"""
         glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
         glutInitWindowSize(self.size, self.size)

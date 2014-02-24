@@ -52,7 +52,7 @@ class Food(WorldObject):
         """dies and returns previous energy amount.
         """
         energy = self.energy
-        if(energy):
+        if(not self.dead):
             self.Die()
         return energy
 
@@ -69,11 +69,13 @@ class Food(WorldObject):
                                                          self.infoWorld["length"])
         return self.AddObject(infoFood)
 
-    def AgeCheck(self):
+    def _AgeCheck(self):
+        WorldObject._AgeCheck(self)
         if(self.age >= self.infoObject["maxage"]):
             self.Die()
 
-    def EnergyCheck(self):
+    def _EnergyCheck(self):
+        WorldObject._EnergyCheck(self)
         if(self.energy >= self.infoObject["maxamount"]):
             self.energy = self.infoObject["maxamount"]
         elif(self.energy < 0):
@@ -82,7 +84,7 @@ class Food(WorldObject):
             # TODO the GUI should be more careful and this raise an Error.
             print("warning: food energy lower than zero detected")
 
-    def hasTooMuchFoodNearby(self):
+    def _hasTooMuchFoodNearby(self):
         """return True as soon as there is a lot of food nearby."""
         for i, _ in enumerate(self.getRangeIterator(self.rangeseed,
                                                     condition=lambda o: o.objectType == b"food")):
@@ -98,6 +100,6 @@ class Food(WorldObject):
         if(not self.dead):
             if(self.age > 10):  # TODO numbers should be a config option
                 if(uniform(0, 1) < self.seedrate):
-                    if(not self.hasTooMuchFoodNearby()):
+                    if(not self._hasTooMuchFoodNearby()):
                         self.Seed()
             self.Grow()

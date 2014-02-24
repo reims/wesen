@@ -55,7 +55,7 @@ def Loader(run_immediately=True):
     if(len(extraArgs) > 0):
         print("handing over the following command-line arguments to OpenGL: ",
               " ".join(extraArgs))
-    checkSourcesAvailability(config['wesen']['sources'])
+    _checkSourcesAvailability(config['wesen']['sources'])
     wesend = Wesend(config)
     if(run_immediately):
         wesend.start()
@@ -121,8 +121,9 @@ def _addOverwriteBool(parser, argName, section, key):
                        action=_OverwriteConfigActionBool)
 
 
-def checkSourcesAvailability(sourcesList):
-    """imports all source classes which are specified by the config."""
+def _checkSourcesAvailability(sourcesList):
+    """imports all sources listed in sourcesList.
+    Upon ImportError, prints a polite message and kills the process."""
     sources = sourcesList.split(",")
     for source in sources:
         try:
