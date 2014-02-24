@@ -1,348 +1,361 @@
 """The class for all data and operations a single Wesen has"""
 
-from .base import WorldObject;
-import importlib;
+from .base import WorldObject
+import importlib
+
 
 class RuleException(Exception):
-	def __init__(self, ruleDescription):
-		super(RuleException, self).__init__(ruleDescription);
+
+    def __init__(self, ruleDescription):
+        super(RuleException, self).__init__(ruleDescription)
+
 
 class Wesen(WorldObject):
-	"""Wesen(infoObject) creates a new Wesen instance.
-	infoObject is a Dictionary of Dictionaries, time,range,world,etc.
-	"""
 
-	# initialization
+    """Wesen(infoObject) creates a new Wesen instance.
+    infoObject is a Dictionary of Dictionaries, time,range,world,etc.
+    """
 
-	def __init__(self, infoAllObject):
-		"""imports the sourcecode of WesenSource and links the capabilities."""
-		WorldObject.__init__(self, infoAllObject);
-		self.infoTime = infoAllObject["time"];
-		self.source = self.infoObject["source"];
-		#TODO one can probably avoid multiple imports (if not already)
-		WesenSource = importlib.import_module("..sources."
-						      +self.source
-						      +".main",
-						      __package__).WesenSource;
-		infoSource = {"source":self.source};
-		infoSourceWorld = self.infoWorld.copy();
-		del infoSourceWorld["objects"];
-		del infoSourceWorld["AddObject"];
-		del infoSourceWorld["DeleteObject"];
-		infoAllSource = {"world":infoSourceWorld, "source":infoSource,
-				 "time":self.infoTime, "range":self.infoRange,
-				 "wesen":self.infoObject, "food":infoAllObject["food"]};
-		self.wesenSource = WesenSource(infoAllSource);
-		self.PutInterface(self.wesenSource);
+    # initialization
 
-	def __repr__(self):
-		return ("<wesen id=%s pos=%s energy=%s source=%s>" %
-			(self.id, self.position, self.energy, str(self.wesenSource)));
+    def __init__(self, infoAllObject):
+        """imports the sourcecode of WesenSource and links the capabilities."""
+        WorldObject.__init__(self, infoAllObject)
+        self.infoTime = infoAllObject["time"]
+        self.source = self.infoObject["source"]
+        # TODO one can probably avoid multiple imports (if not already)
+        WesenSource = importlib.import_module("..sources."
+                                              + self.source
+                                              + ".main",
+                                              __package__).WesenSource
+        infoSource = {"source": self.source}
+        infoSourceWorld = self.infoWorld.copy()
+        del infoSourceWorld["objects"]
+        del infoSourceWorld["AddObject"]
+        del infoSourceWorld["DeleteObject"]
+        infoAllSource = {"world": infoSourceWorld, "source": infoSource,
+                         "time": self.infoTime, "range": self.infoRange,
+                         "wesen": self.infoObject, "food": infoAllObject["food"]}
+        self.wesenSource = WesenSource(infoAllSource)
+        self.PutInterface(self.wesenSource)
 
-	def PutInterface(self, source):
-		"""maps the source functions to the corresponding wesen functions."""
-		source.id = self.getId;
-		source.age = self.getAge;
-		source.position = self.getPosition;
-		source.energy = self.getEnergy;
-		source.time = self.getTime;
-		source.look = self.look;
-		source.closerLook = self.closerLook;
-		source.Move = self.Move;
-		source.MoveToPosition = self.MoveToPosition;
-		source.Talk = self.Talk;
-		source.Eat = self.Eat;
-		source.Reproduce = self.Reproduce;
-		source.Attack = self.Attack;
-		source.Vomit = self.Vomit;
-		source.Donate = self.Donate;
-		source.Broadcast = self.Broadcast;
-		self.Receive = source.Receive;
+    def __repr__(self):
+        return ("<wesen id=%s pos=%s energy=%s source=%s>" %
+                (self.id, self.position, self.energy, str(self.wesenSource)))
 
-	# small capabilites, no time cost
+    def PutInterface(self, source):
+        """maps the source functions to the corresponding wesen functions."""
+        source.id = self.getId
+        source.age = self.getAge
+        source.position = self.getPosition
+        source.energy = self.getEnergy
+        source.time = self.getTime
+        source.look = self.look
+        source.closerLook = self.closerLook
+        source.Move = self.Move
+        source.MoveToPosition = self.MoveToPosition
+        source.Talk = self.Talk
+        source.Eat = self.Eat
+        source.Reproduce = self.Reproduce
+        source.Attack = self.Attack
+        source.Vomit = self.Vomit
+        source.Donate = self.Donate
+        source.Broadcast = self.Broadcast
+        self.Receive = source.Receive
 
-	def getTime(self): return self.time;
+    # small capabilites, no time cost
 
-	def getEnergy(self): return self.energy;
+    def getTime(self):
+        return self.time
 
-	def getPosition(self): return self.position;
+    def getEnergy(self):
+        return self.energy
 
-	def getId(self): return self.id;
+    def getPosition(self):
+        return self.position
 
-	def getAge(self): return self.age;
+    def getId(self):
+        return self.id
 
-	# standard capabilities
+    def getAge(self):
+        return self.age
 
-	def look(self):
-		"""returns a list of dictionaries with all visible WorldObjects position,
-		objecttype and python id.
-		"""
-		if(self.UseTime("look")):
-			return [{"position":o.position, "type":o.objectType, "id":oid}
-				for oid, o in self.getRangeIterator(\
-								    self.infoRange["look"],
-								    condition = lambda x : self != x)];
-		else:
-			return [];
+    # standard capabilities
 
-	def closerLook(self):
-		"""returns look() and a few more information, as
-		energy, age, time, source (which equals to friend/foe).
-		"""
-		if(self.UseTime("closerlook")):
-			return [{"position":o.position, "type":o.objectType,
-				 "id":oid, "energy":o.energy,
-				 "age":o.age, "time":o.time,
-				 "source":o.source}
-				for oid, o in self.getRangeIterator(\
-					self.infoRange["closer_look"],
-					condition = lambda x : self != x)];
-		else:
-			return [];
+    def look(self):
+        """returns a list of dictionaries with all visible WorldObjects position,
+        objecttype and python id.
+        """
+        if(self.UseTime("look")):
+            return [{"position": o.position, "type": o.objectType, "id": oid}
+                    for oid, o in self.getRangeIterator(
+                        self.infoRange["look"],
+                        condition=lambda x: self != x)]
+        else:
+            return []
 
-	def Move(self, direction):
-		"""moves the wesen into a specified direction,
-		returns true if any position change happened."""
-		if(self.dead):
-			return False;
-		direction = [int(dc) for dc in direction];
-		# the following code is a more time-efficient way to do
-		#usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
-		if(direction[0] < 0):
-			if(direction[1] < 0):
-				usedTime = (self.infoTime["move"]
-					    * -1 * (direction[0] + direction[1]));
-			elif(direction[1] > 0):
-				usedTime = (self.infoTime["move"]
-					    * (direction[1] - direction[0]));
-			else:
-				usedTime = (self.infoTime["move"]
-					    * -1 * direction[0]);
-		elif(direction[0] > 0):
-			if(direction[1] < 0):
-				usedTime = (self.infoTime["move"]
-					    * (direction[0] - direction[1]));
-			elif(direction[1] > 0):
-				usedTime = (self.infoTime["move"]
-					    * (direction[1] + direction[0]));
-			else:
-				usedTime = (self.infoTime["move"]
-					    * direction[0]);
-		else:
-			if(direction[1] < 0):
-				usedTime = (self.infoTime["move"]
-					    * -1 * direction[1]);
-			elif(direction[1] > 0):
-				usedTime = (self.infoTime["move"]
-					    * direction[1]);
-			else:
-				return False;
-		if(self.time >= usedTime):
-			self.time -= usedTime;
-			oldPos = self.position;
-			self.position =  [(pc+dc) % self.infoWorld["length"]
-					  for (pc,dc) in zip(self.position,direction)];
-			self.UpdatePos(self.id, oldPos, self.getDescriptor());
-			return True;
-		else:
-			return False;
+    def closerLook(self):
+        """returns look() and a few more information, as
+        energy, age, time, source (which equals to friend/foe).
+        """
+        if(self.UseTime("closerlook")):
+            return [{"position": o.position, "type": o.objectType,
+                     "id": oid, "energy": o.energy,
+                     "age": o.age, "time": o.time,
+                     "source": o.source}
+                    for oid, o in self.getRangeIterator(
+                        self.infoRange["closer_look"],
+                        condition=lambda x: self != x)]
+        else:
+            return []
 
-	def MoveToPosition(self, newPosition):
-		"""moves the wesen to a specified position"""
-		newPosition = [int(pc) for pc in newPosition];
-		while(self.position != newPosition):
-			if not self.Move([-1 if nc < pc else 1 if nc > pc else 0
-					   for (nc,pc) in zip(newPosition, self.position)]):
-				return False;
-		return True;
+    def Move(self, direction):
+        """moves the wesen into a specified direction,
+        returns true if any position change happened."""
+        if(self.dead):
+            return False
+        direction = [int(dc) for dc in direction]
+        # the following code is a more time-efficient way to do
+        #usedTime = self.infoTime["move"]*(abs(direction[0])+abs(direction[1]));
+        if(direction[0] < 0):
+            if(direction[1] < 0):
+                usedTime = (self.infoTime["move"]
+                            * -1 * (direction[0] + direction[1]))
+            elif(direction[1] > 0):
+                usedTime = (self.infoTime["move"]
+                            * (direction[1] - direction[0]))
+            else:
+                usedTime = (self.infoTime["move"]
+                            * -1 * direction[0])
+        elif(direction[0] > 0):
+            if(direction[1] < 0):
+                usedTime = (self.infoTime["move"]
+                            * (direction[0] - direction[1]))
+            elif(direction[1] > 0):
+                usedTime = (self.infoTime["move"]
+                            * (direction[1] + direction[0]))
+            else:
+                usedTime = (self.infoTime["move"]
+                            * direction[0])
+        else:
+            if(direction[1] < 0):
+                usedTime = (self.infoTime["move"]
+                            * -1 * direction[1])
+            elif(direction[1] > 0):
+                usedTime = (self.infoTime["move"]
+                            * direction[1])
+            else:
+                return False
+        if(self.time >= usedTime):
+            self.time -= usedTime
+            oldPos = self.position
+            self.position = [(pc + dc) % self.infoWorld["length"]
+                             for (pc, dc) in zip(self.position, direction)]
+            self.UpdatePos(self.id, oldPos, self.getDescriptor())
+            return True
+        else:
+            return False
 
-	def Talk(self, wesenid, message):
-		"""calls Receive(message) in the wesen specified by wesenid when in range."""
-		if(self.UseTime("talk")):
-			for oid, o in self.getRangeIterator(\
-				self.infoRange["look"],
-				condition = lambda x : ((oid == wesenid) and
-							(o.objectType == "wesen"))):
-				o.wesenSource.Receive(message);
-				return True;
-		return False;
+    def MoveToPosition(self, newPosition):
+        """moves the wesen to a specified position"""
+        newPosition = [int(pc) for pc in newPosition]
+        while(self.position != newPosition):
+            if not self.Move([-1 if nc < pc else 1 if nc > pc else 0
+                              for (nc, pc) in zip(newPosition, self.position)]):
+                return False
+        return True
 
-	def Eat(self, foodid):
-		"""if it's at the same position, eat the food with python object id foodid."""
-		if(self.dead):
-			return False;
-		if not foodid in self.worldObjects:
-			raise RuleException("Tried to eat non-existing food");
-		o = self.worldObjects[foodid];
-		if((o.position == self.position) and
-		   (o.objectType == "food")):
-			if(self.UseTime("eat")):
-				self.energy += o.getEaten();
-				return True;
-		else:
-			if(o.position != self.position):
-				raise RuleException("In order to eat something, one has to be at the same position. Keep in mind that wesen move and you have to look where they are each turn, as the information from looking around becomes stale quickly!");
-			if(o.objectType != "food"):
-					raise RuleException("In order to eat something, it has to be food.");
-		return False;
+    def Talk(self, wesenid, message):
+        """calls Receive(message) in the wesen specified by wesenid when in range."""
+        if(self.UseTime("talk")):
+            for oid, o in self.getRangeIterator(
+                    self.infoRange["look"],
+                    condition=lambda x: ((oid == wesenid) and
+                                         (o.objectType == "wesen"))):
+                o.wesenSource.Receive(message)
+                return True
+        return False
 
-	def Reproduce(self):
-		"""Create a new Wesen instance with the same source and the specified energy
-		which is then subtracted from the reproducing wesen.
-		"""
-		if(self.dead):
-			return False;
-		if(self.UseTime("reproduce")):
-			childEnergy = self.energy // 2;
-			infoWesen = self.infoObject.copy();
-			infoWesen["energy"] = childEnergy;
-			infoWesen["source"] = self.source;
-			infoWesen["position"] = self.position;
-			child = self.AddObject(infoWesen);
-			self.energy -= childEnergy;
-			self.age = 0;
-			self.EnergyCheck();
-			return child.id;
-		return False;
+    def Eat(self, foodid):
+        """if it's at the same position, eat the food with python object id foodid."""
+        if(self.dead):
+            return False
+        if not foodid in self.worldObjects:
+            raise RuleException("Tried to eat non-existing food")
+        o = self.worldObjects[foodid]
+        if((o.position == self.position) and
+           (o.objectType == "food")):
+            if(self.UseTime("eat")):
+                self.energy += o.getEaten()
+                return True
+        else:
+            if(o.position != self.position):
+                raise RuleException(
+                    "In order to eat something, one has to be at the same position. Keep in mind that wesen move and you have to look where they are each turn, as the information from looking around becomes stale quickly!")
+            if(o.objectType != "food"):
+                raise RuleException(
+                    "In order to eat something, it has to be food.")
+        return False
 
-	def Attack(self, wesenid):
-		"""attacks the wesen specified by wesenid when it's at the same position.
-		the energy of the enemy is subtracted from the own energy,
-		so the one who had more energy than his enemy can survive.
-		The other Wesen dies.
-		"""
-		if(self.dead):
-			return False;
-		try:
-			o = self.worldObjects[wesenid];
-		except KeyError:
-			raise RuleException("May not attack non-existent enemy with id '%s'" % (wesenid));
-		if((o.objectType == "wesen") and
-		   (o.position == self.position)):
-			if(self.UseTime("attack")):
-				self.energy -= int(o.getAttacked(self.energy)*0.5);
-				return (not self.EnergyCheck());
-		return False;
+    def Reproduce(self):
+        """Create a new Wesen instance with the same source and the specified energy
+        which is then subtracted from the reproducing wesen.
+        """
+        if(self.dead):
+            return False
+        if(self.UseTime("reproduce")):
+            childEnergy = self.energy // 2
+            infoWesen = self.infoObject.copy()
+            infoWesen["energy"] = childEnergy
+            infoWesen["source"] = self.source
+            infoWesen["position"] = self.position
+            child = self.AddObject(infoWesen)
+            self.energy -= childEnergy
+            self.age = 0
+            self.EnergyCheck()
+            return child.id
+        return False
 
-	def getAttacked(self, energy):
-		"""called when this Wesen is attacked"""
-		previousEnergy = self.energy;
-		self.energy -= int(energy*0.75);
-		self.EnergyCheck();
-		return previousEnergy;
+    def Attack(self, wesenid):
+        """attacks the wesen specified by wesenid when it's at the same position.
+        the energy of the enemy is subtracted from the own energy,
+        so the one who had more energy than his enemy can survive.
+        The other Wesen dies.
+        """
+        if(self.dead):
+            return False
+        try:
+            o = self.worldObjects[wesenid]
+        except KeyError:
+            raise RuleException(
+                "May not attack non-existent enemy with id '%s'" % (wesenid))
+        if((o.objectType == "wesen") and
+           (o.position == self.position)):
+            if(self.UseTime("attack")):
+                self.energy -= int(o.getAttacked(self.energy) * 0.5)
+                return (not self.EnergyCheck())
+        return False
 
-	# advanced capabilites
+    def getAttacked(self, energy):
+        """called when this Wesen is attacked"""
+        previousEnergy = self.energy
+        self.energy -= int(energy * 0.75)
+        self.EnergyCheck()
+        return previousEnergy
 
-	def Vomit(self, energy, deathOnLowEnergy=True):
-		"""turns the given energy into strange food
-		(other growing and seeding behaviour).
-		the energy is subtracted from the wesen"""
-		if(self.dead):
-			return False;
-		if(self.UseTime("vomit")):
-			if(energy > self.energy):
-				energy = self.energy;
-				if(deathOnLowEnergy):
-					self.Die();
-			if(not energy <= 0):
-				#TODO the magic numbers here should be configurable
-				infoFood = {"energy":energy, "position":self.position,
-					    "growrate":1, "seedrate":0.001,
-					    "maxamount":energy+1000, "maxage":1000,
-					    "type":"food"};
-				self.AddObject(infoFood);
-				self.energy -= energy;
-				return True;
-		return False;
+    # advanced capabilites
 
-	def Donate(self, energy, wesenid):
-		"""transfer energy from this wesen to another specified by wesenid"""
-		if(self.dead):
-			return False;
-		o = self.worldObjects[wesenid];
-		if((o.objectType == "wesen") and
-		   (o.position == self.position)):
-			if(self.UseTime("donate")):
-				if(energy > self.energy):
-					energy = self.energy;
-				if(not energy <= 0):
-					o.energy += energy;
-					self.energy -= energy;
-					self.EnergyCheck();
-					return True;
-		return False;
+    def Vomit(self, energy, deathOnLowEnergy=True):
+        """turns the given energy into strange food
+        (other growing and seeding behaviour).
+        the energy is subtracted from the wesen"""
+        if(self.dead):
+            return False
+        if(self.UseTime("vomit")):
+            if(energy > self.energy):
+                energy = self.energy
+                if(deathOnLowEnergy):
+                    self.Die()
+            if(not energy <= 0):
+                # TODO the magic numbers here should be configurable
+                infoFood = {"energy": energy, "position": self.position,
+                            "growrate": 1, "seedrate": 0.001,
+                            "maxamount": energy + 1000, "maxage": 1000,
+                            "type": "food"}
+                self.AddObject(infoFood)
+                self.energy -= energy
+                return True
+        return False
 
-	def Broadcast(self, message):
-		"""calls Talk(message) with all wesen in range"""
-		if(self.dead):
-			return False;
-		if(self.UseTime("broadcast")):
-			for oid, o in self.getRangeIterator(\
-				self.infoRange["talk"],
-				condition = lambda x : (self != x and
-							x.objectType == "wesen")):
-				o.Receive(message);
-			return True;
-		return False;
+    def Donate(self, energy, wesenid):
+        """transfer energy from this wesen to another specified by wesenid"""
+        if(self.dead):
+            return False
+        o = self.worldObjects[wesenid]
+        if((o.objectType == "wesen") and
+           (o.position == self.position)):
+            if(self.UseTime("donate")):
+                if(energy > self.energy):
+                    energy = self.energy
+                if(not energy <= 0):
+                    o.energy += energy
+                    self.energy -= energy
+                    self.EnergyCheck()
+                    return True
+        return False
 
-	def Die(self):
-		if(self.energy):
-			self.Vomit(self.energy, deathOnLowEnergy=False);
-		WorldObject.Die(self);
+    def Broadcast(self, message):
+        """calls Talk(message) with all wesen in range"""
+        if(self.dead):
+            return False
+        if(self.UseTime("broadcast")):
+            for oid, o in self.getRangeIterator(
+                    self.infoRange["talk"],
+                    condition=lambda x: (self != x and
+                                         x.objectType == "wesen")):
+                o.Receive(message)
+            return True
+        return False
 
-	# general methods
+    def Die(self):
+        if(self.energy):
+            self.Vomit(self.energy, deathOnLowEnergy=False)
+        WorldObject.Die(self)
 
-	def getDescriptor(self):
-		"""returns a dictionary
-		with descriptive information about the wesen for the GUI"""
-		descriptor = {"source":self.source,
-			      "sourcedescriptor":self.wesenSource.getDescriptor()};
-		descriptor.update(WorldObject.getDescriptor(self));
-		return descriptor;
+    # general methods
 
-	def persist(self):
-		"""returns JSON serializable object with all information
-		needed to restore the state of the object"""
-		d = WorldObject.persist(self);
-		d.update({"wesensource":self.wesenSource.persist(),
-			  "maxage":self.infoObject["maxage"]});
-		return d;
+    def getDescriptor(self):
+        """returns a dictionary
+        with descriptive information about the wesen for the GUI"""
+        descriptor = {"source": self.source,
+                      "sourcedescriptor": self.wesenSource.getDescriptor()}
+        descriptor.update(WorldObject.getDescriptor(self))
+        return descriptor
 
-	def restore(self, obj):
-		"""restores the state of the wesen object"""
-		WorldObject.restore(self, obj);
-		self.wesenSource.restore(obj);
+    def persist(self):
+        """returns JSON serializable object with all information
+        needed to restore the state of the object"""
+        d = WorldObject.persist(self)
+        d.update({"wesensource": self.wesenSource.persist(),
+                  "maxage": self.infoObject["maxage"]})
+        return d
 
-	def UseTime(self, function):
-		"""if the wesen has enough time,
-		return true and subtract the time needed for function;
-		else return false.
-		"""
-		usedTime = self.infoTime[function];
-		if(self.time >= usedTime):
-			self.time -= usedTime;
-			return True;
-		return False;
+    def restore(self, obj):
+        """restores the state of the wesen object"""
+        WorldObject.restore(self, obj)
+        self.wesenSource.restore(obj)
 
-	def AgeCheck(self):
-		"""kills the wesen if it's too old"""
-		if(self.age > self.infoObject["maxage"]):
-			self.Die();
+    def UseTime(self, function):
+        """if the wesen has enough time,
+        return true and subtract the time needed for function;
+        else return false.
+        """
+        usedTime = self.infoTime[function]
+        if(self.time >= usedTime):
+            self.time -= usedTime
+            return True
+        return False
 
-	def EnergyCheck(self):
-		"""kills the Wesen when energy <= 0"""
-		#XXX this code should not be executed if it is already dead!
-		if(self.dead):
-			print("aha!")
-		if(self.energy <= 0):
-			self.Die();
-			return True;
-		return False;
+    def AgeCheck(self):
+        """kills the wesen if it's too old"""
+        if(self.age > self.infoObject["maxage"]):
+            self.Die()
 
-	def main(self):
-		"""runs one turn of wesen code and it's AI code"""
-		WorldObject.main(self);
-		if(not self.dead):
-			self.energy -= 1;
-			self.time = min(self.time + self.infoTime["init"], self.infoTime["max"]);
-			self.wesenSource.main();
+    def EnergyCheck(self):
+        """kills the Wesen when energy <= 0"""
+        # XXX this code should not be executed if it is already dead!
+        if(self.dead):
+            print("aha!")
+        if(self.energy <= 0):
+            self.Die()
+            return True
+        return False
+
+    def main(self):
+        """runs one turn of wesen code and it's AI code"""
+        WorldObject.main(self)
+        if(not self.dead):
+            self.energy -= 1
+            self.time = min(
+                self.time + self.infoTime["init"], self.infoTime["max"])
+            self.wesenSource.main()

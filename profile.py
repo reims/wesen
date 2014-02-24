@@ -10,23 +10,24 @@ to profile your AI source code.
 
 In some tournaments, there is a penalty for computation cost."""
 
-from src.Wesen.loader import Loader;
-from cProfile import Profile;
-from time import perf_counter; # only in python3.3
-from pstats import Stats;
-import sys;
+from src.Wesen.loader import Loader
+from cProfile import Profile
+from time import perf_counter
+# only in python3.3
+from pstats import Stats
+import sys
 
-print("You can supply an alternative config file on the command-line");
-print("You should stop Wesen by Ctrl+C to finish profiling");
+print("You can supply an alternative config file on the command-line")
+print("You should stop Wesen by Ctrl+C to finish profiling")
 
-sys.argv.append('--disablegui');
-pr = Profile(perf_counter);
-pr.run('Loader()');
-pr.dump_stats('profile.stats');
+sys.argv.append('--disablegui')
+pr = Profile(perf_counter)
+pr.run('Loader()')
+pr.dump_stats('profile.stats')
 # you may explore profile.stats with the pstats browser.
 
 stats = Stats(pr)
 
 stats.sort_stats('tottime')
-#stats.print_stats('Wesen/sources',10)
-stats.print_stats('Wesen/',10)
+# stats.print_stats('Wesen/sources',10)
+stats.print_stats('Wesen/', 10)
