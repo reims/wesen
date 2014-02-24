@@ -67,7 +67,9 @@ class Food(WorldObject):
         infoFood["position"] = getRandomPositionInRadius(self.position,
                                                          self.rangeseed,
                                                          self.infoWorld["length"])
-        return self.AddObject(infoFood)
+        newFood = self.AddObject(infoFood)
+        newFood._eatFoodAtSamePlace()
+        return newFood
 
     def _AgeCheck(self):
         WorldObject._AgeCheck(self)
@@ -87,10 +89,18 @@ class Food(WorldObject):
     def _hasTooMuchFoodNearby(self):
         """return True as soon as there is a lot of food nearby."""
         for i, _ in enumerate(self.getRangeIterator(self.rangeseed,
-                                                    condition=lambda o: o.objectType == b"food")):
+                                                    condition=lambda o: o.objectType == "food")):
             if(i == 10):  # TODO make this number configurable!
                 return True
         return False
+
+    def _eatFoodAtSamePlace(self):
+        """looks for Food with same position but different id than self and eats it."""
+        for obj in [obj # implemented with range iterator to enable changing range to 1 or more later
+                    for oid, obj in self.getRangeIterator(0,
+                                                          condition=lambda o: o.objectType == "food")
+                    if oid != id(self)]:
+            self.energy += obj.getEaten()
 
     def main(self):
         """randomly grow or seed, based on growrate and seedrate.
