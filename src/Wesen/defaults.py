@@ -5,7 +5,6 @@ run the config editor (with wesen --editconfig)
 or see strings.py"""
 
 from os.path import expanduser, join
-from math import sqrt
 
 DEFAULT_CONFIGFOLDER = join(expanduser("~"), ".wesen")
 DEFAULT_CONFIGFILE = join(DEFAULT_CONFIGFOLDER, "conf")

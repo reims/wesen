@@ -143,6 +143,8 @@ class _OverwriteConfigAction(Action):
     called _config in the namespace
     which config option should be overwritten by command-line."""
 
+    # TODO change name _config to sth else, as its not a protected member
+
     def __init__(self, option_strings, dest, section, nargs=1):
         helpMessage = (STRING_USAGE_OVERWRITE % (section, dest))
         super(_OverwriteConfigAction, self)\

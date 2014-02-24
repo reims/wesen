@@ -8,27 +8,27 @@ def persistence(func, static, dynamic):
     of the object and are set during restoring in addition to being stored."""
     for entry in static.keys():
         if static[entry] is None:
-            static[entry] = lambda self: self.__getattribute__(entry)
+            static[entry] = lambda this: this.__getattribute__(entry)
     for entry in dynamic.keys():
         if dynamic[entry] is None:
-            dynamic[entry] = (lambda self: self.__getattribute__(entry),
-                              lambda self, v: self.__setattr__(entry, v))
+            dynamic[entry] = (lambda this: this.__getattribute__(entry),
+                              lambda this, v: this.__setattr__(entry, v))
         else:
-            getter, setter = dynamic[entry]
-            getter = getter or lambda self: self.__getattribute__(entry)
-            setter = setter or lambda self, v: self.__setattr__(entry, v)
+            __getter, __setter = dynamic[entry]
+            getter = __getter or lambda this: this.__getattribute__(entry)
+            setter = __setter or lambda this, v: this.__setattr__(entry, v)
             dynamic[entry] = (getter, setter)
 
     @wraps(func)
-    def wrapper(self, obj=None):
+    def wrapper(this, obj=None):
         if obj is None:  # setter case
             d = dict()
             for entry, f in static.items():
-                d[entry] = f(self)
+                d[entry] = f(this)
             for entry, (f, _) in dynamic.items():
-                d[entry] = f(self)
+                d[entry] = f(this)
             return d
         else:  # getter case
             for entry, (_, f) in dynamic.items():
-                f(self, obj[entry])
+                f(this, obj[entry])
     return wrapper

@@ -69,7 +69,8 @@ class GUI(BasicGUI):
         elif(action == 100):
             self.Pause()
         else:
-            raise "unknown action from popup-menu (%s)" % (action)
+            raise NotImplementedError(
+                "unknown action from popup-menu (%s)" % (action))
         return 0
 
     def initKeyBindings(self):

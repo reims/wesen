@@ -10,6 +10,8 @@ from os.path import exists
 import importlib
 import json
 
+# TODO change the name of this class (it is not a daemon)
+
 
 class Wesend(object):
 
@@ -19,10 +21,9 @@ class Wesend(object):
             and, if enabled in the config, a Gui object.
     """
 
-    def __init__(self, config, extraArgs=""):
+    def __init__(self, config):
         """config should be a dictionary (see loader.py),
         extraArgs are all passed to OpenGL"""
-        # TODO change the NAMES,VERSIONS mechanism to something simpler.
         self.infoGui = config["gui"]
         self.infoWorld = config["world"]
         self.infoWesen = config["wesen"]

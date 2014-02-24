@@ -37,6 +37,7 @@ class BasicGUI(object):
         GameLoop a method,
         world a World object and
         extraArgs is a string which is passed to OpenGL"""
+        # TODO there are a bit too many member variables.
         self.GameLoop = GameLoop
         self.wesend = infoGUI["wesend"]
         self.infoWorld = infoGUI["world"]
@@ -82,8 +83,13 @@ class BasicGUI(object):
         # aspect ratio x:y is 2:1
         self.objects = [self.map, self.text]
         self.initGL(extraArgs)
+        self.menu = None
         self.initMenu()
+        self.keybindings = dict()
+        self.keyExplanation = dict()
         self.initKeyBindings()
+        self.mouseFirst = [0, 0]
+        self.mouseLast = [0, 0]
         glutMainLoop()
 
     def initGL(self, extraArgs):
@@ -141,7 +147,8 @@ class BasicGUI(object):
         # glutAttachMenu(GLUT_RIGHT_BUTTON);
 
     def HandleAction(self, action):
-        raise "unknown action from popup-menu (%s)" % (action)
+        raise NotImplementedError(
+            "unknown action from popup-menu (%s)" % (action))
 
     def _getKeyRepresentation(self, key):
         # TODO rewrite this function for readability.
@@ -231,12 +238,12 @@ class BasicGUI(object):
     def CalcFps(self):
         """calculates GUI.fps and GUI.tps (call every frame)"""
         self.frame += 1
-        self.actualtime = glutGet(GLUT_ELAPSED_TIME)
-        timenow = self.actualtime - self.lasttime
+        actualtime = glutGet(GLUT_ELAPSED_TIME)
+        timenow = actualtime - self.lasttime
         turnsnow = self.turns - self.lastturns
         if(timenow > 1000):
             self.fps = self.frame * 1000.0 / timenow
-            self.lasttime = self.actualtime
+            self.lasttime = actualtime
             self.lastturns = self.turns
             self.tps = turnsnow * 1000.0 / timenow
             self.frame = 0

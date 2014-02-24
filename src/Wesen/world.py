@@ -141,8 +141,8 @@ class World(object):
     def DumpGameState(self, filename=DEFAULT_GAME_STATE_FILE):
         # TODO move this to wesend, where it belongs?
         with open(filename, 'w') as f:
-            json = self.persistToJSON()
-            f.write(json)
+            jsonDump = self.persistToJSON()
+            f.write(jsonDump)
 
     def persist(self):
         """returns a JSON serializable object.

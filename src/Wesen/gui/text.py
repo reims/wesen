@@ -69,7 +69,9 @@ class TextPrinter(object):
     Use ResetRaster() and then Print(text)."""
 
     def __init__(self):
-        self.y = 0.03
+        self.x = 0  # TODO x currently unused, results in suboptimal resizing
+        self.y = 0.03  # TODO where does the magic number come from?
+        self.rasterPos = 0
         self.ResetRaster()
 
     def ResetRaster(self):
@@ -78,6 +80,7 @@ class TextPrinter(object):
         self.Print("\n")
 
     def Reshape(self, x, y):
+        self.x = x
         self.y = 30 / y
 
     def Print(self, text):

@@ -37,6 +37,7 @@ class Wesen(WorldObject):
                          "time": self.infoTime, "range": self.infoRange,
                          "wesen": self.infoObject, "food": infoAllObject["food"]}
         self.wesenSource = WesenSource(infoAllSource)
+        self.Receive = None
         self.PutInterface(self.wesenSource)
 
     def __repr__(self):
@@ -289,7 +290,7 @@ class Wesen(WorldObject):
         if(self.dead):
             return False
         if(self.UseTime("broadcast")):
-            for oid, o in self.getRangeIterator(
+            for _, o in self.getRangeIterator(
                     self.infoRange["talk"],
                     condition=lambda x: (self != x and
                                          x.objectType == "wesen")):
@@ -336,6 +337,7 @@ class Wesen(WorldObject):
             return True
         return False
 
+    # TODO: some methods needn't be public (AgeCheck, ...)
     def AgeCheck(self):
         """kills the wesen if it's too old"""
         if(self.age > self.infoObject["maxage"]):

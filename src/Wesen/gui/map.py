@@ -4,16 +4,13 @@ import OpenGL
 OpenGL.ERROR_ON_COPY = True
 from OpenGL.GL import GL_VERTEX_ARRAY, GL_COLOR_ARRAY, GL_TRIANGLES, \
     GL_DYNAMIC_DRAW, GL_ARRAY_BUFFER, GL_FLOAT, \
-    glPushMatrix, glPopMatrix, glGetError, \
-    glScale, glColor3f, glTranslatef, \
+    glScale, glTranslatef, \
     glEnableClientState, glDisableClientState, \
     glVertexPointer, glColorPointer, glDrawArrays
 from .object import GuiObject
 from OpenGL.arrays import vbo
 from numpy import array as narray
-from numpy import empty as nempty
 from numpy import zeros as nzeros
-from functools import reduce
 from math import ceil, log
 
 
@@ -35,11 +32,12 @@ class Map(GuiObject):
         self._data_size = -1
         self._dirty_objects = {}
 
-    def DrawMap(self, descriptor):
+    def Draw(self, descriptor=[]):
         """Draws a map with all objects in the world,
         according to the descriptor."""
-        # TODO move the frame mechanism to GuiObject!
-        frame, col, plast, x, y = self._getFrameData()
+        GuiObject.Draw(self)
+        # TODO get rid of any frame mechanism parts here
+        frame = self._getFrameData()["frame"]
         glTranslatef(frame, 2 * frame, 0.0)
         # moving away from the frame
         blockSize = (1 - 2 * frame) / self.worldLength
@@ -49,7 +47,7 @@ class Map(GuiObject):
         # 			 descriptor)),
         # 	      "f");
         if len(descriptor) > 0:
-            valuesPerObject = len(self._descToArray(descriptor[0]))
+            #valuesPerObject = len(self._descToArray(descriptor[0]))
             if self._vbo is None:
                 self._BuildData(descriptor)
             for _id, obj in self._dirty_objects.items():
@@ -171,8 +169,3 @@ class Map(GuiObject):
                  desc["position"][0], desc["position"][
                      1] - 1.0, color[0], color[1], color[2], 1.0,
                  desc["position"][0] + 1.0, desc["position"][1] - 1.0, color[0], color[1], color[2], 1.0])
-
-    def Draw(self, descriptor):
-        """draws the map"""
-        GuiObject.Draw(self)
-        self.DrawMap(descriptor)
