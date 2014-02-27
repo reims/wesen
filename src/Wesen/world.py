@@ -20,10 +20,6 @@ class World(object):
         """infoAllWorld is a dictionary of dictionaries"""
         self.callbacks = callbacks
         if not infoAllWorld is None:
-            self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
-                        for _ in range(infoAllWorld["world"]["length"])]
-            # TODO empty map init should be somewhere else; see failing
-            # persitency tests
             self.setInfoAllWorld(infoAllWorld)
             if createObjects:
                 self.createDefaultObjects()
@@ -39,6 +35,8 @@ class World(object):
         self.objects = {}
         self.turns = 0
         self.stats = {}
+        self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
+                        for _ in range(infoAllWorld["world"]["length"])]
         # is initialized depending on sources in initStats()
         self.infoAllWorld["world"].update({"DeleteObject": self.DeleteObject,
                                            "AddObject": self.AddObject,
