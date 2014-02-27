@@ -33,7 +33,7 @@ class World(object):
                                   "world": infoAllWorld["world"].copy(),
                                   "food": infoAllWorld["food"].copy()})
         self.objects = {}
-        self.turns = 0
+        self.turns = infoAllWorld.get("turns", 0)
         self.stats = {}
         self.map = [[{} for _ in range(infoAllWorld["world"]["length"])]
                         for _ in range(infoAllWorld["world"]["length"])]
@@ -130,7 +130,8 @@ class World(object):
              "range": self.infoAllWorld["range"],
              "time": self.infoAllWorld["time"],
              "food": self.infoAllWorld["food"],
-             "objects": [o.persist() for o in self.objects.values()]}
+             "objects": [o.persist() for o in self.objects.values()],
+             "turns": self.turns}
         d["world"].pop("Debug", None)
         d["world"].pop("map", None)
         d["world"].pop("DeleteObject", None)

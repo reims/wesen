@@ -59,7 +59,6 @@ class BasicGUI(object):
         self.frame = 0
         self.lasttime = 0
         self.lastturns = 0
-        self.turns = 0
         # TODO restore after resume?
         self.fps = 0
         self.tps = 0
@@ -257,11 +256,11 @@ class BasicGUI(object):
         self.frame += 1
         actualtime = glutGet(GLUT_ELAPSED_TIME)
         timenow = actualtime - self.lasttime
-        turnsnow = self.turns - self.lastturns
+        turnsnow = self.world.turns - self.lastturns
         if(timenow > 1000):
             self.fps = self.frame * 1000.0 / timenow
             self.lasttime = actualtime
-            self.lastturns = self.turns
+            self.lastturns = self.world.turns
             self.tps = turnsnow * 1000.0 / timenow
             self.frame = 0
 
@@ -273,7 +272,6 @@ class BasicGUI(object):
         if((not self.pause) or self.step):
             if(self.step):
                 self.descriptor = self.GameLoop()
-                self.turns += 1
                 self.CalcFps()
                 self.graph.Step()
                 self.step = False
@@ -281,7 +279,6 @@ class BasicGUI(object):
                 if(self.wait == int(1.0 / self.speed)):
                     self.wait = 1
                     self.descriptor = self.GameLoop()
-                    self.turns += 1
                     self.CalcFps()
                     self.graph.Step()
                 else:
