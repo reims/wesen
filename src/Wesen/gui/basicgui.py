@@ -69,7 +69,6 @@ class BasicGUI(object):
         initxy = self.infoGui["pos"]
         self.initx = int(initxy[:initxy.index(",")])
         self.inity = int(initxy[initxy.index(",") + 1:])
-        self.step = False
         # TODO maybe repair step feature
         self.descriptor = [{}, []]
         self.bgcolor = [0.0, 0.0, 0.05]
@@ -141,10 +140,6 @@ class BasicGUI(object):
         """increase Speed by 0.05"""
         self.SetSpeed(0.05)
 
-    def Step(self):
-        """run 1 turn of game"""
-        self.step = True
-
     def initMenu(self):
         """Abstract method, gets called upon init.
         Subclasses could do:
@@ -186,8 +181,7 @@ class BasicGUI(object):
                             b" ": self.Pause,
                             b"-": self.SpeedDown,
                             b"+": self.SpeedUp,
-                            13: self.Step,  # TODO seems to be broken
-                            }
+                            b"s": self.Step,}
         self._generateKeyExplanations()
 
     def HandleKeys(self, key, x, y):
@@ -264,25 +258,31 @@ class BasicGUI(object):
             self.tps = turnsnow * 1000.0 / timenow
             self.frame = 0
 
+    def Step(self):
+        """Executes one round of the game"""
+        if (not self.pause):
+            return
+        self.descriptor = self.GameLoop()
+        self.graph.Step();
+        try:
+            self.RenderScene()
+        except GLError as e:
+            print("exception:", e)
+            print(traceback.format_exc())
+            sys.exit(1)
+
     def Draw(self):
         """actualizes the descriptor by calling his GameLoop and renders it"""
-        # TODO figure out how self.step is supposed to work (broken!)
         # TODO find out if the framedropping mechanism is already killed
         # everywhere
-        if((not self.pause) or self.step):
-            if(self.step):
+        if (not self.pause):
+            if (self.wait == int(1.0 / self.speed)):
+                self.wait = 1
                 self.descriptor = self.GameLoop()
                 self.CalcFps()
                 self.graph.Step()
-                self.step = False
             else:
-                if(self.wait == int(1.0 / self.speed)):
-                    self.wait = 1
-                    self.descriptor = self.GameLoop()
-                    self.CalcFps()
-                    self.graph.Step()
-                else:
-                    self.wait += 1
+                self.wait += 1
         if(self.init):
             self.Pause()
             self.init = False
